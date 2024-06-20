@@ -1,0 +1,56 @@
+.saleProductBuy{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    gap: 20px;
+}
+.ViewProductBuyOrder{
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+.CreateProductBuyToAdd{
+    width: 50%;
+    padding:5% 5% ;
+
+}
+
+.CreateProductBuyToAdd, .ViewProductBuyOrder{
+    border: 2px solid #a0a0a0;
+    border-radius: 10px;
+}
+.ProductBuyInitializeButton{
+    height: 25%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+.fullWidthButton {
+    width: 80%; /* Set button width to 100% of its container */
+    height: 50%; /* Set button height to 100% of its container */
+    
+}
+
+
+body::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	border-radius: 10px;
+	background-color: #F5F5F5;
+}
+
+body::-webkit-scrollbar
+{
+	width: 5px;
+	background-color: #F5F5F5;
+}
+
+body::-webkit-scrollbar-thumb
+{
+	border-radius: 10px;
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+	background-color: #555;
+}
