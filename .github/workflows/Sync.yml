@@ -22,21 +22,24 @@ jobs:
         with:
           token: ${{ secrets.WORKFLOW_TOKEN }}
 
-      - name: Create CODING directory and move folders
+      - name: Create CODING directory and clone FRONTEND
         run: |
           mkdir -p CODING/FRONTEND
-          mkdir -p CODING/BACKEND
           git clone --branch ${{ env.BRANCHFE }} ${{ env.FRONTEND_REPO }} CODING/FRONTEND
+
+      - name: Create CODING directory and clone BACKEND
+        run: |
+          mkdir -p CODING/BACKEND
           git clone --branch ${{ env.BRANCH }} ${{ env.BACKEND_REPO }} CODING/BACKEND
 
       - name: Copy Frontend to CODING/FRONTEND
         run: |
-          cp -r FRONTEND/* CODING/FRONTEND/.
+          cp -r CODING/FRONTEND/* CODING/FRONTEND/.
         working-directory: ${{ github.workspace }}
 
       - name: Copy Backend to CODING/BACKEND
         run: |
-          cp -r BACKEND/* CODING/BACKEND/.
+          cp -r CODING/BACKEND/* CODING/BACKEND/.
         working-directory: ${{ github.workspace }}
 
       - name: Remove sensitive file if exists
