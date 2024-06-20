@@ -37,13 +37,13 @@ jobs:
           rm -f src/main/resources/firebase-admin.json
           echo "src/main/resources/firebase-admin.json" >> .gitignore
 
-      - name: Copy Frontend to Repo
+      - name: Move Frontend folder to Repo
         run: |
-          cp -r CODING/FRONTEND/* .
+          mv CODING/FRONTEND .
 
-      - name: Copy Backend to Repo
+      - name: Move Backend folder to Repo
         run: |
-          cp -r CODING/BACKEND/* .
+          mv CODING/BACKEND .
 
       - name: Commit and Push changes
         run: |
