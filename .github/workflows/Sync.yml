@@ -1,21 +1,15 @@
 name: Sync Upstream
 
 env:
-  # URL to the frontend repository
   FRONTEND_REPO: "https://github.com/totrieuvy/SWP.git"
-  # URL to the backend repository
   BACKEND_REPO: "https://github.com/LearningCoding101/SWP_Jewelry.git"
-  # Token to authenticate the workflow
   WORKFLOW_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
-  # Branch to pull from (optional, defaults to main)
   BRANCH: "main"
   BRANCHFE: "master"
 
-# This runs every day at 6:00 AM UTC
 on:
   schedule:
     - cron: '0 6 * * *'
-  # Allows manual workflow run
   workflow_dispatch:
 
 jobs:
@@ -25,11 +19,31 @@ jobs:
     steps:
       - name: Checkout main repository
         uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.WORKFLOW_TOKEN }}
 
       - name: Clone Frontend Repository
         run: |
-          git clone --branch ${{ env.BRANCHFE }} ${{ env.FRONTEND_REPO }} CODING/FRONTEND
+          git clone --branch ${{ env.BRANCHFE }} ${{ env.FRONTEND_REPO }} CODING/FE
 
       - name: Clone Backend Repository
         run: |
-          git clone --branch ${{ env.BRANCH }} ${{ env.BACKEND_REPO }} CODING/BACKEND
+          git clone --branch ${{ env.BRANCH }} ${{ env.BACKEND_REPO }} CODING/BE
+
+      - name: Copy Frontend to Repo
+        run: |
+          cp -r CODING/FE/* .
+
+      - name: Copy Backend to Repo
+        run: |
+          cp -r CODING/BE/* .
+
+      - name: Commit and Push changes
+        run: |
+          git config --global user.name "LearningCoding101"
+          git config --global user.email "hahoang33322@gmail.com"
+          git add .
+          git commit -m "Sync repositories"
+          git push origin ${{ env.BRANCH }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
