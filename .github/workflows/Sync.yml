@@ -28,8 +28,8 @@ jobs:
 
       - name: Clone Frontend Repository
         run: |
-          git clone --branch ${{ env.BRANCHFE }} ${{ env.FRONTEND_REPO }} CODING/FE
+          git clone --branch ${{ env.BRANCHFE }} ${{ env.FRONTEND_REPO }} CODING/FRONTEND
 
       - name: Clone Backend Repository
         run: |
-          git clone --branch ${{ env.BRANCH }} ${{ env.BACKEND_REPO }} CODING/BE
+          git clone --branch ${{ env.BRANCH }} ${{ env.BACKEND_REPO }} CODING/BACKEND
