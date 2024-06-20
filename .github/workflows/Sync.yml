@@ -22,17 +22,28 @@ jobs:
         with:
           token: ${{ secrets.WORKFLOW_TOKEN }}
 
-      - name: Create CODING directory and clone FRONTEND
+      - name: Create CODING directory and move folders
         run: |
           mkdir -p CODING/FRONTEND
-          git clone --branch ${{ env.BRANCHFE }} ${{ env.FRONTEND_REPO }} CODING/FRONTEND
-
-      - name: Create CODING directory and clone BACKEND
-        run: |
           mkdir -p CODING/BACKEND
+          git clone --branch ${{ env.BRANCHFE }} ${{ env.FRONTEND_REPO }} CODING/FRONTEND
           git clone --branch ${{ env.BRANCH }} ${{ env.BACKEND_REPO }} CODING/BACKEND
 
-    
+      - name: Remove .git directory from CODING/FRONTEND and CODING/BACKEND
+        run: |
+          rm -rf CODING/FRONTEND/.git
+          rm -rf CODING/BACKEND/.git
+
+      - name: Copy Frontend to CODING/FRONTEND
+        run: |
+          cp -r CODING/FRONTEND/* CODING/FRONTEND/.
+        working-directory: ${{ github.workspace }}
+
+      - name: Copy Backend to CODING/BACKEND
+        run: |
+          cp -r CODING/BACKEND/* CODING/BACKEND/.
+        working-directory: ${{ github.workspace }}
+
       - name: Remove sensitive file if exists
         run: |
           rm -f CODING/BACKEND/src/main/resources/firebase-admin.json
