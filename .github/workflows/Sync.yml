@@ -29,6 +29,16 @@ jobs:
           git clone --branch ${{ env.BRANCHFE }} ${{ env.FRONTEND_REPO }} CODING/FRONTEND
           git clone --branch ${{ env.BRANCH }} ${{ env.BACKEND_REPO }} CODING/BACKEND
 
+      - name: Copy Frontend to CODING/FRONTEND
+        run: |
+          cp -r FRONTEND/* CODING/FRONTEND/.
+        working-directory: ${{ github.workspace }}
+
+      - name: Copy Backend to CODING/BACKEND
+        run: |
+          cp -r BACKEND/* CODING/BACKEND/.
+        working-directory: ${{ github.workspace }}
+
       - name: Remove sensitive file if exists
         run: |
           rm -f CODING/BACKEND/src/main/resources/firebase-admin.json
@@ -36,7 +46,6 @@ jobs:
 
       - name: Commit and Push changes
         run: |
-          cd CODING
           git config --global user.name "LearningCoding101"
           git config --global user.email "hahoang33322@gmail.com"
           git add .
