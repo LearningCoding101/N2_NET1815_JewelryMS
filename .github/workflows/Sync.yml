@@ -24,29 +24,24 @@ jobs:
 
       - name: Clone Frontend Repository
         run: |
-          git clone --branch ${{ env.BRANCHFE }} ${{ env.FRONTEND_REPO }} CODING/FE
+          git clone --branch ${{ env.BRANCHFE }} ${{ env.FRONTEND_REPO }} FRONTEND
 
       - name: Clone Backend Repository
         run: |
-          git clone --branch ${{ env.BRANCH }} ${{ env.BACKEND_REPO }} CODING/BE
-
-      - name: Remove sensitive file if exists
-        run: |
-          rm -f src/main/resources/firebase-admin.json
-          echo "src/main/resources/firebase-admin.json" >> .gitignore
+          git clone --branch ${{ env.BRANCH }} ${{ env.BACKEND_REPO }} BACKEND
 
       - name: Copy Frontend to Repo
         run: |
-          cp -r CODING/FE/* .
+          cp -r FRONTEND/* .
 
       - name: Copy Backend to Repo
         run: |
-          cp -r CODING/BE/* .
+          cp -r BACKEND/* .
 
       - name: Commit and Push changes
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "LearningCoding101"
+          git config --global user.email "hahoang33322@gmail.com"
           git add .
           git commit -m "Sync repositories and remove sensitive file"
           git push origin ${{ env.BRANCH }}
