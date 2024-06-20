@@ -32,16 +32,7 @@ jobs:
           mkdir -p CODING/BACKEND
           git clone --branch ${{ env.BRANCH }} ${{ env.BACKEND_REPO }} CODING/BACKEND
 
-      - name: Copy Frontend to CODING/FRONTEND
-        run: |
-          cp -r CODING/FRONTEND/* CODING/FRONTEND/.
-        working-directory: ${{ github.workspace }}
-
-      - name: Copy Backend to CODING/BACKEND
-        run: |
-          cp -r CODING/BACKEND/* CODING/BACKEND/.
-        working-directory: ${{ github.workspace }}
-
+    
       - name: Remove sensitive file if exists
         run: |
           rm -f CODING/BACKEND/src/main/resources/firebase-admin.json
