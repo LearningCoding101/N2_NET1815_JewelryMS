@@ -22,23 +22,14 @@ jobs:
         with:
           token: ${{ secrets.WORKFLOW_TOKEN }}
 
-      - name: Create FRONTEND and BACKEND folders in CODING directory
+      - name: Create CODING directory and move folders
         run: |
           mkdir -p CODING/FRONTEND
           mkdir -p CODING/BACKEND
-
-      - name: Clone Frontend Repository
-        run: |
           git clone --branch ${{ env.BRANCHFE }} ${{ env.FRONTEND_REPO }} CODING/FRONTEND
-
-      - name: Clone Backend Repository
-        run: |
           git clone --branch ${{ env.BRANCH }} ${{ env.BACKEND_REPO }} CODING/BACKEND
-      - name: Move Backend folder to Repo
-        run: |
-          mv CODING .
-          - name: Remove sensitive file if exists
-      - name: Remove json
+
+      - name: Remove sensitive file if exists
         run: |
           rm -f CODING/BACKEND/src/main/resources/firebase-admin.json
           echo "CODING/BACKEND/src/main/resources/firebase-admin.json" >> CODING/BACKEND/.gitignore
