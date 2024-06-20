@@ -74,7 +74,6 @@ The Jewelry Sales Management System aims to streamline operations in the jewelry
 | Scrum Master   | Hà Thái Hoàng                                       |
 | Frontend Dev   | Tô Triều Vỹ, Hà Thái Hoàng                          |
 | Backend Dev    | Hà Thái Hoàng, Lâm Tấn Phú, Thái Đăng               |
-| Designer       | Hà Thái Hoàng                                       |
 | Tester         | Hà Thái Hoàng, Duy Khánh, Phạm Văn Quốc Vương, Thảo |
 
 ## Project Structure
