@@ -56,6 +56,8 @@ The Jewelry Sales Management System aims to streamline operations in the jewelry
 ### Backend
 - Java
 - Spring Boot
+- Spring JPA
+- Thymeleaf
 
 ### Database
 - MYSQL
