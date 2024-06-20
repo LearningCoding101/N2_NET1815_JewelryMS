@@ -9,6 +9,7 @@ env:
   WORKFLOW_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
   # Branch to pull from (optional, defaults to main)
   BRANCH: "main"
+  BRANCHFE: "master"
 
 # This runs every day at 6:00 AM UTC
 on:
@@ -27,7 +28,7 @@ jobs:
 
       - name: Clone Frontend Repository
         run: |
-          git clone --branch ${{ env.BRANCH }} ${{ env.FRONTEND_REPO }} CODING/FE
+          git clone --branch ${{ env.BRANCHFE }} ${{ env.FRONTEND_REPO }} CODING/FE
 
       - name: Clone Backend Repository
         run: |
