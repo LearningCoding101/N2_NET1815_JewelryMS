@@ -24,19 +24,26 @@ jobs:
 
       - name: Clone Frontend Repository
         run: |
-          git clone --branch ${{ env.BRANCHFE }} ${{ env.FRONTEND_REPO }} FRONTEND
+          mkdir -p CODING/FRONTEND
+          git clone --branch ${{ env.BRANCHFE }} ${{ env.FRONTEND_REPO }} CODING/FRONTEND
 
       - name: Clone Backend Repository
         run: |
-          git clone --branch ${{ env.BRANCH }} ${{ env.BACKEND_REPO }} BACKEND
+          mkdir -p CODING/BACKEND
+          git clone --branch ${{ env.BRANCH }} ${{ env.BACKEND_REPO }} CODING/BACKEND
+
+      - name: Remove sensitive file if exists
+        run: |
+          rm -f src/main/resources/firebase-admin.json
+          echo "src/main/resources/firebase-admin.json" >> .gitignore
 
       - name: Copy Frontend to Repo
         run: |
-          cp -r FRONTEND/* .
+          cp -r CODING/FRONTEND/* .
 
       - name: Copy Backend to Repo
         run: |
-          cp -r BACKEND/* .
+          cp -r CODING/BACKEND/* .
 
       - name: Commit and Push changes
         run: |
