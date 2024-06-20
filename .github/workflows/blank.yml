@@ -1,0 +1,34 @@
+name: Sync Upstream
+
+env:
+  # URL to the frontend repository
+  FRONTEND_REPO: "https://github.com/totrieuvy/SWP.git"
+  # URL to the backend repository
+  BACKEND_REPO: "https://github.com/LearningCoding101/SWP_Jewelry.git"
+  # Token to authenticate the workflow
+  WORKFLOW_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
+  # Branch to pull from (optional, defaults to main)
+  BRANCH: "main"
+
+# This runs every day at 6:00 AM UTC
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  # Allows manual workflow run
+  workflow_dispatch:
+
+jobs:
+  sync-repos:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main repository
+        uses: actions/checkout@v3
+
+      - name: Clone Frontend Repository
+        run: |
+          git clone --branch ${{ env.BRANCH }} ${{ env.FRONTEND_REPO }} CODING/FE
+
+      - name: Clone Backend Repository
+        run: |
+          git clone --branch ${{ env.BRANCH }} ${{ env.BACKEND_REPO }} CODING/BE
