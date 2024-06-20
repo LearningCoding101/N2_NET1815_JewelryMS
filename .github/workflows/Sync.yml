@@ -1,3 +1,4 @@
+
 name: Sync Upstream
 
 env:
@@ -26,18 +27,20 @@ jobs:
         run: |
           mkdir -p CODING/FRONTEND
           git clone --branch ${{ env.BRANCHFE }} ${{ env.FRONTEND_REPO }} CODING/FRONTEND
-
       - name: Create CODING directory and clone BACKEND
         run: |
           mkdir -p CODING/BACKEND
           git clone --branch ${{ env.BRANCH }} ${{ env.BACKEND_REPO }} CODING/BACKEND
 
     
+      - name: Remove .git directory from CODING/FRONTEND and CODING/BACKEND
+        run: |
+          rm -rf CODING/FRONTEND/.git
+          rm -rf CODING/BACKEND/.git
       - name: Remove sensitive file if exists
         run: |
           rm -f CODING/BACKEND/src/main/resources/firebase-admin.json
           echo "CODING/BACKEND/src/main/resources/firebase-admin.json" >> CODING/BACKEND/.gitignore
-
       - name: Commit and Push changes
         run: |
           git config --global user.name "LearningCoding101"
