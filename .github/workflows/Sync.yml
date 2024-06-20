@@ -22,31 +22,30 @@ jobs:
         with:
           token: ${{ secrets.WORKFLOW_TOKEN }}
 
-      - name: Clone Frontend Repository
+      - name: Create FRONTEND and BACKEND folders in CODING directory
         run: |
           mkdir -p CODING/FRONTEND
+          mkdir -p CODING/BACKEND
+
+      - name: Clone Frontend Repository
+        run: |
           git clone --branch ${{ env.BRANCHFE }} ${{ env.FRONTEND_REPO }} CODING/FRONTEND
 
       - name: Clone Backend Repository
         run: |
-          mkdir -p CODING/BACKEND
           git clone --branch ${{ env.BRANCH }} ${{ env.BACKEND_REPO }} CODING/BACKEND
-
-      - name: Remove sensitive file if exists
-        run: |
-          rm -f src/main/resources/firebase-admin.json
-          echo "src/main/resources/firebase-admin.json" >> .gitignore
-
-      - name: Move Frontend folder to Repo
-        run: |
-          mv CODING/FRONTEND .
-
       - name: Move Backend folder to Repo
         run: |
-          mv CODING/BACKEND .
+          mv CODING .
+          - name: Remove sensitive file if exists
+      - name: Remove json
+        run: |
+          rm -f CODING/BACKEND/src/main/resources/firebase-admin.json
+          echo "CODING/BACKEND/src/main/resources/firebase-admin.json" >> CODING/BACKEND/.gitignore
 
       - name: Commit and Push changes
         run: |
+          cd CODING
           git config --global user.name "LearningCoding101"
           git config --global user.email "hahoang33322@gmail.com"
           git add .
