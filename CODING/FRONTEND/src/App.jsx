@@ -43,12 +43,6 @@ import AssignStaffForm from "./page/manager/schedule/assign-staff-form/AssignSta
 import AdminAccountStaff from "./page/admin/admin-account-staff/AdminAccountStaff";
 import Promotion from "./page/manager/promotion/Promotion";
 import ViewSchedule from "./page/manager/schedule/schedule_of_all_staff/ViewSchedule";
-<<<<<<< HEAD
-import CategoryTotalPieChart from "./component/Chart/CategoryTotalPieChart";
-import CustomerDemographicBarChart from "./component/Chart/CustomerDemographicBarChart";
-import Analytic from "./page/admin/admin-analytic/Analytic";
-=======
->>>>>>> b3e34e7fafef374e47c54357cd1992b4b1b42819
 
 const PrivateProute = ({ role }) => {
   console.log(role);
