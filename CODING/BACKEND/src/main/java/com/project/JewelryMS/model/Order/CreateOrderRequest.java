@@ -10,4 +10,5 @@ public class CreateOrderRequest {
     private Float totalAmount;
     private Integer status;
     private Long customer_ID;
+    private Integer staff_ID;
 }

@@ -30,6 +30,11 @@ public class PurchaseOrder implements Serializable {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Customer customer;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="FK_StaffID", referencedColumnName = "PK_staffID")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private StaffAccount staffAccount;
+
     String paymentType;
     Float totalAmount;
     String email;

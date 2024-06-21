@@ -17,6 +17,7 @@ public class HtmlFormatterService {
                                       String chi,
                                       String carat,
                                       String manufacturer,
+                                      String manufactureCost,
                                       String category,
                                       String quantity
                                       ){
@@ -27,6 +28,7 @@ public class HtmlFormatterService {
                 "<td style='border: 2px solid #dededf; background-color: #ffffff; color: #000000; padding: 5px;'>" + chi + "</td>" +
                 "<td style='border: 2px solid #dededf; background-color: #ffffff; color: #000000; padding: 5px;'>" + carat + "</td>" +
                 "<td style='border: 2px solid #dededf; background-color: #ffffff; color: #000000; padding: 5px;'>" + manufacturer + "</td>" +
+                "<td style='border: 2px solid #dededf; background-color: #ffffff; color: #000000; padding: 5px;'>" + manufactureCost + "</td>" +
                 "<td style='border: 2px solid #dededf; background-color: #ffffff; color: #000000; padding: 5px;'>" + category + "</td>" +
                 "<td style='border: 2px solid #dededf; background-color: #ffffff; color: #000000; padding: 5px;'>" + quantity + "</td>" +
                 "</tr>";
@@ -42,6 +44,7 @@ public class HtmlFormatterService {
                 "<th style='border: 2px solid #dededf; background-color: #eceff1; color: #000000; padding: 5px;'>Chỉ</th>" +
                 "<th style='border: 2px solid #dededf; background-color: #eceff1; color: #000000; padding: 5px;'>Carat</th>" +
                 "<th style='border: 2px solid #dededf; background-color: #eceff1; color: #000000; padding: 5px;'>Nhà sản xuất</th>" +
+                "<th style='border: 2px solid #dededf; background-color: #eceff1; color: #000000; padding: 5px;'>Phí Gia Công</th>" +
                 "<th style='border: 2px solid #dededf; background-color: #eceff1; color: #000000; padding: 5px;'>Thể Loại</th>" +
                 "<th style='border: 2px solid #dededf; background-color: #eceff1; color: #000000; padding: 5px;'>Số lượng</th>" +
                 "</tr>" +
@@ -62,6 +65,7 @@ public class HtmlFormatterService {
                     String.valueOf(item.getChi()),
                     String.valueOf(item.getCarat()),
                     String.valueOf(item.getManufacturer()),
+                    String.valueOf(item.getManufactureCost()),
                     categoryName, // categoryName will be empty string if category is null
                     String.valueOf(item.getQuantity())
             );
@@ -86,6 +90,7 @@ public class HtmlFormatterService {
                                              String chi,
                                              String carat,
                                              String manufacturer,
+                                             String manufactureCost,
                                              String category,
                                              String quantity,
                                              String guaranteeTill,
@@ -98,6 +103,7 @@ public class HtmlFormatterService {
                 "<td style='border: 2px solid #dededf; background-color: #ffffff; color: #000000; padding: 5px;'>" + chi + "</td>" +
                 "<td style='border: 2px solid #dededf; background-color: #ffffff; color: #000000; padding: 5px;'>" + carat + "</td>" +
                 "<td style='border: 2px solid #dededf; background-color: #ffffff; color: #000000; padding: 5px;'>" + manufacturer + "</td>" +
+                "<td style='border: 2px solid #dededf; background-color: #ffffff; color: #000000; padding: 5px;'>" + manufactureCost + "</td>" +
                 "<td style='border: 2px solid #dededf; background-color: #ffffff; color: #000000; padding: 5px;'>" + category + "</td>" +
                 "<td style='border: 2px solid #dededf; background-color: #ffffff; color: #000000; padding: 5px;'>" + quantity + "</td>" +
                 "<td style='border: 2px solid #dededf; background-color: #ffffff; color: #000000; padding: 5px;'>" + guaranteeTill + "</td>" +
@@ -127,6 +133,7 @@ public class HtmlFormatterService {
                 .append("<th style='border: 2px solid #dededf; background-color: #eceff1; color: #000000; padding: 5px;'>Image</th>")
                 .append("<th style='border: 2px solid #dededf; background-color: #eceff1; color: #000000; padding: 5px;'>Metal Type</th>")
                 .append("<th style='border: 2px solid #dededf; background-color: #eceff1; color: #000000; padding: 5px;'>Manufacturer</th>")
+                .append("<th style='border: 2px solid #dededf; background-color: #eceff1; color: #000000; padding: 5px;'>ManufactureCost</th>")
                 .append("</tr>")
                 .append("</thead>")
                 .append("<tbody>");
@@ -146,6 +153,7 @@ public class HtmlFormatterService {
                     .append("<td style='border: 2px solid #dededf; background-color: #ffffff; color: #000000; padding: 5px;'>").append("<img src='").append(orderDetail.getImage()).append("' alt='Product Image' style='max-width: 100px;'>").append("</td>")
                     .append("<td style='border: 2px solid #dededf; background-color: #ffffff; color: #000000; padding: 5px;'>").append(orderDetail.getMetalType()).append("</td>")
                     .append("<td style='border: 2px solid #dededf; background-color: #ffffff; color: #000000; padding: 5px;'>").append(orderDetail.getManufacturer()).append("</td>")
+                    .append("<td style='border: 2px solid #dededf; background-color: #ffffff; color: #000000; padding: 5px;'>").append(orderDetail.getManufactureCost()).append("</td>")
                     .append("</tr>");
         }
 

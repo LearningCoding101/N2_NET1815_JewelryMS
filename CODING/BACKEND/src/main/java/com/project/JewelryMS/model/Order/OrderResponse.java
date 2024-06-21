@@ -21,5 +21,7 @@ public class OrderResponse {
     private Float totalAmount;
     private Date purchaseDate;
     private Integer status;
+    private Long customer_ID;
+    private Integer staff_ID;
     private Set<ProductResponse> productDetail = new HashSet<>();
 }

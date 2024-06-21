@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CategoryResponse {
-    String category_Name;
-    Float category_Total;
-
+public class TopSellProductResponse {
+    String product_Name;
+    Integer unitSold;
+    Float revenueSold;
 }

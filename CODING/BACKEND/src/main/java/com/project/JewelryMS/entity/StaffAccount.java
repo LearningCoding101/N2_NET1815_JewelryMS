@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.sql.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -42,5 +43,9 @@ public class StaffAccount {
     @JsonIgnoreProperties
     @JsonManagedReference
     Set<Staff_Shift> staffShifts;
+
+    @OneToMany(mappedBy = "staffAccount", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties
+    Set<PurchaseOrder> purchaseOrders = new HashSet<>();
 
 }

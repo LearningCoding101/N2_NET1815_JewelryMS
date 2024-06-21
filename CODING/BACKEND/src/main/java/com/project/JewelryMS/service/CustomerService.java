@@ -42,15 +42,18 @@ public class CustomerService {
         if(customerOptional.isPresent()) {
             Customer customer = customerOptional.get();
             int totalPoints = customer.getPointAmount();
-            if (totalPoints >= 0 && totalPoints <= 99) {
-                return "Connect";
-            } else if (totalPoints >= 100 && totalPoints <= 399) {
-                return "Member";
-            } else if (totalPoints >= 400 && totalPoints <= 999) {
-                return "Companion";
-            } else {
-                return "Intimate";
+            if (totalPoints >= 0) {
+                if (totalPoints >= 0 && totalPoints <= 99) {
+                    return "Connect";
+                } else if (totalPoints >= 100 && totalPoints <= 399) {
+                    return "Member";
+                } else if (totalPoints >= 400 && totalPoints <= 999) {
+                    return "Companion";
+                } else {
+                    return "Intimate";
+                }
             }
+            return "Negative Point Error ???";
         }
         return "Not Found Customer ID";
     }
