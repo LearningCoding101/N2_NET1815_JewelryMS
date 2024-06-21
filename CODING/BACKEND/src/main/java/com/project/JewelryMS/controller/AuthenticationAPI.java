@@ -74,11 +74,11 @@ public class AuthenticationAPI {
         return ResponseEntity.ok(accountResponse);
     }
     //Change password
-    @PutMapping("change")
+    @PutMapping("change/{id}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_MANAGER')")
-    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest request){
+    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest request, @PathVariable Long id){
 
-        return authenticationService.changePassword(request);
+        return authenticationService.changePassword(request, id);
     }
 
     //ResetPassword

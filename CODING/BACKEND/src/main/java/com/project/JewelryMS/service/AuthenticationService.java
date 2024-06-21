@@ -104,8 +104,8 @@ public class AuthenticationService implements UserDetailsService {
                     accountResponse.setId((long)account.getPK_userID());
                     return accountResponse;
     }
-    public ResponseEntity<String> changePassword(ChangePasswordRequest request) {
-        Account account = authenticationRepository.findById(request.getID()).orElse(null);
+    public ResponseEntity<String> changePassword(ChangePasswordRequest request ,Long id) {
+        Account account = authenticationRepository.findById(id).orElse(null);
 
         if (account == null) {
             return new ResponseEntity<>("Account not found", HttpStatus.NOT_FOUND);
