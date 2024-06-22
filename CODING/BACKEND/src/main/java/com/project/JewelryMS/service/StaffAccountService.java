@@ -1,10 +1,8 @@
 package com.project.JewelryMS.service;
 
 import com.project.JewelryMS.entity.Account;
-import com.project.JewelryMS.entity.RoleEnum;
 import com.project.JewelryMS.entity.Shift;
 import com.project.JewelryMS.entity.StaffAccount;
-import com.project.JewelryMS.model.Staff.CreateStaffAccountRequest;
 import com.project.JewelryMS.model.Staff.StaffAccountRequest;
 import com.project.JewelryMS.model.Staff.StaffAccountResponse;
 import com.project.JewelryMS.repository.AuthenticationRepository;
@@ -15,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -123,7 +120,7 @@ public class StaffAccountService {
     }
 
     // Method to "delete" a StaffAccount by updating the Account status
-    public void deactivateStaffAccount(Integer id) {
+    public boolean deactivateStaffAccount(Integer id) {
         Optional<StaffAccount> staffAccountOpt = staffAccountRepository.findById(id);
         if (staffAccountOpt.isPresent()) {
             StaffAccount staffAccount = staffAccountOpt.get();
@@ -131,6 +128,7 @@ public class StaffAccountService {
             if (account != null) {
                 account.setStatus(0);
                 authenticationRepository.save(account);
+                return true;
             } else {
                 throw new RuntimeException("Account associated with StaffAccount ID " + id + " not found");
             }

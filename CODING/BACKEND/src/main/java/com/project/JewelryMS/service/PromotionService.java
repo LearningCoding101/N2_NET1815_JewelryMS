@@ -73,7 +73,6 @@ public class PromotionService {
         promotion.setEndDate(endDate);
         if(createPromotionRequest.getDiscount()>=0 && createPromotionRequest.getDiscount()<=100) {
             promotion.setDiscount(createPromotionRequest.getDiscount());
-            promotionRepository.save(promotion);
         }else{
             throw new RuntimeException("Can't Set Promotion <0 and >100");
         }

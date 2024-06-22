@@ -11,6 +11,7 @@ import com.project.JewelryMS.repository.StaffAccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -78,7 +79,7 @@ public class ProfileService {
         if (staffOptional.isPresent()) {
             StaffAccount staffAccount = staffOptional.get();
             return new StaffProfileResponse(staffAccount.getAccount().getRole(), staffAccount.getAccount().getEmail(), staffAccount.getAccount().getUsername(),
-                    staffAccount.getAccount().getAccountName(), staffAccount.getStartDate(), staffAccount.getPhoneNumber(),
+                    staffAccount.getAccount().getAccountName(), (Date) staffAccount.getStartDate(), staffAccount.getPhoneNumber(),
                     staffAccount.getSalary(), staffAccount.getAccount().getStatus());
         }
         return null;

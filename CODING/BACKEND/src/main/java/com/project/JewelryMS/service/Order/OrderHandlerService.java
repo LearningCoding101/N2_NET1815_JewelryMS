@@ -114,8 +114,14 @@ public class OrderHandlerService {
         return purchaseOrder.getPK_OrderID();
     }
 
-    public Long handleCreateOrderBuyWithDetails(List<CreateProductBuyRequest> createProductBuyRequests){
+    public Long handleCreateOrderBuyWithDetails(CreateOrderBuyWrapper createOrderBuyWrapper){
         PurchaseOrder order = new PurchaseOrder();
+        // Check if the input list is null
+        if (createOrderBuyWrapper.getList() == null) {
+            throw new IllegalArgumentException("createProductBuyRequests cannot be null");
+        }
+        List<CreateProductBuyRequest> createProductBuyRequests = createOrderBuyWrapper.getList();
+
         Long id = -1L;
 //        order.setStatus(null);
         order.setPurchaseDate(new Date());

@@ -3,6 +3,7 @@ package com.project.JewelryMS.service;
 import com.project.JewelryMS.entity.*;
 import com.project.JewelryMS.model.Dashboard.*;
 import com.project.JewelryMS.model.Dashboard.Customer.*;
+import com.project.JewelryMS.model.Order.ProductResponse;
 import com.project.JewelryMS.repository.CategoryRepository;
 import com.project.JewelryMS.repository.CustomerRepository;
 import com.project.JewelryMS.repository.OrderRepositiory;
@@ -26,10 +27,9 @@ public class DashboardService {
     CustomerService customerService;
 
 
-    public RevenueCategoryResponse RevenueCategory(){
+    public List<CategoryResponse> RevenueCategory(){
         Optional<List<Category>> optionalCategoryList = Optional.ofNullable(categoryRepository.findAllCategories());
         List<CategoryResponse> categoryResponseList = new ArrayList<>();
-        RevenueCategoryResponse revenueCategoryResponse = new RevenueCategoryResponse();
         if(optionalCategoryList.isPresent()){
             List<Category> categoryList = optionalCategoryList.get();
             for(Category category: categoryList){
@@ -40,8 +40,7 @@ public class DashboardService {
             }
         }
 //        categoryResponseList.sort(Comparator.comparing(CategoryResponse::getCategory_Total).reversed());
-        revenueCategoryResponse.setList(categoryResponseList);
-        return revenueCategoryResponse;
+            return categoryResponseList;
     }
 
     public Float CalculateCategoryTotal(Long Category_ID){
@@ -62,7 +61,7 @@ public class DashboardService {
         return totalRevenue;
     }
 
-    public RevenueProductResponse getTopSellingProducts() {
+    public List<TopSellProductResponse> getTopSellingProducts() {
         List<PurchaseOrder> orders = orderRepositiory.findAll();
 
         // Sử dụng Map để lưu trữ số lượng và doanh thu bán hàng cho từng sản phẩm
@@ -85,16 +84,13 @@ public class DashboardService {
         // Chuyển Map sang List và sắp xếp theo số lượng bán ra hoặc doanh thu
         List<TopSellProductResponse> topSellProductResponses = new ArrayList<>(productSalesMap.values());
         topSellProductResponses.sort(Comparator.comparing(TopSellProductResponse::getUnitSold).reversed());
-        RevenueProductResponse revenueProductResponse = new RevenueProductResponse();
-        revenueProductResponse.setList(topSellProductResponses);
-        return revenueProductResponse;
+        return topSellProductResponses;
     }
 
 
-    public RevenueCategoryResponse RevenueCategory(RevenueDateRequest revenueDateRequest){
+    public List<CategoryResponse> RevenueCategory(RevenueDateRequest revenueDateRequest){
         Optional<List<Category>> optionalCategoryList = Optional.ofNullable(categoryRepository.findAllCategories());
         List<CategoryResponse> categoryResponseList = new ArrayList<>();
-        RevenueCategoryResponse revenueCategoryResponse = new RevenueCategoryResponse();
         if(optionalCategoryList.isPresent()){
             List<Category> categoryList = optionalCategoryList.get();
             for(Category category: categoryList){
@@ -105,8 +101,7 @@ public class DashboardService {
             }
         }
 //       categoryResponseList.sort(Comparator.comparing(CategoryResponse::getCategory_Total).reversed());
-       revenueCategoryResponse.setList(categoryResponseList);
-       return revenueCategoryResponse;
+        return categoryResponseList;
     }
 
     public Float CalculateCategoryTotal(Long Category_ID, RevenueDateRequest revenueDateRequest){
@@ -135,7 +130,7 @@ public class DashboardService {
         return totalRevenue;
     }
 
-    public RevenueProductResponse getTopSellingProducts(RevenueDateRequest revenueDateRequest) {
+    public List<TopSellProductResponse>  getTopSellingProducts(RevenueDateRequest revenueDateRequest) {
         // Lấy start và end dates từ request và chuyển đổi thành LocalDateTime
         LocalDate startDate = revenueDateRequest.getStartTime();
         LocalDate endDate = revenueDateRequest.getEndTime();
@@ -166,9 +161,7 @@ public class DashboardService {
         // Chuyển Map sang List và sắp xếp theo số lượng bán ra hoặc doanh thu
         List<TopSellProductResponse> topSellProductResponses = new ArrayList<>(productSalesMap.values());
         topSellProductResponses.sort(Comparator.comparing(TopSellProductResponse::getUnitSold).reversed());
-        RevenueProductResponse revenueProductResponse = new RevenueProductResponse();
-        revenueProductResponse.setList(topSellProductResponses);
-        return revenueProductResponse;
+        return topSellProductResponses;
     }
 
     public CustomerLoyaltyResponse getCustomerLoyaltyStatistics(RevenueDateRequest revenueDateRequest) {
