@@ -48,7 +48,11 @@ jobs:
           git config --global user.name "LearningCoding101"
           git config --global user.email "hahoang33322@gmail.com"
           git add .
-          git commit -m "Sync repositories and remove sensitive file"
-          git push origin ${{ env.BRANCH }} --no-verify
+      
+          # Check if there are changes to commit
+          git diff --quiet && git diff --cached --quiet || {
+            git commit -m "Sync repositories and remove sensitive file"
+            git push origin ${{ env.BRANCH }} --no-verify
+          }
         env:
           GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
