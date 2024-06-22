@@ -49,6 +49,6 @@ jobs:
           git config --global user.email "hahoang33322@gmail.com"
           git add .
           git commit -m "Sync repositories and remove sensitive file"
-          git push origin ${{ env.BRANCH }}
+          git push origin ${{ env.BRANCH }} --no-verify
         env:
           GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
