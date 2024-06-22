@@ -80,11 +80,19 @@ The Jewelry Sales Management System aims to streamline operations in the jewelry
 
 ## Team Test Assignment
 
-| Role           | Team Member                                         |
+| Sprint           | Use Cases                                         |
 |----------------|-----------------------------------------------------|
-| Hà Thái Hoàng  | UC2, 24                                    |
-| Bùi Duy Khánh | UC 1, 23                                      |
-|Phạm Văn Quốc Vương  | UC 3, 22                       |
+| Sprint 1 | UC2, UC24, UC1, UC23, UC3, UC22                           |
+| Sprint 2 | UC12                                                      |
+| Sprint 3 | UC18, UC19, UC20, UC24, UC25, UC36,                                 |
+| Sprint 4 | UC12, UC13, UC14, UC15, UC21, UC22, UC23, UC38, UC39, UC41                  |                    
+
+TEST WORK FLOW
+
+SPRINT 1:
+Hoàng: UC2, UC 24
+Khánh: UC 1, UC 23
+Vương: UC 3, UC 22  
 
 
 ## Project Structure
