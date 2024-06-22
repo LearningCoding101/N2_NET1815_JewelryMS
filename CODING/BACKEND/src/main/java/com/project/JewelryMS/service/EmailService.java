@@ -76,16 +76,15 @@ public class EmailService {
         sendMailTemplate(emailDetail);
         return temporaryPassword;
 
-    }
-    public void sendMailTemplate(EmailDetail emailDetail){
-        try{
+    }public void sendMailTemplate(EmailDetail emailDetail) {
+        try {
             Context context = new Context();
 
             context.setVariable("name", emailDetail.getRecipient());
             context.setVariable("content", emailDetail.getMsgBody());
             String text = templateEngine.process("emailtemplate", context);
 
-            // Creating a simple mail message
+            // Creating a MimeMessage
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
 
@@ -94,9 +93,11 @@ public class EmailService {
             mimeMessageHelper.setTo(emailDetail.getRecipient());
             mimeMessageHelper.setText(text, true);
             mimeMessageHelper.setSubject(emailDetail.getSubject());
+
+            // Send the email
             javaMailSender.send(mimeMessage);
-        }catch (MessagingException messagingException){
-            messagingException.printStackTrace();
+        } catch (MessagingException e) {
+            e.printStackTrace();
         }
     }
     public String generateTempEmail(int length){

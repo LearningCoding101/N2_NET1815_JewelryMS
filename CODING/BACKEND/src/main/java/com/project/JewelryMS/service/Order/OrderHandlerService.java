@@ -60,48 +60,31 @@ public class OrderHandlerService {
         return purchaseOrder.getPK_OrderID();
     }
 
-    public Long handleCreateOrderWithDetails(CreateOrderRequest orderRequest, List<CreateOrderDetailRequest> detailRequest, String email){
+    public Long handleCreateOrderWithDetails(CreateOrderRequest orderRequest, List<CreateOrderDetailRequest> detailRequest, String email) {
         PurchaseOrder order = new PurchaseOrder();
-        Long id = -1L;
         order.setStatus(orderRequest.getStatus());
         order.setPurchaseDate(new Date());
         order.setPaymentType(orderRequest.getPaymentType());
         order.setTotalAmount(orderRequest.getTotalAmount());
-        if(orderRequest.getCustomer_ID()!=null) {
+
+        // Set Customer if provided
+        if (orderRequest.getCustomer_ID() != null) {
             Optional<Customer> customerOptional = customerRepository.findById(orderRequest.getCustomer_ID());
-            if (customerOptional.isPresent()) {
-                Customer customer = customerOptional.get();
-                order.setCustomer(customer);
-            }else{
-                order.setCustomer(null);
-            }
-        }else{
-            order.setCustomer(null);
+            customerOptional.ifPresent(order::setCustomer);
         }
 
-        if(orderRequest.getStaff_ID()!=null) {
+        // Set StaffAccount if provided
+        if (orderRequest.getStaff_ID() != null) {
             Optional<StaffAccount> staffAccountOptional = staffAccountRepository.findById(orderRequest.getStaff_ID());
-            if(staffAccountOptional.isPresent()){
-                StaffAccount staffAccount = staffAccountOptional.get();
-                order.setStaffAccount(staffAccount);
-            }else{
-                order.setStaffAccount(null);
-            }
-        }else{
-            order.setStaffAccount(null);
-        Long customerID = orderRequest.getCustomer_ID(); // This could be null
-        Optional<Long> optionalCustomerId = Optional.ofNullable(customerID);
-        if (optionalCustomerId.isPresent()){
-            Optional<Customer> customerOptional = customerRepository.findById(customerID);
-            if(customerOptional.isPresent()){
-                Customer customer = customerOptional.get();
-                order.setCustomer(customer);
-            }
+            staffAccountOptional.ifPresent(order::setStaffAccount);
         }
 
+        // Set email
         order.setEmail(email);
+
+        // Create OrderDetails
         List<OrderDetail> orderDetails = new ArrayList<>();
-        for(CreateOrderDetailRequest detail : detailRequest){
+        for (CreateOrderDetailRequest detail : detailRequest) {
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setQuantity(detail.getQuantity());
             orderDetail.setProductSell(productSellService.getProductSellById(detail.getProductID()));
@@ -109,11 +92,15 @@ public class OrderHandlerService {
             orderDetails.add(orderDetail);
         }
 
-        if(!orderDetails.isEmpty()){
+        // Save order and orderDetails
+        Long id = -1L;
+        if (!orderDetails.isEmpty()) {
             id = createOrderWithDetails(order, orderDetails);
         }
+
         return id;
     }
+
     //Product Buy Section///////////////////////////////////////////////////////////////////////////////////////////////
     @Transactional
     public Long createOrderWithBuyDetails(PurchaseOrder purchaseOrder, List<OrderBuyDetail> list){

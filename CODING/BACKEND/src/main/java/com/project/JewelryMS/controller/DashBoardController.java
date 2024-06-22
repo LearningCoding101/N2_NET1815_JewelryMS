@@ -1,5 +1,8 @@
 package com.project.JewelryMS.controller;
 
+import com.project.JewelryMS.model.Dashboard.Customer.CustomerDemographicsResponse;
+import com.project.JewelryMS.model.Dashboard.Customer.CustomerLoyaltyResponse;
+import com.project.JewelryMS.model.Dashboard.Customer.CustomerSignUpResponse;
 import com.project.JewelryMS.model.Dashboard.RevenueCategoryResponse;
 import com.project.JewelryMS.model.Dashboard.RevenueDateRequest;
 import com.project.JewelryMS.model.Dashboard.RevenueProductResponse;
@@ -42,4 +45,18 @@ public class DashBoardController {
         return ResponseEntity.ok(dashboardService.getTopSellingProducts());
     }
 
+    @PostMapping("/loyalty-customers")
+    public ResponseEntity<CustomerLoyaltyResponse> getCustomerLoyaltyStatistics(@RequestBody RevenueDateRequest revenueDateRequest) {
+        return ResponseEntity.ok(dashboardService.getCustomerLoyaltyStatistics(revenueDateRequest));
+    }
+
+    @PostMapping("demographic-customers")
+    public ResponseEntity<CustomerDemographicsResponse> getCustomerDemoGraphic(@RequestBody RevenueDateRequest revenueDateRequest){
+        return ResponseEntity.ok(dashboardService.getCustomerDemoGraphicResponse(revenueDateRequest));
+    }
+
+    @PostMapping("/customer-signups")
+    public ResponseEntity<CustomerSignUpResponse> getCustomerSignUpsByStaff(@RequestBody RevenueDateRequest revenueDateRequest) {
+        return ResponseEntity.ok(dashboardService.getCustomerSignUpsByStaff(revenueDateRequest));
+    }
 }

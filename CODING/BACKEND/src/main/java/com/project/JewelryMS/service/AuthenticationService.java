@@ -120,14 +120,14 @@ public class AuthenticationService implements UserDetailsService {
 
         return new ResponseEntity<>("Password changed successfully", HttpStatus.OK);
     }
-
-    @Override
+@Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-
-
-        return authenticationRepository.findAccountByUsername(username);
+        Account account = authenticationRepository.findAccountByUsername(username);
+        if (account == null) {
+            throw new UsernameNotFoundException("User not found with username: " + username);
+        }
+        return account;
     }
-
 
     public List<Account> getAllManagerAccount() {
         return authenticationRepository.findByRole(RoleEnum.ROLE_MANAGER);

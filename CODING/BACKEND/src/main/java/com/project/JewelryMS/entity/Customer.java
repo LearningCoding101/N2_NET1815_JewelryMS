@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,9 +29,16 @@ public class Customer {
     boolean status = true;
     @Column(name="gender")
     String gender;
+    @Column(name="createDate")
+    Date createDate;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties
     Set<PurchaseOrder> purchaseOrders = new HashSet<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="FK_StaffID",referencedColumnName = "PK_staffID")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    StaffAccount staffAccount;
 }
 

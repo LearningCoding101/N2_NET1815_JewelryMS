@@ -48,4 +48,9 @@ public class StaffAccount {
     @JsonIgnoreProperties
     Set<PurchaseOrder> purchaseOrders = new HashSet<>();
 
+    @OneToMany(mappedBy = "staffAccount")
+    @JsonIgnoreProperties("staffAccount")
+    List<Customer> customer;
+
+
 }
