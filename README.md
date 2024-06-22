@@ -78,6 +78,15 @@ The Jewelry Sales Management System aims to streamline operations in the jewelry
 | Backend Dev    | Hà Thái Hoàng, Lâm Tấn Phú, Thái Đăng               |
 | Tester         | Hà Thái Hoàng, Duy Khánh, Phạm Văn Quốc Vương, Thảo |
 
+## Team Test Assignment
+
+| Role           | Team Member                                         |
+|----------------|-----------------------------------------------------|
+| Hà Thái Hoàng  | UC2, 24                                    |
+| Bùi Duy Khánh | UC 1, 23                                      |
+|Phạm Văn Quốc Vương  | UC 3, 22                       |
+
+
 ## Project Structure
 
 ### Frontend Directory Structure
