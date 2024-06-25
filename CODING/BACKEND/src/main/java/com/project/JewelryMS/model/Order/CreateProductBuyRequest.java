@@ -12,7 +12,7 @@ public class CreateProductBuyRequest {
     private Long category_id;
     private String metalType;
     private String gemstoneType;
-    private MultipartFile image;
+    private String image;
     private Integer metalWeight;
     private Float gemstoneWeight;
     private Float cost;

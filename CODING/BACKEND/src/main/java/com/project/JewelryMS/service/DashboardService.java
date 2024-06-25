@@ -164,7 +164,7 @@ public class DashboardService {
         return topSellProductResponses;
     }
 
-    public CustomerLoyaltyResponse getCustomerLoyaltyStatistics(RevenueDateRequest revenueDateRequest) {
+    public List<CustomerLoyalty> getCustomerLoyaltyStatistics(RevenueDateRequest revenueDateRequest) {
         // Convert LocalDate to LocalDateTime to include the whole day
         LocalDate startDate = revenueDateRequest.getStartTime();
         LocalDate endDate = revenueDateRequest.getEndTime();
@@ -186,12 +186,10 @@ public class DashboardService {
             customerLoyalties.add(customerLoyalty);
         }
 
-        CustomerLoyaltyResponse response = new CustomerLoyaltyResponse();
-        response.setList(customerLoyalties);
-        return response;
+        return customerLoyalties;
     }
 
-    public CustomerDemographicsResponse getCustomerDemoGraphicResponse(RevenueDateRequest revenueDateRequest){
+    public List<CustomerDemographics> getCustomerDemoGraphicResponse(RevenueDateRequest revenueDateRequest){
         // Convert LocalDate to LocalDateTime to include the whole day
         LocalDate startDate = revenueDateRequest.getStartTime();
         LocalDate endDate = revenueDateRequest.getEndTime();
@@ -207,12 +205,10 @@ public class DashboardService {
             customerDemoGraphic.setGender(customer.getGender());
             customerDemoGraphics.add(customerDemoGraphic);
         }
-        CustomerDemographicsResponse customerDemoGraphicResponse = new CustomerDemographicsResponse();
-        customerDemoGraphicResponse.setList(customerDemoGraphics);
-        return customerDemoGraphicResponse;
+        return customerDemoGraphics;
     }
 
-    public CustomerSignUpResponse getCustomerSignUpsByStaff(RevenueDateRequest revenueDateRequest) {
+    public List<CustomerSignUp> getCustomerSignUpsByStaff(RevenueDateRequest revenueDateRequest) {
         LocalDate startDate = revenueDateRequest.getStartTime();
         LocalDate endDate = revenueDateRequest.getEndTime();
 
@@ -232,9 +228,7 @@ public class DashboardService {
             customerSignUps.add(customerSignUp);
         }
 
-        CustomerSignUpResponse response = new CustomerSignUpResponse();
-        response.setList(customerSignUps);
-        return response;
+        return customerSignUps;
     }
 
 }

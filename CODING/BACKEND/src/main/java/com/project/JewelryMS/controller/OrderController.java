@@ -1,5 +1,6 @@
 package com.project.JewelryMS.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.project.JewelryMS.entity.OrderDetail;
 import com.project.JewelryMS.entity.ProductSell;
@@ -22,6 +23,8 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -55,11 +58,25 @@ public class OrderController {
     }
     //Product Buy Section//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     @PostMapping("initializePB")
-    @CrossOrigin(origins = "*")
+    public ResponseEntity<String> saleCreateBuyOrder(@RequestBody(required = false) byte[] requestData) {
+        try {
+            String orderJson = new String(requestData); // Convert byte array to String
 
-    public ResponseEntity saleCreateBuyOrder(@ModelAttribute CreateOrderBuyWrapper order){
-        orderHandlerService.handleCreateOrderBuyWithDetails(order);
-        return ResponseEntity.ok("Create Successfully");
+
+            System.out.println("Received order: " + orderJson);
+            ObjectMapper objectMapper = new ObjectMapper();
+            CreateProductBuyRequest[] orderArray = objectMapper.readValue(orderJson, CreateProductBuyRequest[].class);
+            List<CreateProductBuyRequest> orderList = Arrays.asList(orderArray);
+
+
+            // Process orderWrapper as needed
+            orderHandlerService.handleCreateOrderBuyWithDetails(orderList);
+
+            return ResponseEntity.ok("Create Successfully");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing request");
+        }
     }
 
     @PostMapping("append-productBuy")

@@ -8,9 +8,19 @@ import com.project.JewelryMS.model.ProductBuy.CreateProductBuyResponse;
 import com.project.JewelryMS.model.ProductBuy.ProductBuyResponse;
 import com.project.JewelryMS.repository.CategoryRepository;
 import com.project.JewelryMS.repository.ProductBuyRepository;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.fileupload.disk.DiskFileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload.util.Streams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Base64Utils;
+import org.springframework.web.multipart.MultipartFile;
 
+
+
+import java.io.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -40,7 +50,9 @@ public class ProductBuyService {
         productBuy.setMetalType(request.getMetalType());
         productBuy.setGemstoneType(request.getGemstoneType());
         if(request.getImage()!=null) {
-            String imageUrl = imageService.uploadImageByPathService(request.getImage());
+            String imageUrl = imageService.uploadImageByPathService(
+                    base64ToMultipartFile(request.getImage())
+            );
             productBuy.setImage(imageUrl);
         }else{
             productBuy.setImage(null);
@@ -51,7 +63,61 @@ public class ProductBuyService {
         productBuy.setPbStatus(true);
         return productBuyRepository.save(productBuy);
     }
+    public static MultipartFile base64ToMultipartFile(String base64String) {
+        String base64Data = base64String.split(",")[1];
 
+        // Decode base64 string to byte array
+        byte[] fileBytes = Base64.decodeBase64(base64Data);
+        return new MultipartFile() {
+
+            private final String fileName = "filename.jpeg"; // Provide a suitable name if needed
+
+            @Override
+            public String getName() {
+                return fileName;
+            }
+
+            @Override
+            public String getOriginalFilename() {
+                return fileName;
+            }
+
+            @Override
+            public String getContentType() {
+                // You may need to determine the content type based on the file content
+                return "image/jpeg";
+            }
+
+            @Override
+            public boolean isEmpty() {
+                return fileBytes == null || fileBytes.length == 0;
+            }
+
+            @Override
+            public long getSize() {
+                return fileBytes.length;
+            }
+
+            @Override
+            public byte[] getBytes() throws IOException {
+                return fileBytes;
+            }
+
+            @Override
+            public InputStream getInputStream() throws IOException {
+                return new ByteArrayInputStream(fileBytes);
+            }
+
+            @Override
+            public void transferTo(File dest) throws IOException, IllegalStateException {
+                // You can implement this if needed for file transfer
+            }
+        };
+    }
+
+    private static String getFileExtension(String fileName) {
+        return fileName.substring(fileName.lastIndexOf('.'));
+    }
 
     public Float calculateProductBuyCost(CalculatePBRequest createProductBuyRequest) {
         Float totalGemPrice = 0.0F;

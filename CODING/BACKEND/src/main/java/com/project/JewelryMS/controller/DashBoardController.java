@@ -1,9 +1,9 @@
 package com.project.JewelryMS.controller;
 
 import com.project.JewelryMS.model.Dashboard.CategoryResponse;
-import com.project.JewelryMS.model.Dashboard.Customer.CustomerDemographicsResponse;
-import com.project.JewelryMS.model.Dashboard.Customer.CustomerLoyaltyResponse;
-import com.project.JewelryMS.model.Dashboard.Customer.CustomerSignUpResponse;
+import com.project.JewelryMS.model.Dashboard.Customer.CustomerDemographics;
+import com.project.JewelryMS.model.Dashboard.Customer.CustomerLoyalty;
+import com.project.JewelryMS.model.Dashboard.Customer.CustomerSignUp;
 import com.project.JewelryMS.model.Dashboard.RevenueDateRequest;
 import com.project.JewelryMS.model.Dashboard.TopSellProductResponse;
 import com.project.JewelryMS.service.DashboardService;
@@ -45,17 +45,17 @@ public class DashBoardController {
     }
 
     @PostMapping("/loyalty-customers")
-    public ResponseEntity<CustomerLoyaltyResponse> getCustomerLoyaltyStatistics(@RequestBody RevenueDateRequest revenueDateRequest) {
+    public ResponseEntity<List<CustomerLoyalty>> getCustomerLoyaltyStatistics(@RequestBody RevenueDateRequest revenueDateRequest) {
         return ResponseEntity.ok(dashboardService.getCustomerLoyaltyStatistics(revenueDateRequest));
     }
 
     @PostMapping("demographic-customers")
-    public ResponseEntity<CustomerDemographicsResponse> getCustomerDemoGraphic(@RequestBody RevenueDateRequest revenueDateRequest){
+    public ResponseEntity<List<CustomerDemographics>> getCustomerDemoGraphic(@RequestBody RevenueDateRequest revenueDateRequest){
         return ResponseEntity.ok(dashboardService.getCustomerDemoGraphicResponse(revenueDateRequest));
     }
 
     @PostMapping("/customer-signups")
-    public ResponseEntity<CustomerSignUpResponse> getCustomerSignUpsByStaff(@RequestBody RevenueDateRequest revenueDateRequest) {
+    public ResponseEntity<List<CustomerSignUp>> getCustomerSignUpsByStaff(@RequestBody RevenueDateRequest revenueDateRequest) {
         return ResponseEntity.ok(dashboardService.getCustomerSignUpsByStaff(revenueDateRequest));
     }
 }

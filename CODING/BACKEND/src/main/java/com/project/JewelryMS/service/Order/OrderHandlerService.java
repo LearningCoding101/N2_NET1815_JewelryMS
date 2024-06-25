@@ -59,47 +59,66 @@ public class OrderHandlerService {
         orderService.saveOrder(purchaseOrder);
         return purchaseOrder.getPK_OrderID();
     }
-
     public Long handleCreateOrderWithDetails(CreateOrderRequest orderRequest, List<CreateOrderDetailRequest> detailRequest, String email) {
         PurchaseOrder order = new PurchaseOrder();
         order.setStatus(orderRequest.getStatus());
         order.setPurchaseDate(new Date());
+        Long id = -1L;
+
         order.setPaymentType(orderRequest.getPaymentType());
         order.setTotalAmount(orderRequest.getTotalAmount());
-
-        // Set Customer if provided
         if (orderRequest.getCustomer_ID() != null) {
             Optional<Customer> customerOptional = customerRepository.findById(orderRequest.getCustomer_ID());
-            customerOptional.ifPresent(order::setCustomer);
+            if (customerOptional.isPresent()) {
+                Customer customer = customerOptional.get();
+                order.setCustomer(customer);
+            } else {
+                order.setCustomer(null);
+            }
+        } else {
+            order.setCustomer(null);
         }
 
-        // Set StaffAccount if provided
         if (orderRequest.getStaff_ID() != null) {
             Optional<StaffAccount> staffAccountOptional = staffAccountRepository.findById(orderRequest.getStaff_ID());
-            staffAccountOptional.ifPresent(order::setStaffAccount);
-        }
+            if (staffAccountOptional.isPresent()) {
+                StaffAccount staffAccount = staffAccountOptional.get();
+                order.setStaffAccount(staffAccount);
+            } else {
+                order.setStaffAccount(null);
+            }
+        } else {
+            order.setStaffAccount(null);
+            Long customerID = orderRequest.getCustomer_ID(); // This could be null
+            Optional<Long> optionalCustomerId = Optional.ofNullable(customerID);
+            if (optionalCustomerId.isPresent()) {
+                Optional<Customer> customerOptional = customerRepository.findById(customerID);
+                if (customerOptional.isPresent()) {
+                    Customer customer = customerOptional.get();
+                    order.setCustomer(customer);
+                }
+            }
 
-        // Set email
-        order.setEmail(email);
+            order.setEmail(email);
+            List<OrderDetail> orderDetails = new ArrayList<>();
+            for (CreateOrderDetailRequest detail : detailRequest) {
+                OrderDetail orderDetail = new OrderDetail();
+                orderDetail.setQuantity(detail.getQuantity());
+                orderDetail.setProductSell(productSellService.getProductSellById(detail.getProductID()));
+                orderDetail.setPurchaseOrder(order);
+                orderDetails.add(orderDetail);
+            }
 
-        // Create OrderDetails
-        List<OrderDetail> orderDetails = new ArrayList<>();
-        for (CreateOrderDetailRequest detail : detailRequest) {
-            OrderDetail orderDetail = new OrderDetail();
-            orderDetail.setQuantity(detail.getQuantity());
-            orderDetail.setProductSell(productSellService.getProductSellById(detail.getProductID()));
-            orderDetail.setPurchaseOrder(order);
-            orderDetails.add(orderDetail);
-        }
+            if (!orderDetails.isEmpty()) {
+                id = createOrderWithDetails(order, orderDetails);
+            }
 
-        // Save order and orderDetails
-        Long id = -1L;
-        if (!orderDetails.isEmpty()) {
-            id = createOrderWithDetails(order, orderDetails);
         }
 
         return id;
+
     }
+
 
     //Product Buy Section///////////////////////////////////////////////////////////////////////////////////////////////
     @Transactional
@@ -114,13 +133,13 @@ public class OrderHandlerService {
         return purchaseOrder.getPK_OrderID();
     }
 
-    public Long handleCreateOrderBuyWithDetails(CreateOrderBuyWrapper createOrderBuyWrapper){
+    public Long handleCreateOrderBuyWithDetails(List<CreateProductBuyRequest> List ){
         PurchaseOrder order = new PurchaseOrder();
         // Check if the input list is null
-        if (createOrderBuyWrapper.getList() == null) {
+        if (List == null) {
             throw new IllegalArgumentException("createProductBuyRequests cannot be null");
         }
-        List<CreateProductBuyRequest> createProductBuyRequests = createOrderBuyWrapper.getList();
+        List<CreateProductBuyRequest> createProductBuyRequests = List;
 
         Long id = -1L;
 //        order.setStatus(null);
