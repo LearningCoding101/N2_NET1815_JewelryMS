@@ -92,8 +92,8 @@ TEST WORK FLOW
 SPRINT 1:
 | Name   | Values           |
 |--------|------------------|
-| Hà Thái Hoàng | UC 23      |
-| Duy Khánh | UC 24      |
+| Hà Thái Hoàng | UC 24      |
+| Duy Khánh | UC 23      |
 | Phạm Văn Quốc Vương | UC 22       |
 
 
