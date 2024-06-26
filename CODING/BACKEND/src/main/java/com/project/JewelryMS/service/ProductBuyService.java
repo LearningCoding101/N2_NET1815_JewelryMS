@@ -15,7 +15,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.util.Streams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Base64Utils;
+//import org.springframework.util.Base64Utils;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -35,7 +35,10 @@ public class ProductBuyService {
     private ApiService apiService;
     @Autowired
     private ImageService imageService;
-    public ProductBuy createProductBuy(CreateProductBuyRequest request) {
+
+
+
+    public Long createProductBuy(CreateProductBuyRequest request) {
         ProductBuy productBuy = new ProductBuy();
         productBuy.setPbName(request.getName());
 
@@ -61,7 +64,9 @@ public class ProductBuyService {
         productBuy.setCarat(request.getGemstoneWeight());
         productBuy.setPbCost(request.getCost());
         productBuy.setPbStatus(true);
-        return productBuyRepository.save(productBuy);
+        ProductBuy productBuy1 = productBuyRepository.save(productBuy);
+        Long ProductBuy_ID =  productBuy1.getPK_ProductBuyID();
+        return ProductBuy_ID;
     }
     public static MultipartFile base64ToMultipartFile(String base64String) {
         String base64Data = base64String.split(",")[1];

@@ -64,44 +64,22 @@ public class OrderHandlerService {
         order.setStatus(orderRequest.getStatus());
         order.setPurchaseDate(new Date());
         Long id = -1L;
-
         order.setPaymentType(orderRequest.getPaymentType());
         order.setTotalAmount(orderRequest.getTotalAmount());
         if (orderRequest.getCustomer_ID() != null) {
-            Optional<Customer> customerOptional = customerRepository.findById(orderRequest.getCustomer_ID());
-            if (customerOptional.isPresent()) {
-                Customer customer = customerOptional.get();
-                order.setCustomer(customer);
-            } else {
-                order.setCustomer(null);
-            }
+            customerRepository.findById(orderRequest.getCustomer_ID()).ifPresent(order::setCustomer);
         } else {
             order.setCustomer(null);
         }
 
         if (orderRequest.getStaff_ID() != null) {
-            Optional<StaffAccount> staffAccountOptional = staffAccountRepository.findById(orderRequest.getStaff_ID());
-            if (staffAccountOptional.isPresent()) {
-                StaffAccount staffAccount = staffAccountOptional.get();
-                order.setStaffAccount(staffAccount);
-            } else {
-                order.setStaffAccount(null);
-            }
+            staffAccountRepository.findById(orderRequest.getStaff_ID()).ifPresent(order::setStaffAccount);
         } else {
             order.setStaffAccount(null);
-            Long customerID = orderRequest.getCustomer_ID(); // This could be null
-            Optional<Long> optionalCustomerId = Optional.ofNullable(customerID);
-            if (optionalCustomerId.isPresent()) {
-                Optional<Customer> customerOptional = customerRepository.findById(customerID);
-                if (customerOptional.isPresent()) {
-                    Customer customer = customerOptional.get();
-                    order.setCustomer(customer);
-                }
-            }
-
-            order.setEmail(email);
-            List<OrderDetail> orderDetails = new ArrayList<>();
-            for (CreateOrderDetailRequest detail : detailRequest) {
+        }
+        order.setEmail(email);
+        List<OrderDetail> orderDetails = new ArrayList<>();
+        for (CreateOrderDetailRequest detail : detailRequest) {
                 OrderDetail orderDetail = new OrderDetail();
                 orderDetail.setQuantity(detail.getQuantity());
                 orderDetail.setProductSell(productSellService.getProductSellById(detail.getProductID()));
@@ -109,14 +87,10 @@ public class OrderHandlerService {
                 orderDetails.add(orderDetail);
             }
 
-            if (!orderDetails.isEmpty()) {
+        if (!orderDetails.isEmpty()) {
                 id = createOrderWithDetails(order, orderDetails);
-            }
-
         }
-
         return id;
-
     }
 
 
@@ -133,25 +107,26 @@ public class OrderHandlerService {
         return purchaseOrder.getPK_OrderID();
     }
 
-    public Long handleCreateOrderBuyWithDetails(List<CreateProductBuyRequest> List ){
+    public Long handleCreateOrderBuyWithDetails(CreateOrderBuyWrapper createOrderBuyWrapper ){
         PurchaseOrder order = new PurchaseOrder();
+        Long id = -1L;
         // Check if the input list is null
-        if (List == null) {
+        if (createOrderBuyWrapper.getProductBuyLists() == null) {
             throw new IllegalArgumentException("createProductBuyRequests cannot be null");
         }
-        List<CreateProductBuyRequest> createProductBuyRequests = List;
+        List<Long> ProductBuyIDList = createOrderBuyWrapper.getProductBuyLists();
+        CreatePBOrderRequest orderRequest = createOrderBuyWrapper.getOrderRequest();
 
-        Long id = -1L;
-//        order.setStatus(null);
         order.setPurchaseDate(new Date());
-//        order.setPaymentType(null);
-//        order.setTotalAmount(null);
-        List<Long> ProductBuyIDList = new ArrayList<>();
-        for(CreateProductBuyRequest productBuyRequest: createProductBuyRequests){
-            ProductBuy productBuy = new ProductBuy();
-            productBuy = productBuyService.createProductBuy(productBuyRequest);
-            ProductBuyIDList.add(productBuy.getPK_ProductBuyID());
+        order.setStatus(orderRequest.getStatus());
+        order.setPaymentType(orderRequest.getPaymentType());
+        order.setTotalAmount(orderRequest.getTotalAmount());
+        if (orderRequest.getStaff_ID() != null) {
+            staffAccountRepository.findById(orderRequest.getStaff_ID()).ifPresent(order::setStaffAccount);
+        } else {
+            order.setStaffAccount(null);
         }
+
         List<OrderBuyDetail> orderBuyDetails = new ArrayList<>();
         for(Long ProductBuyIDs : ProductBuyIDList){
             OrderBuyDetail orderBuyDetail = new OrderBuyDetail();

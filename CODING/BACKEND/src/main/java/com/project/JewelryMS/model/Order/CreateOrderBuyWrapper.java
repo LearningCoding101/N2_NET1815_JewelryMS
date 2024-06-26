@@ -10,8 +10,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 public class CreateOrderBuyWrapper {
-    private List<CreateProductBuyRequest> order;
-
+    private List<Long> ProductBuyLists;
+    private CreatePBOrderRequest orderRequest;
 }

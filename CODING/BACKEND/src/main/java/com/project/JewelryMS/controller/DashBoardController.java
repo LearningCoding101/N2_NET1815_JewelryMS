@@ -1,19 +1,15 @@
 package com.project.JewelryMS.controller;
 
-import com.project.JewelryMS.model.Dashboard.CategoryResponse;
+import com.project.JewelryMS.model.Dashboard.*;
 import com.project.JewelryMS.model.Dashboard.Customer.CustomerDemographics;
 import com.project.JewelryMS.model.Dashboard.Customer.CustomerLoyalty;
 import com.project.JewelryMS.model.Dashboard.Customer.CustomerSignUp;
-import com.project.JewelryMS.model.Dashboard.RevenueDateRequest;
-import com.project.JewelryMS.model.Dashboard.TopSellProductResponse;
 import com.project.JewelryMS.service.DashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -22,40 +18,64 @@ public class DashBoardController {
     @Autowired
     DashboardService dashboardService;
 
-    @PostMapping("revenue-category")
-    public ResponseEntity<List<CategoryResponse>> GetAllRevenueCategory(@RequestBody RevenueDateRequest revenueDateRequest){
+    @GetMapping("revenue-category")
+    public ResponseEntity<List<CategoryResponse>> getAllRevenueCategory(@RequestParam("startTime") String startTime, @RequestParam("endTime") String endTime) {
+        RevenueDateRequest revenueDateRequest = new RevenueDateRequest(LocalDate.parse(startTime), LocalDate.parse(endTime));
         List<CategoryResponse> revenueCategoryResponse = dashboardService.RevenueCategory(revenueDateRequest);
         return ResponseEntity.ok(revenueCategoryResponse);
     }
 
-    @PostMapping("top-selling-products")
-    public ResponseEntity<List<TopSellProductResponse>> getTopSellingProducts(@RequestBody RevenueDateRequest revenueDateRequest) {
+    @GetMapping("top-selling-products")
+    public ResponseEntity<List<TopSellProductResponse>> getTopSellingProducts(@RequestParam("startTime") String startTime, @RequestParam("endTime") String endTime) {
+        RevenueDateRequest revenueDateRequest = new RevenueDateRequest(LocalDate.parse(startTime), LocalDate.parse(endTime));
         return ResponseEntity.ok(dashboardService.getTopSellingProducts(revenueDateRequest));
     }
 
-    @PostMapping("revenue-category-all")
-    public ResponseEntity<List<CategoryResponse>> GetAllRevenueCategory(){
+    @GetMapping("revenue-category-all")
+    public ResponseEntity<List<CategoryResponse>> getAllRevenueCategory() {
         List<CategoryResponse> revenueCategoryResponse = dashboardService.RevenueCategory();
         return ResponseEntity.ok(revenueCategoryResponse);
     }
 
-    @PostMapping("top-selling-products-all")
+    @GetMapping("top-selling-products-all")
     public ResponseEntity<List<TopSellProductResponse>> getTopSellingProducts() {
         return ResponseEntity.ok(dashboardService.getTopSellingProducts());
     }
 
-    @PostMapping("/loyalty-customers")
-    public ResponseEntity<List<CustomerLoyalty>> getCustomerLoyaltyStatistics(@RequestBody RevenueDateRequest revenueDateRequest) {
+    @GetMapping("/loyalty-customers")
+    public ResponseEntity<List<CustomerLoyalty>> getCustomerLoyaltyStatistics(@RequestParam("startTime") String startTime, @RequestParam("endTime") String endTime) {
+        RevenueDateRequest revenueDateRequest = new RevenueDateRequest(LocalDate.parse(startTime), LocalDate.parse(endTime));
         return ResponseEntity.ok(dashboardService.getCustomerLoyaltyStatistics(revenueDateRequest));
     }
 
-    @PostMapping("demographic-customers")
-    public ResponseEntity<List<CustomerDemographics>> getCustomerDemoGraphic(@RequestBody RevenueDateRequest revenueDateRequest){
+    @GetMapping("demographic-customers")
+    public ResponseEntity<List<CustomerDemographics>> getCustomerDemoGraphic(@RequestParam("startTime") String startTime, @RequestParam("endTime") String endTime) {
+        RevenueDateRequest revenueDateRequest = new RevenueDateRequest(LocalDate.parse(startTime), LocalDate.parse(endTime));
         return ResponseEntity.ok(dashboardService.getCustomerDemoGraphicResponse(revenueDateRequest));
     }
 
-    @PostMapping("/customer-signups")
-    public ResponseEntity<List<CustomerSignUp>> getCustomerSignUpsByStaff(@RequestBody RevenueDateRequest revenueDateRequest) {
+    @GetMapping("/customer-signups")
+    public ResponseEntity<List<CustomerSignUp>> getCustomerSignUpsByStaff(@RequestParam("startTime") String startTime, @RequestParam("endTime") String endTime) {
+        RevenueDateRequest revenueDateRequest = new RevenueDateRequest(LocalDate.parse(startTime), LocalDate.parse(endTime));
         return ResponseEntity.ok(dashboardService.getCustomerSignUpsByStaff(revenueDateRequest));
     }
+
+    @GetMapping("compare-day")
+    public ComparisonResponse compareDay(@RequestParam("date1") String date1, @RequestParam("date2") String date2) {
+        DayComparisonRequest request = new DayComparisonRequest(LocalDate.parse(date1), LocalDate.parse(date2));
+        return dashboardService.compareDay(request);
+    }
+
+    @GetMapping("compare-month")
+    public ComparisonResponse compareMonth(@RequestParam("month1") String month1, @RequestParam("month2") String month2) {
+        MonthComparisonRequest request = new MonthComparisonRequest(month1, month2);
+        return dashboardService.compareMonth(request);
+    }
+
+    @GetMapping("compare-year")
+    public ComparisonResponse compareYear(@RequestParam("year1") String year1, @RequestParam("year2") String year2) {
+        YearComparisonRequest request = new YearComparisonRequest(year1, year2);
+        return dashboardService.compareYear(request);
+    }
+
 }
