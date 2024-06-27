@@ -2,8 +2,6 @@ package com.project.JewelryMS.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
-import com.project.JewelryMS.entity.OrderDetail;
-import com.project.JewelryMS.entity.ProductSell;
 import com.project.JewelryMS.model.EmailDetail;
 import com.project.JewelryMS.model.Order.*;
 import com.project.JewelryMS.model.OrderDetail.*;
@@ -12,7 +10,6 @@ import com.project.JewelryMS.service.EmailService;
 import com.project.JewelryMS.service.Order.OrderDetailService;
 import com.project.JewelryMS.service.Order.OrderHandlerService;
 import com.project.JewelryMS.service.QRService;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -21,9 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -177,6 +172,18 @@ public class OrderController {
 //        List<OrderDetailResponse> responses =orderHandlerService.calculateAndSetGuaranteeEndDate(request);
 //        return new ResponseEntity<>(responses, HttpStatus.OK);
 //    }
+
+    @PatchMapping("/cash-confirm")
+    public ResponseEntity confirmCashPayment(@RequestBody ConfirmCashPaymentRequest request){
+        boolean isUpdated = orderHandlerService.updateOrderStatusCash(request);
+
+        if (isUpdated) {
+            return ResponseEntity.ok("Đơn hàng thanh toán thành công");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Đơn hàng thanh toán thất bại");
+        }
+
+    }
 
 
 }

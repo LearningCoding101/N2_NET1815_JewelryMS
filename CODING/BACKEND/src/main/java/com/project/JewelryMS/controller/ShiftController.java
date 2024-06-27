@@ -16,7 +16,7 @@ import java.util.Date;
 import java.util.List;
 
 @RestController
-@RequestMapping("shift")
+@RequestMapping("/api/shift")
 @SecurityRequirement(name = "api")
 @CrossOrigin(origins = "*")
 public class ShiftController {

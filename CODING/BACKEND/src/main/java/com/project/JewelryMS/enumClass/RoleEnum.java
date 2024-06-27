@@ -1,4 +1,4 @@
-package com.project.JewelryMS.entity;
+package com.project.JewelryMS.enumClass;
 
 public enum RoleEnum {
     ROLE_ADMIN,

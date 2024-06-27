@@ -2,7 +2,7 @@ package com.project.JewelryMS.repository;
 
 
 import com.project.JewelryMS.entity.Account;
-import com.project.JewelryMS.entity.RoleEnum;
+import com.project.JewelryMS.enumClass.RoleEnum;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

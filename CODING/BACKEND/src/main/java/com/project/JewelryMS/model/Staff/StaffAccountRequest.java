@@ -1,10 +1,11 @@
 package com.project.JewelryMS.model.Staff;
 
-import com.project.JewelryMS.entity.RoleEnum;
+import com.project.JewelryMS.enumClass.RoleEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 @Data
 @AllArgsConstructor
@@ -16,7 +17,7 @@ public class StaffAccountRequest {
 
     private float salary;
 
-    private Date startDate;
+    private LocalDateTime startDate;
 
     private RoleEnum role;
 

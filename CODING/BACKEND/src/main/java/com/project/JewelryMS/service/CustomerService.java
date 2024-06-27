@@ -71,6 +71,7 @@ public class CustomerService {
         customer.setPhoneNumber(createCustomerRequest.getPhoneNumber());
         customer.setGender(createCustomerRequest.getGender());
         customer.setCreateDate(new Date());
+        customer.setCusName(createCustomerRequest.getCusName());
         Optional<StaffAccount> staffAccountOptional = staffAccountRepository.findById(createCustomerRequest.getStaff_ID());
         if(staffAccountOptional.isPresent()) {
             StaffAccount staffAccount = staffAccountOptional.get();
@@ -98,6 +99,7 @@ public class CustomerService {
             customer.setEmail(customerRequest.getEmail());
             customer.setPhoneNumber(customerRequest.getPhoneNumber());
             customer.setGender(customerRequest.getGender());
+            customer.setCusName(customerRequest.getCusName());
             customerRepository.save(customer);
         }
     }

@@ -1,7 +1,6 @@
 package com.project.JewelryMS.model.Staff;
 
-import com.project.JewelryMS.entity.RoleEnum;
-import com.project.JewelryMS.entity.Shift;
+import com.project.JewelryMS.enumClass.RoleEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,7 +8,6 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.Date;
 //import java.sql.Date;
-import java.sql.Timestamp;
 import java.util.List;
 
 @Data
@@ -19,7 +17,7 @@ public class StaffAccountResponse {
     private int staffID;
     private String phoneNumber;
     private float salary;
-    private Date startDate;
+    private String startDate; // Changed to String for formatted date
     private String accountName;
     private RoleEnum role;
     private int status;
@@ -28,16 +26,18 @@ public class StaffAccountResponse {
     private List<ShiftResponse> shift;
 
     // Getters and Setters
+
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
     public static class ShiftResponse {
         private int shiftID;
-        private LocalDateTime endTime;
+        private String endTime; // Changed to String for formatted date
         private int register;
         private String shiftType;
-        private LocalDateTime startTime;
+        private String startTime; // Changed to String for formatted date
         private String status;
         private String workArea;
     }
 }
+

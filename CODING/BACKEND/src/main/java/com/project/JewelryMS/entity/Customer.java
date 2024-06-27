@@ -32,6 +32,9 @@ public class Customer {
     @Column(name="createDate")
     Date createDate;
 
+    @Column(name="customerName")
+    String cusName;
+
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties
     Set<PurchaseOrder> purchaseOrders = new HashSet<>();

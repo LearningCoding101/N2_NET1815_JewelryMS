@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/guarantee")
+@RequestMapping("/api/guarantee")
 @SecurityRequirement(name = "api")
 @CrossOrigin(origins = "*")
 public class GuaranteeController {

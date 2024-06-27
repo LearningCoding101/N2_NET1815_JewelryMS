@@ -1,6 +1,6 @@
 package com.project.JewelryMS.model.Profile;
 
-import com.project.JewelryMS.entity.RoleEnum;
+import com.project.JewelryMS.enumClass.RoleEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

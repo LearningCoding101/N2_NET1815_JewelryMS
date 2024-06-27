@@ -1,13 +1,9 @@
 package com.project.JewelryMS.model.StaffShift;
 
-import com.project.JewelryMS.entity.RoleEnum;
-import com.project.JewelryMS.model.Staff.StaffAccountResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 @Data

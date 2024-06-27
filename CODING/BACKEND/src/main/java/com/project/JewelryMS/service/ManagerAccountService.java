@@ -1,7 +1,7 @@
 package com.project.JewelryMS.service;
 
 import com.project.JewelryMS.entity.Account;
-import com.project.JewelryMS.entity.RoleEnum;
+import com.project.JewelryMS.enumClass.RoleEnum;
 import com.project.JewelryMS.model.Manager.CreateManagerAccountRequest;
 import com.project.JewelryMS.model.Manager.ManagerAccountRequest;
 import com.project.JewelryMS.model.Manager.ManagerAccountResponse;

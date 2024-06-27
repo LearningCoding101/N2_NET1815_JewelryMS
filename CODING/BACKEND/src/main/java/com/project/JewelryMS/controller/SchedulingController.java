@@ -3,6 +3,7 @@ package com.project.JewelryMS.controller;
 import com.project.JewelryMS.entity.Shift;
 import com.project.JewelryMS.entity.Staff_Shift;
 import com.project.JewelryMS.model.Shift.AssignStaffByDayOfWeekRequest;
+import com.project.JewelryMS.model.Shift.AssignStaffByShiftTypePatternRequest;
 import com.project.JewelryMS.model.Shift.AssignStaffToMultipleDaysRequest;
 import com.project.JewelryMS.model.StaffShift.IdWrapper;
 import com.project.JewelryMS.model.StaffShift.StaffShiftResponse;
@@ -20,7 +21,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("scheduling")
+@RequestMapping("api/scheduling")
 @SecurityRequirement(name = "api")
 public class SchedulingController {
 
@@ -105,16 +106,37 @@ public class SchedulingController {
         return ResponseEntity.ok(staffShiftResponses);
     }
 
-    // New endpoint for assigning staff by day of the week with their specific preferences
-    @PostMapping("/assignStaffByDayOfWeek")
+//    // New endpoint for assigning staff by day of the week with their specific preferences
+//    @PostMapping("/assignStaffByDayOfWeek")
+//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
+//    public ResponseEntity<List<StaffShiftResponse>> assignStaffByDayOfWeek(
+//            @RequestBody AssignStaffByDayOfWeekRequest request) {
+//        List<StaffShiftResponse> staffShiftResponses = schedulingService.assignStaffByDayOfWeek(
+//                request.getStaffAvailability(),
+//                request.getStartDate(),
+//                request.getEndDate()
+//        );
+//        return ResponseEntity.ok(staffShiftResponses);
+//    }
+
+    @PostMapping("/assignStaffByShiftTypePattern")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
-    public ResponseEntity<List<StaffShiftResponse>> assignStaffByDayOfWeek(
-            @RequestBody AssignStaffByDayOfWeekRequest request) {
-        List<StaffShiftResponse> staffShiftResponses = schedulingService.assignStaffByDayOfWeek(
-                request.getStaffAvailability(),
-                request.getStartDate(),
-                request.getEndDate()
-        );
+    public ResponseEntity<List<StaffShiftResponse>> assignStaffByShiftTypePattern(
+            @RequestBody AssignStaffByShiftTypePatternRequest request,
+            @RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+            @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
+
+        Map<String, List<Integer>> staffShiftPatterns = request.getStaffShiftPatterns();
+        List<StaffShiftResponse> staffShiftResponses = schedulingService.assignStaffByShiftTypePattern(staffShiftPatterns, startDate, endDate);
         return ResponseEntity.ok(staffShiftResponses);
+    }
+
+    @DeleteMapping("/removeStaffFromShiftsInRange")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    public ResponseEntity<String> removeStaffFromShiftsInRange(@RequestParam int staffId,
+                                                               @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+                                                               @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
+        schedulingService.removeStaffFromShiftsInRange(staffId, startDate, endDate);
+        return ResponseEntity.ok("Unassigning staff from shifts in the specified range is complete.");
     }
 }

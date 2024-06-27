@@ -5,10 +5,8 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Getter
 @Setter
@@ -16,7 +14,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(name = "Staff")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "account.staffAccount", "shift.staffAccounts"})
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class StaffAccount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,10 +23,7 @@ public class StaffAccount {
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "FK_UserID", referencedColumnName = "PK_userID")
-//    @JsonBackReference
-    @JsonIgnoreProperties
     private Account account;
-
 
     @Column(name = "phoneNumber")
     private String phoneNumber;
@@ -37,20 +32,18 @@ public class StaffAccount {
     private float salary;
 
     @Column(name = "startDate")
-    private Date startDate;
+    private LocalDateTime startDate;
 
-    @OneToMany(mappedBy = "staffAccount")
-    @JsonIgnoreProperties
-    @JsonManagedReference
-    Set<Staff_Shift> staffShifts;
+    @OneToMany(mappedBy = "staffAccount", fetch = FetchType.EAGER) // Ensure eager fetching here
+    @JsonIgnoreProperties("staffAccount")
+    private Set<Staff_Shift> staffShifts;
 
     @OneToMany(mappedBy = "staffAccount", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnoreProperties
-    Set<PurchaseOrder> purchaseOrders = new HashSet<>();
+    @JsonIgnoreProperties("staffAccount")
+    private Set<PurchaseOrder> purchaseOrders = new HashSet<>();
 
     @OneToMany(mappedBy = "staffAccount")
     @JsonIgnoreProperties("staffAccount")
-    List<Customer> customer;
-
-
+    private List<Customer> customer;
 }
+

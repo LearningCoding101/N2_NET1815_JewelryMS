@@ -4,7 +4,9 @@ import com.project.JewelryMS.model.Dashboard.*;
 import com.project.JewelryMS.model.Dashboard.Customer.CustomerDemographics;
 import com.project.JewelryMS.model.Dashboard.Customer.CustomerLoyalty;
 import com.project.JewelryMS.model.Dashboard.Customer.CustomerSignUp;
+import com.project.JewelryMS.model.Transition.TransitionResponse;
 import com.project.JewelryMS.service.DashboardService;
+import com.project.JewelryMS.service.TransitionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +19,14 @@ import java.util.List;
 public class DashBoardController {
     @Autowired
     DashboardService dashboardService;
+    @Autowired
+    private TransitionService transitionService;
+
+    @GetMapping("/purchase-order-history")
+    public ResponseEntity<List<TransitionResponse>> getPurchaseOrderHistory() {
+        List<TransitionResponse> purchaseOrderHistory = transitionService.getPurchaseOrderHistory();
+        return ResponseEntity.ok(purchaseOrderHistory);
+    }
 
     @GetMapping("revenue-category")
     public ResponseEntity<List<CategoryResponse>> getAllRevenueCategory(@RequestParam("startTime") String startTime, @RequestParam("endTime") String endTime) {
@@ -77,5 +87,7 @@ public class DashBoardController {
         YearComparisonRequest request = new YearComparisonRequest(year1, year2);
         return dashboardService.compareYear(request);
     }
+
+
 
 }

@@ -379,7 +379,7 @@ public class OrderHandlerService {
         orderToUpdate.setStatus(3);
         calculateAndSetGuaranteeEndDate((long) orderID);
         sendConfirmationEmail((long) orderID, orderToUpdate.getEmail());
-        System.out.println(orderToUpdate.toString());
+        System.out.println(orderToUpdate);
         orderService.saveOrder(orderToUpdate);
 
 
@@ -402,11 +402,11 @@ public class OrderHandlerService {
         } else {
             PurchaseOrder orderToUpdate = orderService.getOrderById(request.getOrderID());
             if(orderToUpdate != null){
-                System.out.println(orderToUpdate.toString());
+                System.out.println(orderToUpdate);
                 orderToUpdate.setStatus(3);
-                calculateAndSetGuaranteeEndDate((long) request.getOrderID());
-                System.out.println(orderToUpdate.toString());
-                sendConfirmationEmail((long) request.getOrderID(), orderToUpdate.getEmail());
+                calculateAndSetGuaranteeEndDate(request.getOrderID());
+                System.out.println(orderToUpdate);
+                sendConfirmationEmail(request.getOrderID(), orderToUpdate.getEmail());
                 return orderService.saveOrder(orderToUpdate) != null;
             } else{
                 return false;
@@ -432,9 +432,9 @@ public class OrderHandlerService {
 
     public Float calculateDiscountProduct(OrderPromotionRequest orderPromotionRequest) {
         Promotion promotion = promotionRepository.findById(orderPromotionRequest.getPromotionID()).orElseThrow(() -> new IllegalArgumentException("Promotion ID not found"));
-        Integer discount = promotion.getDiscount();
-        Float percentage = discount / 100.0F;
-        Float totalAmount = 0.0F;
+        int discount = promotion.getDiscount();
+        float percentage = discount / 100.0F;
+        float totalAmount = 0.0F;
         Optional<ProductSell> productSellOptional = productSellRepository.findById(orderPromotionRequest.getProductSell_ID());
         if (productSellOptional.isPresent()) {
             ProductSell productSell = productSellOptional.get();
@@ -446,38 +446,37 @@ public class OrderHandlerService {
     }
 
     public Float TotalOrderDetails(OrderTotalRequest orderTotalRequest) {
-        Float subtotal = orderTotalRequest.getSubTotal();
-        Float discountProuduct = orderTotalRequest.getDiscountProduct();
-        Float total = subtotal - discountProuduct;
-        return total;
+        float subtotal = orderTotalRequest.getSubTotal();
+        float discountProduct = orderTotalRequest.getDiscountProduct();
+        return subtotal - discountProduct;//total
     }
 
     public TotalOrderResponse totalOrder(List<TotalOrderRequest> totalOrderRequests) {
-        Float subTotalResponse = 0.0F;
-        Float discount_priceResponse = 0.0F;
-        Float totalResponse = 0.0F;
+        float subTotalResponse = 0.0F;
+        float discount_priceResponse = 0.0F;
+        float totalResponse = 0.0F;
         for (TotalOrderRequest request : totalOrderRequests) {
             // Fetch product details
             Optional<ProductSell> productSellOpt = productSellRepository.findById(request.getProductSell_ID());
             if (productSellOpt.isPresent()) {
                 ProductSell productSell = productSellOpt.get();
-                Float cost = productSell.getCost();
-                Float subtotal = cost * request.getQuantity();
+                float cost = productSell.getCost();
+                float subtotal = cost * request.getQuantity();
                 subTotalResponse += subtotal;
                 // Fetch promotion details if provided
-                Float discountAmount = 0.0F;
+                float discountAmount = 0.0F;
                 if (request.getPromotion_ID() != null) {
                     Optional<Promotion> promotionOptional = promotionRepository.findById(request.getPromotion_ID());
                     if (promotionOptional.isPresent()) {
-                        Integer discount = promotionOptional.get().getDiscount();
-                        Float percentage = discount / 100.0F;
+                        int discount = promotionOptional.get().getDiscount();
+                        float percentage = discount / 100.0F;
                         discountAmount = subtotal * percentage;
                         discount_priceResponse +=discountAmount;
                     }
                 }
 
                 // Calculate the total after discount
-                Float totalDetails = subtotal - discountAmount;
+                float totalDetails = subtotal - discountAmount;
                 totalResponse += totalDetails;
             } else {
                 throw new IllegalArgumentException("ProductSell ID not found: " + request.getProductSell_ID());
@@ -493,12 +492,10 @@ public class OrderHandlerService {
     public List<OrderDetailResponse> calculateAndSetGuaranteeEndDate(Long orderId) {
         List<OrderDetail> orderDetails = orderDetailRepository.findAll();
 
-        List<OrderDetailResponse> responses = orderDetails.stream()
+        return orderDetails.stream()
                 .filter(orderDetail -> orderDetail.getPurchaseOrder().getPK_OrderID().equals(orderId))
                 .map(this::processOrderDetail)
                 .toList();
-
-        return responses;
     }
 
     private OrderDetailResponse processOrderDetail(OrderDetail orderDetail) {

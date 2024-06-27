@@ -5,7 +5,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
 import com.project.JewelryMS.entity.Account;
-import com.project.JewelryMS.entity.RoleEnum;
+import com.project.JewelryMS.enumClass.RoleEnum;
 import com.project.JewelryMS.entity.StaffAccount;
 import com.project.JewelryMS.model.*;
 import com.project.JewelryMS.model.Staff.CreateStaffAccountRequest;
@@ -22,6 +22,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,7 +53,7 @@ public class AuthenticationService implements UserDetailsService {
         StaffAccount staffAccount = new StaffAccount();
         staffAccount.setSalary(createStaffAccountRequest.getSalary());
         staffAccount.setPhoneNumber(createStaffAccountRequest.getPhoneNumber());
-        staffAccount.setStartDate(createStaffAccountRequest.getStartDate());
+        staffAccount.setStartDate(LocalDateTime.now());
         staffAccount.setAccount(account);
         account.setStatus(1);
         staffAccountRepository.save(staffAccount);

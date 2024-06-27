@@ -3,7 +3,6 @@ package com.project.JewelryMS.service;
 import com.project.JewelryMS.entity.*;
 import com.project.JewelryMS.model.Dashboard.*;
 import com.project.JewelryMS.model.Dashboard.Customer.*;
-import com.project.JewelryMS.model.Order.ProductResponse;
 import com.project.JewelryMS.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,7 +15,7 @@ public class DashboardService {
     @Autowired
     CategoryRepository categoryRepository;
     @Autowired
-    OrderRepositiory orderRepositiory;
+    OrderRepository orderRepository;
     @Autowired
     CustomerRepository customerRepository;
     @Autowired
@@ -43,7 +42,7 @@ public class DashboardService {
     }
 
     public Float CalculateCategoryTotal(Long Category_ID){
-        List<PurchaseOrder> orders = orderRepositiory.findAll();
+        List<PurchaseOrder> orders = orderRepository.findAll();
 
         // Tính tổng doanh thu cho danh mục
         float totalRevenue = 0.0F;
@@ -61,7 +60,7 @@ public class DashboardService {
     }
 
     public List<TopSellProductResponse> getTopSellingProducts() {
-        List<PurchaseOrder> orders = orderRepositiory.findAll();
+        List<PurchaseOrder> orders = orderRepository.findAll();
 
         // Sử dụng Map để lưu trữ số lượng và doanh thu bán hàng cho từng sản phẩm
         Map<Long, TopSellProductResponse> productSalesMap = new HashMap<>();
@@ -112,7 +111,7 @@ public class DashboardService {
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX); // 23:59:59.999999999
 
         // Truy vấn các đơn hàng trong khoảng thời gian đã chỉ định
-        List<PurchaseOrder> orders = orderRepositiory.findOrdersByDateRange(startDateTime, endDateTime);
+        List<PurchaseOrder> orders = orderRepository.findOrdersByDateRange(startDateTime, endDateTime);
 
         // Tính tổng doanh thu cho danh mục
         float totalRevenue = 0.0F;
@@ -138,7 +137,7 @@ public class DashboardService {
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX); // 23:59:59.999999999
 
         // Truy vấn các đơn hàng trong khoảng thời gian đã chỉ định
-        List<PurchaseOrder> orders = orderRepositiory.findOrdersByDateRange(startDateTime, endDateTime);
+        List<PurchaseOrder> orders = orderRepository.findOrdersByDateRange(startDateTime, endDateTime);
 
         // Sử dụng Map để lưu trữ số lượng và doanh thu bán hàng cho từng sản phẩm
         Map<Long, TopSellProductResponse> productSalesMap = new HashMap<>();
