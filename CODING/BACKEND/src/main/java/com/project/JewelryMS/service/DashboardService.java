@@ -22,7 +22,8 @@ public class DashboardService {
     CustomerService customerService;
     @Autowired
     private OrderDetailRepository orderDetailRepository;
-
+    @Autowired
+    private StaffAccountRepository staffAccountRepository;
 
 
     public List<CategoryResponse> RevenueCategory(){
@@ -44,7 +45,7 @@ public class DashboardService {
     public Float CalculateCategoryTotal(Long Category_ID){
         List<PurchaseOrder> orders = orderRepository.findAll();
 
-        // Tính tổng doanh thu cho danh mục
+        //total revenue in the category
         float totalRevenue = 0.0F;
 
         for(PurchaseOrder order : orders){
@@ -103,7 +104,7 @@ public class DashboardService {
     }
 
     public Float CalculateCategoryTotal(Long Category_ID, RevenueDateRequest revenueDateRequest){
-        // Lấy start và end dates từ request và chuyển đổi thành LocalDateTime
+        //Convert LocalDate to LocalDateTime
         LocalDate startDate = revenueDateRequest.getStartTime();
         LocalDate endDate = revenueDateRequest.getEndTime();
 
@@ -113,7 +114,7 @@ public class DashboardService {
         // Truy vấn các đơn hàng trong khoảng thời gian đã chỉ định
         List<PurchaseOrder> orders = orderRepository.findOrdersByDateRange(startDateTime, endDateTime);
 
-        // Tính tổng doanh thu cho danh mục
+        //Total revenue for category
         float totalRevenue = 0.0F;
 
         for(PurchaseOrder order : orders){
@@ -129,7 +130,7 @@ public class DashboardService {
     }
 
     public List<TopSellProductResponse>  getTopSellingProducts(RevenueDateRequest revenueDateRequest) {
-        // Lấy start và end dates từ request và chuyển đổi thành LocalDateTime
+        //Convert LocalDate to LocalDateTime
         LocalDate startDate = revenueDateRequest.getStartTime();
         LocalDate endDate = revenueDateRequest.getEndTime();
 
@@ -162,48 +163,69 @@ public class DashboardService {
         return topSellProductResponses;
     }
 
-    public List<CustomerLoyalty> getCustomerLoyaltyStatistics(RevenueDateRequest revenueDateRequest) {
-        // Convert LocalDate to LocalDateTime to include the whole day
-        LocalDate startDate = revenueDateRequest.getStartTime();
-        LocalDate endDate = revenueDateRequest.getEndTime();
+    public List<CustomerLoyalty> getCustomerLoyaltyStatistics(RevenueDateRequest request) {
+        LocalDateTime startDateTime = request.getStartTime().atStartOfDay();
+        LocalDateTime endDateTime = request.getEndTime().atTime(LocalTime.MAX);
+        List<Customer> customers = customerRepository.findAllByCreateDateBetween(startDateTime, endDateTime);
 
-        LocalDateTime startDateTime = startDate.atStartOfDay();
-        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
-
-        // Fetch customers created within the date range
-        List<Customer> customers = customerRepository.findCustomersByCreateDateRange(startDateTime, endDateTime);
-
-        // Build the list of CustomerLoyalty objects
-        List<CustomerLoyalty> customerLoyalties = new ArrayList<>();
+        int connect = 0, member = 0, companion = 0, intimate = 0;
         for (Customer customer : customers) {
-            CustomerLoyalty customerLoyalty = new CustomerLoyalty();
-            customerLoyalty.setEmail(customer.getEmail());
-            customerLoyalty.setPhoneNumber(customer.getPhoneNumber());
-            customerLoyalty.setPointAmount(customer.getPointAmount());
-            customerLoyalty.setRank(customerService.getCustomerRank(customer.getPK_CustomerID()));
-            customerLoyalties.add(customerLoyalty);
+            String rank = getCustomerRank(customer);
+            switch (rank) {
+                case "Connect":
+                    connect++;
+                    break;
+                case "Member":
+                    member++;
+                    break;
+                case "Companion":
+                    companion++;
+                    break;
+                case "Intimate":
+                    intimate++;
+                    break;
+            }
         }
 
-        return customerLoyalties;
+        CustomerLoyalty loyalty = new CustomerLoyalty(connect, member, companion, intimate);
+        return Collections.singletonList(loyalty);
     }
 
-    public List<CustomerDemographics> getCustomerDemoGraphicResponse(RevenueDateRequest revenueDateRequest){
-        // Convert LocalDate to LocalDateTime to include the whole day
-        LocalDate startDate = revenueDateRequest.getStartTime();
-        LocalDate endDate = revenueDateRequest.getEndTime();
+    public List<CustomerDemographics> getCustomerDemoGraphicResponse(RevenueDateRequest request) {
+        LocalDateTime startDateTime = request.getStartTime().atStartOfDay();
+        LocalDateTime endDateTime = request.getEndTime().atTime(LocalTime.MAX);
+        List<Customer> customers = customerRepository.findAllByCreateDateBetween(startDateTime, endDateTime);
 
-        LocalDateTime startDateTime = startDate.atStartOfDay();
-        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
-
-        // Fetch customers created within the date range
-        List<Customer> customers = customerRepository.findCustomersByCreateDateRange(startDateTime, endDateTime);
-        List<CustomerDemographics> customerDemoGraphics = new ArrayList<>();
-        for(Customer customer: customers){
-            CustomerDemographics customerDemoGraphic = new CustomerDemographics();
-            customerDemoGraphic.setGender(customer.getGender());
-            customerDemoGraphics.add(customerDemoGraphic);
+        int male = 0, female = 0, other = 0;
+        for (Customer customer : customers) {
+            switch (customer.getGender().toLowerCase()) {
+                case "male":
+                    male++;
+                    break;
+                case "female":
+                    female++;
+                    break;
+                default:
+                    other++;
+                    break;
+            }
         }
-        return customerDemoGraphics;
+
+        CustomerDemographics demographics = new CustomerDemographics(male, female, other);
+        return Collections.singletonList(demographics);
+    }
+
+    private String getCustomerRank(Customer customer) {
+        int totalPoints = customer.getPointAmount();
+        if (totalPoints >= 0 && totalPoints <= 99) {
+            return "Connect";
+        } else if (totalPoints >= 100 && totalPoints <= 399) {
+            return "Member";
+        } else if (totalPoints >= 400 && totalPoints <= 999) {
+            return "Companion";
+        } else {
+            return "Intimate";
+        }
     }
 
     public List<CustomerSignUp> getCustomerSignUpsByStaff(RevenueDateRequest revenueDateRequest) {
@@ -217,10 +239,12 @@ public class DashboardService {
         List<CustomerSignUp> customerSignUps = new ArrayList<>();
 
         for (Object[] result : results) {
-            String staffName = (String) result[0];
-            Long signUpCount = (Long) result[1];
+            int staffId = (int) result[0];
+            String staffName = (String) result[1];
+            Long signUpCount = (Long) result[2];
 
             CustomerSignUp customerSignUp = new CustomerSignUp();
+            customerSignUp.setStaffId(staffId);
             customerSignUp.setStaffName(staffName);
             customerSignUp.setNumberSignUp(signUpCount.intValue());
             customerSignUps.add(customerSignUp);
@@ -298,5 +322,58 @@ public class DashboardService {
         return response;
     }
 
+    //Get Revenue Generated by a Staff in a single day
+    public List<StaffRevenueResponse> getRevenueGeneratedByStaff(LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
 
+        List<PurchaseOrder> orders = orderRepository.findOrdersByDateRange(startDateTime, endDateTime);
+        Map<Integer, Double> revenueByStaff = new HashMap<>();
+
+        for (PurchaseOrder order : orders) {
+            StaffAccount staffAccount = order.getStaffAccount();
+            if (staffAccount != null) {
+                int staffId = staffAccount.getStaffID();
+                double orderRevenue = order.getOrderDetails().stream()
+                        .mapToDouble(od -> od.getQuantity() * od.getProductSell().getCost())
+                        .sum();
+                revenueByStaff.merge(staffId, orderRevenue, Double::sum);
+            }
+        }
+
+        List<StaffRevenueResponse> responseList = new ArrayList<>();
+        for (Map.Entry<Integer, Double> entry : revenueByStaff.entrySet()) {
+            staffAccountRepository.findById(entry.getKey()).ifPresent(staff -> responseList.add(new StaffRevenueResponse(staff.getAccount().getUsername(), entry.getValue())));
+        }
+
+        return responseList;
+    }
+
+    //Sales made by a staff in a day(amount of products)
+
+    public List<StaffSalesResponse> getSalesMadeByStaff(LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+
+        List<PurchaseOrder> orders = orderRepository.findOrdersByDateRange(startDateTime, endDateTime);
+        Map<Integer, Integer> salesByStaff = new HashMap<>();
+
+        for (PurchaseOrder order : orders) {
+            StaffAccount staffAccount = order.getStaffAccount();
+            if (staffAccount != null) {
+                int staffId = staffAccount.getStaffID();
+                int totalSales = order.getOrderDetails().stream()
+                        .mapToInt(OrderDetail::getQuantity)
+                        .sum();
+                salesByStaff.merge(staffId, totalSales, Integer::sum);
+            }
+        }
+
+        List<StaffSalesResponse> responseList = new ArrayList<>();
+        for (Map.Entry<Integer, Integer> entry : salesByStaff.entrySet()) {
+            staffAccountRepository.findById(entry.getKey()).ifPresent(staff -> responseList.add(new StaffSalesResponse(staff.getAccount().getUsername(), entry.getValue())));
+        }
+
+        return responseList;
+    }
 }

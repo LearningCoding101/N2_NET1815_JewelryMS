@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CustomerLoyalty {
-    String email;
-    String phoneNumber;
-    Integer pointAmount;
-    String rank;
+    int connect;
+    int member;
+    int companion;
+    int intimate;
 }

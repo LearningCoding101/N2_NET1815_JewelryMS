@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import com.project.JewelryMS.enumClass.OrderTypeEnum;
+
+import java.util.Date;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,6 +17,7 @@ public class TransitionResponse {
     private String paymentType;
     private Integer orderStatus;
     private Float totalAmount;
+    private Date purchaseDate;
     @Enumerated(value = EnumType.STRING)
     private OrderTypeEnum OrderType;
     private Integer staffID;

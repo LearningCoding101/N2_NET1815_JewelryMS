@@ -34,6 +34,7 @@ public class TransitionService {
             response.setOrderID(order.getPK_OrderID());
             response.setPaymentType(order.getPaymentType());
             response.setOrderStatus(order.getStatus());
+            response.setPurchaseDate(order.getPurchaseDate());
             response.setTotalAmount(order.getTotalAmount());
 
             if (order.getOrderBuyDetails() != null && !order.getOrderBuyDetails().isEmpty()) {

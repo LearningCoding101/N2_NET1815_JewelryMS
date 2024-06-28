@@ -9,6 +9,7 @@ import com.project.JewelryMS.model.OrderDetail.OrderPromotionRequest;
 import com.project.JewelryMS.model.OrderDetail.OrderTotalRequest;
 import com.project.JewelryMS.repository.*;
 import com.project.JewelryMS.service.EmailService;
+import com.project.JewelryMS.service.ImageService;
 import com.project.JewelryMS.service.ProductBuyService;
 import com.project.JewelryMS.service.ProductSellService;
 import jakarta.transaction.Transactional;
@@ -48,6 +49,10 @@ public class OrderHandlerService {
     CustomerRepository customerRepository;
     @Autowired
     StaffAccountRepository staffAccountRepository;
+    @Autowired
+    OrderRepository orderRepository;
+    @Autowired
+    ImageService imageService;
     @Transactional
     public Long createOrderWithDetails(PurchaseOrder purchaseOrder, List<OrderDetail> list){
         Set<OrderDetail> detailSet = new HashSet<>();
@@ -64,7 +69,11 @@ public class OrderHandlerService {
         order.setStatus(orderRequest.getStatus());
         order.setPurchaseDate(new Date());
         Long id = -1L;
-        order.setPaymentType(orderRequest.getPaymentType());
+        if(orderRequest.getPaymentType()!=null) {
+            order.setPaymentType(orderRequest.getPaymentType());
+        }else{
+            order.setPaymentType(null);
+        }
         order.setTotalAmount(orderRequest.getTotalAmount());
         if (orderRequest.getCustomer_ID() != null) {
             customerRepository.findById(orderRequest.getCustomer_ID()).ifPresent(order::setCustomer);
@@ -381,9 +390,23 @@ public class OrderHandlerService {
         sendConfirmationEmail((long) orderID, orderToUpdate.getEmail());
         System.out.println(orderToUpdate);
         orderService.saveOrder(orderToUpdate);
-
-
     }
+
+    public String updateOrderBuyStatus(ConfirmPaymentPBRequest confirmPaymentPBRequest){
+        Optional<PurchaseOrder> orderOptional = orderRepository.findById(confirmPaymentPBRequest.getOrder_ID());
+        if(orderOptional.isPresent()){
+            PurchaseOrder purchaseOrder = orderOptional.get();
+            String image = imageService.uploadImageByPathService(confirmPaymentPBRequest.getImage());
+            purchaseOrder.setImage(image);
+            purchaseOrder.setStatus(3);
+            orderRepository.save(purchaseOrder);
+            return "Đơn hàng thanh toán thành công";
+        }
+        return "Đơn hàng thanh toán thất bại";
+    }
+
+
+
     public void sendConfirmationEmail(Long orderId, String recipientEmail) {
         // Prepare EmailDetail object
         EmailDetail emailDetail = new EmailDetail();
@@ -487,6 +510,33 @@ public class OrderHandlerService {
         totalOrderResponse.setDiscount_Price(discount_priceResponse);
         totalOrderResponse.setTotal(totalResponse);
         return totalOrderResponse;
+    }
+
+    public String updateOrder(UpdateOrderRequest updateOrderRequest){
+        Optional<PurchaseOrder> orderOptional = orderRepository.findById(updateOrderRequest.getOrder_ID());
+        if(orderOptional.isPresent()){
+            PurchaseOrder order = orderOptional.get();
+            if (updateOrderRequest.getCustomer_ID() != null) {
+                customerRepository.findById(updateOrderRequest.getCustomer_ID()).ifPresent(order::setCustomer);
+            } else {
+                order.setCustomer(null);
+            }
+
+            if (updateOrderRequest.getStaff_ID() != null) {
+                staffAccountRepository.findById(updateOrderRequest.getStaff_ID()).ifPresent(order::setStaffAccount);
+            } else {
+                order.setStaffAccount(null);
+            }
+            if(updateOrderRequest.getPaymentType()!=null) {
+                order.setPaymentType(updateOrderRequest.getPaymentType());
+            }else{
+                order.setPaymentType(null);
+            }
+            orderRepository.save(order);
+            return "Update Order Successfully";
+        }else{
+            return "Order Not Found!!!";
+        }
     }
     //Calculate and Set Guarantee End Date////////////////////////////////////////////////////////////////////////////////////////
     public List<OrderDetailResponse> calculateAndSetGuaranteeEndDate(Long orderId) {

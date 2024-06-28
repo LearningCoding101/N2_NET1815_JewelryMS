@@ -43,5 +43,20 @@ public class Customer {
     @JoinColumn(name="FK_StaffID",referencedColumnName = "PK_staffID")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     StaffAccount staffAccount;
+
+    public String getLoyaltyRank() {
+        int totalPoints = this.pointAmount;
+        if (totalPoints >= 0 && totalPoints <= 99) {
+            return "Connect";
+        } else if (totalPoints >= 100 && totalPoints <= 399) {
+            return "Member";
+        } else if (totalPoints >= 400 && totalPoints <= 999) {
+            return "Companion";
+        } else if (totalPoints >= 1000) {
+            return "Intimate";
+        } else {
+            return "Unknown";
+        }
+    }
 }
 

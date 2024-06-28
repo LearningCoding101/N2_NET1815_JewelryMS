@@ -23,8 +23,13 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     @Query("SELECT c FROM Customer c WHERE c.createDate BETWEEN :startDate AND :endDate")
     List<Customer> findCustomersByCreateDateRange(LocalDateTime startDate, LocalDateTime endDate);
 
-    @Query("SELECT c.staffAccount.account.accountName, COUNT(c) FROM Customer c WHERE c.createDate BETWEEN :startDate AND :endDate GROUP BY c.staffAccount.account.accountName")
+    @Query("SELECT c.staffAccount.staffID, c.staffAccount.account.accountName, COUNT(c) " +
+            "FROM Customer c " +
+            "WHERE c.createDate BETWEEN :startDate AND :endDate " +
+            "GROUP BY c.staffAccount.staffID, c.staffAccount.account.accountName")
     List<Object[]> findCustomerSignUpsByStaff(LocalDateTime startDate, LocalDateTime endDate);
+
+
     @Query("SELECT COUNT(c) FROM Customer c WHERE FUNCTION('DATE', c.createDate) = :date")
     long countCustomersOnDate(Date date);
 //DATE_FORMAT(c.createDate, '%Y-%m') = :month
@@ -34,4 +39,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
     @Query("SELECT COUNT(c) FROM Customer c WHERE FUNCTION('YEAR', c.createDate) = :year")
     long countCustomersInYear(Year year);
+
+    List<Customer> findAllByCreateDateBetween(LocalDateTime startDate, LocalDateTime endDate);
+
 }

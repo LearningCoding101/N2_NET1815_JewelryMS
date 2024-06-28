@@ -5,6 +5,7 @@ import com.project.JewelryMS.entity.StaffAccount;
 import com.project.JewelryMS.entity.Staff_Shift;
 import com.project.JewelryMS.model.Shift.CreateShiftRequest;
 import com.project.JewelryMS.model.Shift.ShiftRequest;
+import com.project.JewelryMS.model.Staff.StaffAccountResponse;
 import com.project.JewelryMS.model.StaffShift.StaffShiftResponse;
 import com.project.JewelryMS.repository.ShiftRepository;
 import com.project.JewelryMS.repository.StaffAccountRepository;
@@ -99,14 +100,17 @@ public class SchedulingService {
             for (String shiftType : shiftTypes) {
                 LocalDate finalDate = date;
                 futures.add(executorService.submit(() -> {
+                    // Fetch all shifts for the current date and shift type
                     List<Shift> shifts = shiftRepository.findAllByDateAndType(finalDate, shiftType);
                     List<StaffShiftResponse> shiftResponses = new CopyOnWriteArrayList<>();
 
                     for (Shift shift : shifts) {
+                        // Fetch all staff accounts for the current shift
                         List<StaffAccount> staffAccounts = staffAccountRepository.findAllByShift(shift);
+                        // Format the start and end times
                         String formattedStartTime = shift.getStartTime().format(timeFormatter);
                         String formattedEndTime = shift.getEndTime().format(timeFormatter);
-
+                        // Create a StaffShiftResponse object
                         StaffShiftResponse staffShift = new StaffShiftResponse(
                                 shift.getShiftID(),
                                 formattedStartTime,
@@ -123,10 +127,10 @@ public class SchedulingService {
                                                 s.getAccount().getUsername()))
                                         .collect(Collectors.toList())
                         );
-
+                        // Add the StaffShiftResponse to the list
                         shiftResponses.add(staffShift);
                     }
-
+                    // Add the shift responses to the matrix
                     matrix.get(formattedDate).put(shiftType, shiftResponses);
                 }));
             }
@@ -140,10 +144,11 @@ public class SchedulingService {
                 e.printStackTrace();  // Handle exception
             }
         }
-
+        // Shutdown the executor service
         executorService.shutdown();
         return matrix;
     }
+
     // Method to assign multiple staff to a shift
     @Transactional
     public List<Staff_Shift> assignMultipleStaffToShift(List<Integer> staffIds, int shiftId) {
@@ -430,6 +435,7 @@ public class SchedulingService {
 //        }
 //        return staffShiftResponses;
 //    }
+
     @Transactional
     public void removeStaffFromShiftsInRange(int staffId, LocalDate startDate, LocalDate endDate) {
         // Validate staff existence
@@ -447,8 +453,63 @@ public class SchedulingService {
         staffShiftRepository.deleteAll(staffShifts);
     }
 
+    //Original shift type pattern, unused
+//    @Transactional
+//    public List<StaffShiftResponse> assignStaffByShiftTypePattern(
+//            Map<String, List<Integer>> staffShiftPatterns, LocalDate startDate, LocalDate endDate) {
+//
+//        List<StaffShiftResponse> staffShiftResponses = new CopyOnWriteArrayList<>();
+//        int totalDays = (int) ChronoUnit.DAYS.between(startDate, endDate) + 1;
+//        List<LocalDate> dates = IntStream.range(0, totalDays)
+//                .mapToObj(startDate::plusDays)
+//                .filter(date -> date.getDayOfWeek() != DayOfWeek.SUNDAY)
+//                .toList();
+//
+//        // Create a map to track how often each staff ID appears
+//        Map<Integer, Integer> staffFrequency = new HashMap<>();
+//        for (List<Integer> staffIds : staffShiftPatterns.values()) {
+//            for (int staffId : staffIds) {
+//                staffFrequency.put(staffId, staffFrequency.getOrDefault(staffId, 0) + 1);
+//            }
+//        }
+//
+//        List<Future<?>> futures = new ArrayList<>();
+//
+//        for (Map.Entry<String, List<Integer>> entry : staffShiftPatterns.entrySet()) {
+//            String shiftType = entry.getKey();
+//            List<Integer> staffIds = entry.getValue();
+//
+//            for (int staffId : staffIds) {
+//                int frequency = staffFrequency.get(staffId);
+//                for (int i = 0; i < dates.size(); i += frequency) {
+//                    LocalDate date = dates.get(i);
+//                    futures.add(executorService.submit(() -> {
+//                        try {
+//                            StaffShiftResponse response = assignStaffToDay(staffId, date, shiftType);
+//                            staffShiftResponses.add(response);
+//                        } catch (ShiftAssignmentException e) {
+//                            System.out.println("Staff ID " + staffId + " is already assigned on " + date + " for " + shiftType + " shift.");
+//                        }
+//                    }));
+//                }
+//            }
+//        }
+//
+//        // Wait for all tasks to complete
+//        for (Future<?> future : futures) {
+//            try {
+//                future.get();
+//            } catch (InterruptedException | ExecutionException e) {
+//                e.printStackTrace();  // Handle exception
+//            }
+//        }
+//
+//        return staffShiftResponses;
+//    }
+
+    //A modified version of the shift Type pattern, modified by demand by the front end team
     @Transactional
-    public List<StaffShiftResponse> assignStaffByShiftTypePattern(
+    public List<StaffAccountResponse> assignStaffByShiftTypePattern(
             Map<String, List<Integer>> staffShiftPatterns, LocalDate startDate, LocalDate endDate) {
 
         List<StaffShiftResponse> staffShiftResponses = new CopyOnWriteArrayList<>();
@@ -497,15 +558,44 @@ public class SchedulingService {
             }
         }
 
-        return staffShiftResponses;
+        // Collect unique staff IDs from the responses
+        Set<Integer> staffIds = staffShiftResponses.stream()
+                .map(StaffShiftResponse::getStaff)
+                .flatMap(List::stream)
+                .map(StaffShiftResponse.StaffResponse::getStaffID)
+                .collect(Collectors.toSet());
+
+        // Fetch staff accounts and map to responses
+        List<StaffAccount> staffAccounts = staffAccountRepository.findAllById(staffIds);
+        return staffAccounts.stream()
+                .map(this::mapToStaffAccountResponse)
+                .collect(Collectors.toList());
     }
 
-    private void assignShiftsForDay(List<StaffShiftResponse> responses, int staffId, LocalDate date, String shiftType) {
-        try {
-            StaffShiftResponse response = assignStaffToDay(staffId, date, shiftType);
-            responses.add(response);
-        } catch (ShiftAssignmentException e) {
-            System.out.println("Staff ID " + staffId + " is already assigned on " + date + " for " + shiftType + " shift.");
-        }
+    // Method to map StaffAccount to StaffAccountResponse
+    private StaffAccountResponse mapToStaffAccountResponse(StaffAccount staffAccount) {
+        return new StaffAccountResponse(
+                staffAccount.getStaffID(),
+                staffAccount.getPhoneNumber(),
+                staffAccount.getSalary(),
+                staffAccount.getStartDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                staffAccount.getAccount().getAccountName(),
+                staffAccount.getAccount().getRole(),
+                staffAccount.getAccount().getStatus(),
+                staffAccount.getAccount().getEmail(),
+                staffAccount.getAccount().getUsername(),
+                staffAccount.getStaffShifts().stream()
+                        .map(shift -> new StaffAccountResponse.ShiftResponse(
+                                shift.getShift().getShiftID(),
+                                shift.getShift().getEndTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH")),
+                                shift.getShift().getRegister(),
+                                shift.getShift().getShiftType(),
+                                shift.getShift().getStartTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH")),
+                                shift.getShift().getStatus(),
+                                shift.getShift().getWorkArea()
+                        ))
+                        .collect(Collectors.toList())
+        );
     }
+
 }

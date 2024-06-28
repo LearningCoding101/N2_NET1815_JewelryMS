@@ -8,5 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CustomerDemographics {
-    String gender;
+    private int male;
+    private int female;
+    private int other;
 }
