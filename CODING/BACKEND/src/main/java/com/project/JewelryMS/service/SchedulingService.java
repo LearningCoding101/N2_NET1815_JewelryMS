@@ -578,7 +578,7 @@ public class SchedulingService {
                 staffAccount.getStaffID(),
                 staffAccount.getPhoneNumber(),
                 staffAccount.getSalary(),
-                staffAccount.getStartDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                staffAccount.getStartDate(),
                 staffAccount.getAccount().getAccountName(),
                 staffAccount.getAccount().getRole(),
                 staffAccount.getAccount().getStatus(),
@@ -587,10 +587,10 @@ public class SchedulingService {
                 staffAccount.getStaffShifts().stream()
                         .map(shift -> new StaffAccountResponse.ShiftResponse(
                                 shift.getShift().getShiftID(),
-                                shift.getShift().getEndTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH")),
+                                shift.getShift().getEndTime(),
                                 shift.getShift().getRegister(),
                                 shift.getShift().getShiftType(),
-                                shift.getShift().getStartTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH")),
+                                shift.getShift().getStartTime(),
                                 shift.getShift().getStatus(),
                                 shift.getShift().getWorkArea()
                         ))
