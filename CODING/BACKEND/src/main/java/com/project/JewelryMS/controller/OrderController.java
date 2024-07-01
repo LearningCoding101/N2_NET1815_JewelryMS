@@ -130,29 +130,29 @@ public class OrderController {
         return ResponseEntity.ok().build();
     }
 
-    // Calculate order subtotal
-    @PostMapping("/subtotal")
-  //  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_MANAGER')")
-    public ResponseEntity<Float> calculateTotalAmount(@RequestBody OrderDetailRequest orderDetailRequest) {
-        Float totalAmount = orderHandlerService.calculateSubTotal(orderDetailRequest);
-        return ResponseEntity.ok(totalAmount);
-    }
-
-    // Calculate product discount
-    @PostMapping("/discount")
-   // @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_MANAGER')")
-    public ResponseEntity<Float> calculateDiscount(@RequestBody OrderPromotionRequest orderPromotionRequest) {
-        Float totalAmount = orderHandlerService.calculateDiscountProduct(orderPromotionRequest);
-        return ResponseEntity.ok(totalAmount);
-    }
-
-    // Calculate order details total
-    @PostMapping("/order-details-total")
-   // @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_MANAGER')")
-    public ResponseEntity<Float> calculateOrderDetailTotal(@RequestBody OrderTotalRequest orderTotalRequest) {
-        Float totalAmount = orderHandlerService.TotalOrderDetails(orderTotalRequest);
-        return ResponseEntity.ok(totalAmount);
-    }
+//    // Calculate order subtotal
+//    @PostMapping("/subtotal")
+//  //  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_MANAGER')")
+//    public ResponseEntity<Float> calculateTotalAmount(@RequestBody OrderDetailRequest orderDetailRequest) {
+//        Float totalAmount = orderHandlerService.calculateSubTotal(orderDetailRequest);
+//        return ResponseEntity.ok(totalAmount);
+//    }
+//
+//    // Calculate product discount
+//    @PostMapping("/discount")
+//   // @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_MANAGER')")
+//    public ResponseEntity<Float> calculateDiscount(@RequestBody OrderPromotionRequest orderPromotionRequest) {
+//        Float totalAmount = orderHandlerService.calculateDiscountProduct(orderPromotionRequest);
+//        return ResponseEntity.ok(totalAmount);
+//    }
+//
+//    // Calculate order details total
+//    @PostMapping("/order-details-total")
+//   // @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_MANAGER')")
+//    public ResponseEntity<Float> calculateOrderDetailTotal(@RequestBody OrderTotalRequest orderTotalRequest) {
+//        Float totalAmount = orderHandlerService.TotalOrderDetails(orderTotalRequest);
+//        return ResponseEntity.ok(totalAmount);
+//    }
 
     // Calculate order total
     @PostMapping("/total")
@@ -192,7 +192,7 @@ public class OrderController {
             String response = orderHandlerService.updateOrderBuyStatus(confirmPaymentPBRequest);
             return ResponseEntity.ok(response);
         }else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Đơn hàng thanh toán thất bại");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Xác nhận quy trình thanh toán thất bại");
         }
     }
 

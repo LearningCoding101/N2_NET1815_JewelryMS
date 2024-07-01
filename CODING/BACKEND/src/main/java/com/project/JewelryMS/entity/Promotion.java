@@ -33,9 +33,12 @@ public class Promotion {
     @Column(name="discount")
     @Min(0)
     @Max(100)
-    private int discount;
+    private Integer discount;
 
     @ManyToMany(mappedBy = "promotion", fetch = FetchType.LAZY)
     private List<ProductSell> productSell ;
 
+    @OneToMany(mappedBy = "promotion")
+    @JsonIgnoreProperties
+    private List<OrderDetail> orderDetails;
 }

@@ -2,6 +2,7 @@ package com.project.JewelryMS.repository;
 
 import com.project.JewelryMS.entity.ProductSell;
 import com.project.JewelryMS.entity.Promotion;
+import com.project.JewelryMS.model.Dashboard.DiscountEffectivenessResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,5 +20,7 @@ public interface PromotionRepository extends JpaRepository<Promotion, Long> {
 
     @Query("SELECT ps.productID FROM ProductSell ps JOIN ps.promotion p WHERE p.PK_promotionID = :promotionID")
     List<Long> findProductSellIdsByPromotionId(@Param("promotionID") Long promotionID);
+
+
 
 }

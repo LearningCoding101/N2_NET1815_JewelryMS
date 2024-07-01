@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
-import java.sql.Date;
 import java.sql.Timestamp;
 
 @Entity
@@ -32,4 +31,10 @@ public class OrderDetail implements Serializable {
 
     @Column(name = "guaranteeEndDate")
     Timestamp guaranteeEndDate;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "FK_Promotion_ID", referencedColumnName = "PK_promotionID")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    Promotion promotion;
+
 }

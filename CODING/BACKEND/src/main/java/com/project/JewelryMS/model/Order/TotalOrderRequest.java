@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TotalOrderRequest {
+    private Long OrderDetail_ID;
     private Long ProductSell_ID;
     private Integer Quantity;
     private Long Promotion_ID;

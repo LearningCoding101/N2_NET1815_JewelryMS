@@ -55,8 +55,8 @@ public class ApiService {
             JsonNode root = jsonMapper.readTree(jsonResponse);
             JsonNode dataList = root.path("DataList").path("Data");
             for (JsonNode item : dataList) {
-                if (item.path("Tên giá vàng").asText().equals("VÀNG MIẾNG VRTL (Vàng Rồng Thăng Long)")) {
-                    return item.path("Giá mua ra").asText();
+                if (item.path("Tên giá vàng").asText().equals("VÀNG NGUYÊN LIỆU (Vàng thị trường)")) {
+                    return item.path("Giá mua vào").asText();
                 }
             }
         } catch (Exception e) {
@@ -71,7 +71,7 @@ public class ApiService {
             JsonNode root = jsonMapper.readTree(jsonResponse);
             JsonNode dataList = root.path("DataList").path("Data");
             for (JsonNode item : dataList) {
-                if (item.path("Tên giá vàng").asText().equals("VÀNG MIẾNG VRTL (Vàng Rồng Thăng Long)")) {
+                if (item.path("Tên giá vàng").asText().equals("VÀNG NGUYÊN LIỆU (Vàng thị trường)")) {
                     return item.path("Giá mua vào").asText();
                 }
             }

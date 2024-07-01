@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class DashboardService {
@@ -22,9 +23,9 @@ public class DashboardService {
     CustomerService customerService;
     @Autowired
     private OrderDetailRepository orderDetailRepository;
-    @Autowired
-    private StaffAccountRepository staffAccountRepository;
 
+    @Autowired
+    StaffAccountRepository staffAccountRepository;
 
     public List<CategoryResponse> RevenueCategory(){
         Optional<List<Category>> optionalCategoryList = Optional.ofNullable(categoryRepository.findAllCategories());
@@ -45,7 +46,7 @@ public class DashboardService {
     public Float CalculateCategoryTotal(Long Category_ID){
         List<PurchaseOrder> orders = orderRepository.findAll();
 
-        //total revenue in the category
+        // Tính tổng doanh thu cho danh mục
         float totalRevenue = 0.0F;
 
         for(PurchaseOrder order : orders){
@@ -104,7 +105,7 @@ public class DashboardService {
     }
 
     public Float CalculateCategoryTotal(Long Category_ID, RevenueDateRequest revenueDateRequest){
-        //Convert LocalDate to LocalDateTime
+        // Lấy start và end dates từ request và chuyển đổi thành LocalDateTime
         LocalDate startDate = revenueDateRequest.getStartTime();
         LocalDate endDate = revenueDateRequest.getEndTime();
 
@@ -114,7 +115,7 @@ public class DashboardService {
         // Truy vấn các đơn hàng trong khoảng thời gian đã chỉ định
         List<PurchaseOrder> orders = orderRepository.findOrdersByDateRange(startDateTime, endDateTime);
 
-        //Total revenue for category
+        // Tính tổng doanh thu cho danh mục
         float totalRevenue = 0.0F;
 
         for(PurchaseOrder order : orders){
@@ -130,7 +131,7 @@ public class DashboardService {
     }
 
     public List<TopSellProductResponse>  getTopSellingProducts(RevenueDateRequest revenueDateRequest) {
-        //Convert LocalDate to LocalDateTime
+        // Lấy start và end dates từ request và chuyển đổi thành LocalDateTime
         LocalDate startDate = revenueDateRequest.getStartTime();
         LocalDate endDate = revenueDateRequest.getEndTime();
 
@@ -239,12 +240,10 @@ public class DashboardService {
         List<CustomerSignUp> customerSignUps = new ArrayList<>();
 
         for (Object[] result : results) {
-            int staffId = (int) result[0];
-            String staffName = (String) result[1];
-            Long signUpCount = (Long) result[2];
+            String staffName = (String) result[0];
+            Long signUpCount = (Long) result[1];
 
             CustomerSignUp customerSignUp = new CustomerSignUp();
-            customerSignUp.setStaffId(staffId);
             customerSignUp.setStaffName(staffName);
             customerSignUp.setNumberSignUp(signUpCount.intValue());
             customerSignUps.add(customerSignUp);
@@ -330,6 +329,7 @@ public class DashboardService {
         List<PurchaseOrder> orders = orderRepository.findOrdersByDateRange(startDateTime, endDateTime);
         Map<Integer, Double> revenueByStaff = new HashMap<>();
 
+
         for (PurchaseOrder order : orders) {
             StaffAccount staffAccount = order.getStaffAccount();
             if (staffAccount != null) {
@@ -375,5 +375,22 @@ public class DashboardService {
         }
 
         return responseList;
+    }
+    public List<DiscountEffectivenessResponse> getDiscountCodeEffectiveness() {
+        List<OrderDetail> orderDetails = orderDetailRepository.findAll();
+
+        Map<String, Long> discountCodeCount = orderDetails.stream()
+                .filter(orderDetail -> orderDetail.getPromotion() != null && orderDetail.getPromotion().getCode() != null)
+                .collect(Collectors.groupingBy(orderDetail -> orderDetail.getPromotion().getCode(), Collectors.counting()));
+
+        return discountCodeCount.entrySet().stream()
+                .map(entry -> {
+                    DiscountEffectivenessResponse response = new DiscountEffectivenessResponse();
+                    response.setDiscountCode(entry.getKey());
+                    response.setNumberUse(Math.toIntExact(entry.getValue()));
+                    return response;
+                })
+                .sorted(Comparator.comparingInt(DiscountEffectivenessResponse::getNumberUse).reversed())
+                .collect(Collectors.toList());
     }
 }

@@ -1,6 +1,7 @@
 package com.project.JewelryMS.repository;
 
 import com.project.JewelryMS.entity.OrderDetail;
+import com.project.JewelryMS.model.Dashboard.DiscountEffectivenessResponse;
 import com.project.JewelryMS.model.OrderDetail.OrderDetailDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,7 +16,12 @@ import java.util.List;
 
 @Repository
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> {
-
+//    @Query("SELECT new com.project.JewelryMS.model.Dashboard.DiscountEffectivenessResponse(d.discountCode, COUNT(d.discountCode)) " +
+//            "FROM OrderDetail d " +
+//            "WHERE d.discountCode IS NOT NULL " +
+//            "GROUP BY d.discountCode " +
+//            "ORDER BY COUNT(d.discountCode) DESC")
+//    List<DiscountEffectivenessResponse> findDiscountCodeEffectiveness();
 
 
     @Query("SELECT new com.project.JewelryMS.model.OrderDetail.OrderDetailDTO(od.PK_ODID, od.quantity, od.purchaseOrder.PK_OrderID, " +

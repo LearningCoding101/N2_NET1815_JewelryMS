@@ -40,6 +40,7 @@ public class PromotionService {
         promotionResponse.setPromotionID(promotion.getPK_promotionID());
         promotionResponse.setCode(promotion.getCode());
         promotionResponse.setDescription(promotion.getDescription());
+        promotionResponse.setDiscount(promotion.getDiscount());
         promotionResponse.setStartDate(formatDate(promotion.getStartDate()));
         promotionResponse.setEndDate(formatDate(promotion.getEndDate()));
         promotionResponse.setStatus(promotion.isStatus());

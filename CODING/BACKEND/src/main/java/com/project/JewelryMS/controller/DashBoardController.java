@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @RestController
@@ -27,129 +26,50 @@ public class DashBoardController {
 
     @GetMapping("/purchase-order-history")
     public ResponseEntity<List<TransitionResponse>> getPurchaseOrderHistory() {
-        try {
-            List<TransitionResponse> purchaseOrderHistory = transitionService.getPurchaseOrderHistory();
-            return ResponseEntity.ok(purchaseOrderHistory);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // Handle other exceptions
-        }
+        List<TransitionResponse> purchaseOrderHistory = transitionService.getPurchaseOrderHistory();
+        return ResponseEntity.ok(purchaseOrderHistory);
     }
 
     @GetMapping("revenue-category")
-    public ResponseEntity<List<CategoryResponse>> getAllRevenueCategory(
-            @RequestParam("startTime") String startTime,
-            @RequestParam("endTime") String endTime) {
-        try {
-            LocalDate startDate = LocalDate.parse(startTime);
-            LocalDate endDate = LocalDate.parse(endTime);
-
-            if (startDate.isAfter(endDate)) {
-                return ResponseEntity.badRequest().body(null); // Or handle with a custom error response
-            }
-
-            RevenueDateRequest revenueDateRequest = new RevenueDateRequest(startDate, endDate);
-            List<CategoryResponse> revenueCategoryResponse = dashboardService.RevenueCategory(revenueDateRequest);
-
-            return ResponseEntity.ok(revenueCategoryResponse);
-        } catch (DateTimeParseException e) {
-            return ResponseEntity.badRequest().body(null); // Invalid date format
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // Handle other exceptions
-        }
+    public ResponseEntity<List<CategoryResponse>> getAllRevenueCategory(@RequestParam("startTime") String startTime, @RequestParam("endTime") String endTime) {
+        RevenueDateRequest revenueDateRequest = new RevenueDateRequest(LocalDate.parse(startTime), LocalDate.parse(endTime));
+        List<CategoryResponse> revenueCategoryResponse = dashboardService.RevenueCategory(revenueDateRequest);
+        return ResponseEntity.ok(revenueCategoryResponse);
     }
 
     @GetMapping("top-selling-products")
-    public ResponseEntity<List<TopSellProductResponse>> getTopSellingProducts(
-            @RequestParam("startTime") String startTime,
-            @RequestParam("endTime") String endTime) {
-        try {
-            LocalDate startDate = LocalDate.parse(startTime);
-            LocalDate endDate = LocalDate.parse(endTime);
-
-            if (startDate.isAfter(endDate)) {
-                return ResponseEntity.badRequest().body(null);
-            }
-
-            RevenueDateRequest revenueDateRequest = new RevenueDateRequest(startDate, endDate);
-            List<TopSellProductResponse> topSellingProducts = dashboardService.getTopSellingProducts(revenueDateRequest);
-
-            return ResponseEntity.ok(topSellingProducts);
-        } catch (DateTimeParseException e) {
-            return ResponseEntity.badRequest().body(null); // Invalid date format
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // Handle other exceptions
-        }
+    public ResponseEntity<List<TopSellProductResponse>> getTopSellingProducts(@RequestParam("startTime") String startTime, @RequestParam("endTime") String endTime) {
+        RevenueDateRequest revenueDateRequest = new RevenueDateRequest(LocalDate.parse(startTime), LocalDate.parse(endTime));
+        return ResponseEntity.ok(dashboardService.getTopSellingProducts(revenueDateRequest));
     }
 
     @GetMapping("revenue-category-all")
     public ResponseEntity<List<CategoryResponse>> getAllRevenueCategory() {
-        try {
-            List<CategoryResponse> revenueCategoryResponse = dashboardService.RevenueCategory();
-            return ResponseEntity.ok(revenueCategoryResponse);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // Handle other exceptions
-        }
+        List<CategoryResponse> revenueCategoryResponse = dashboardService.RevenueCategory();
+        return ResponseEntity.ok(revenueCategoryResponse);
     }
 
     @GetMapping("top-selling-products-all")
     public ResponseEntity<List<TopSellProductResponse>> getTopSellingProducts() {
-        try {
-            List<TopSellProductResponse> topSellingProducts = dashboardService.getTopSellingProducts();
-            return ResponseEntity.ok(topSellingProducts);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // Handle other exceptions
-        }
-    }
-
-    @GetMapping("/customer-signups")
-    public ResponseEntity<List<CustomerSignUp>> getCustomerSignUpsByStaff(
-            @RequestParam("startTime") String startTime,
-            @RequestParam("endTime") String endTime) {
-        try {
-            LocalDate startDate = LocalDate.parse(startTime);
-            LocalDate endDate = LocalDate.parse(endTime);
-
-            if (startDate.isAfter(endDate)) {
-                return ResponseEntity.badRequest().body(null); // Or handle with a custom error response
-            }
-
-            RevenueDateRequest revenueDateRequest = new RevenueDateRequest(startDate, endDate);
-            List<CustomerSignUp> customerSignUps = dashboardService.getCustomerSignUpsByStaff(revenueDateRequest);
-
-            return ResponseEntity.ok(customerSignUps);
-        } catch (DateTimeParseException e) {
-            return ResponseEntity.badRequest().body(null); // Invalid date format
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // Handle other exceptions
-        }
+        return ResponseEntity.ok(dashboardService.getTopSellingProducts());
     }
 
     @GetMapping("/loyalty-customers")
-    public ResponseEntity<CustomerLoyalty> getCustomerLoyaltyStatistics(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-        try {
-            RevenueDateRequest revenueDateRequest = new RevenueDateRequest(startDate, endDate);
-            List<CustomerLoyalty> loyaltyStats = dashboardService.getCustomerLoyaltyStatistics(revenueDateRequest);
-
-            return ResponseEntity.ok(loyaltyStats.get(0));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // Handle other exceptions
-        }
+    public ResponseEntity<List<CustomerLoyalty>> getCustomerLoyaltyStatistics(@RequestParam("startTime") String startTime, @RequestParam("endTime") String endTime) {
+        RevenueDateRequest revenueDateRequest = new RevenueDateRequest(LocalDate.parse(startTime), LocalDate.parse(endTime));
+        return ResponseEntity.ok(dashboardService.getCustomerLoyaltyStatistics(revenueDateRequest));
     }
 
-    @GetMapping("/demographic-customers")
-    public ResponseEntity<CustomerDemographics> getCustomerDemoGraphic(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-        try {
-            RevenueDateRequest revenueDateRequest = new RevenueDateRequest(startDate, endDate);
-            List<CustomerDemographics> demographicStats = dashboardService.getCustomerDemoGraphicResponse(revenueDateRequest);
+    @GetMapping("demographic-customers")
+    public ResponseEntity<List<CustomerDemographics>> getCustomerDemoGraphic(@RequestParam("startTime") String startTime, @RequestParam("endTime") String endTime) {
+        RevenueDateRequest revenueDateRequest = new RevenueDateRequest(LocalDate.parse(startTime), LocalDate.parse(endTime));
+        return ResponseEntity.ok(dashboardService.getCustomerDemoGraphicResponse(revenueDateRequest));
+    }
 
-            return ResponseEntity.ok(demographicStats.get(0));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // Handle other exceptions
-        }
+    @GetMapping("/customer-signups")
+    public ResponseEntity<List<CustomerSignUp>> getCustomerSignUpsByStaff(@RequestParam("startTime") String startTime, @RequestParam("endTime") String endTime) {
+        RevenueDateRequest revenueDateRequest = new RevenueDateRequest(LocalDate.parse(startTime), LocalDate.parse(endTime));
+        return ResponseEntity.ok(dashboardService.getCustomerSignUpsByStaff(revenueDateRequest));
     }
 
     @GetMapping("compare-day")
@@ -169,7 +89,6 @@ public class DashBoardController {
         YearComparisonRequest request = new YearComparisonRequest(year1, year2);
         return dashboardService.compareYear(request);
     }
-
     @GetMapping("/revenueByStaff")
     public ResponseEntity<List<StaffRevenueResponse>> getRevenueGeneratedByStaff(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -181,6 +100,11 @@ public class DashBoardController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // Handle other exceptions
         }
     }
+    @GetMapping("discount-code-effectiveness")
+    public List<DiscountEffectivenessResponse> getDiscountCodeEffectiveness() {
+        return dashboardService.getDiscountCodeEffectiveness();
+    }
+
 
     @GetMapping("/salesByStaff")
     public ResponseEntity<List<StaffSalesResponse>> getSalesMadeByStaff(
