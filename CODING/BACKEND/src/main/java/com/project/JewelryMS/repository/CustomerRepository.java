@@ -23,7 +23,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     @Query("SELECT c FROM Customer c WHERE c.createDate BETWEEN :startDate AND :endDate")
     List<Customer> findCustomersByCreateDateRange(LocalDateTime startDate, LocalDateTime endDate);
 
-    @Query("SELECT c.staffAccount.staffID, c.staffAccount.account.accountName, COUNT(c) " +
+    @Query("SELECT c.staffAccount.account.accountName, COUNT(c) " +
             "FROM Customer c " +
             "WHERE c.createDate BETWEEN :startDate AND :endDate " +
             "GROUP BY c.staffAccount.staffID, c.staffAccount.account.accountName")

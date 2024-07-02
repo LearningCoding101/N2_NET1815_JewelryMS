@@ -6,6 +6,7 @@ import com.project.JewelryMS.model.Shift.ShiftRequest;
 import com.project.JewelryMS.service.ShiftService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -110,5 +111,16 @@ public class ShiftController {
         shiftRequest.setShiftID(id); // Ensure the ID from the path is set in the request
         shiftService.updateShiftDetails(shiftRequest);
         return ResponseEntity.ok("Shift Details updated successfully");
+    }
+
+    // Endpoint to delete shifts with no staff and older than 2 months
+    @DeleteMapping("/deleteOldShifts")
+    public ResponseEntity<String> deleteShiftsWithCriteria() {
+        try {
+            shiftService.deleteShiftsWithCriteria();
+            return ResponseEntity.ok("Shifts deleted successfully based on criteria.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete shifts: " + e.getMessage());
+        }
     }
 }

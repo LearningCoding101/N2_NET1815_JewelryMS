@@ -45,4 +45,5 @@ public class Shift {
     @OneToMany(mappedBy = "shift", fetch = FetchType.LAZY)
     @JsonManagedReference
     Set<Staff_Shift> staffShifts;
+
 }

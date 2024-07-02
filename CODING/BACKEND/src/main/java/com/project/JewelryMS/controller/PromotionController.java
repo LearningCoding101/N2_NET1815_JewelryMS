@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -74,9 +75,8 @@ public class PromotionController {
     @GetMapping("/date")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_MANAGER')")
     public ResponseEntity<List<PromotionResponse>> listPromotionsByDate(
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
-        LocalDateTime targetDate = date.atStartOfDay();
-        List<PromotionResponse> promotions = promotionService.getPromotionsByDate(targetDate);
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) {
+        List<PromotionResponse> promotions = promotionService.getPromotionsByDate(date);
         return ResponseEntity.ok(promotions);
     }
 

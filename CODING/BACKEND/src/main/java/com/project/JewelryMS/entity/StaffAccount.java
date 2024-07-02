@@ -37,7 +37,7 @@ public class StaffAccount {
     @Column(name = "startDate")
     private LocalDateTime startDate;
 
-    @OneToMany(mappedBy = "staffAccount")
+    @OneToMany(mappedBy = "staffAccount", fetch = FetchType.EAGER)//Change fetch type for schedule
     @JsonIgnoreProperties
     @JsonManagedReference
     Set<Staff_Shift> staffShifts;

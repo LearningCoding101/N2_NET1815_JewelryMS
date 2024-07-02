@@ -26,8 +26,8 @@ public class Promotion {
     long PK_promotionID;
     String code;
     String description;
-    LocalDateTime startDate;
-    LocalDateTime endDate;
+    Date startDate;
+    Date endDate;
     boolean status;
 
     @Column(name="discount")

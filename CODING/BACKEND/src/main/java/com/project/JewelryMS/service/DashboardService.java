@@ -7,6 +7,8 @@ import com.project.JewelryMS.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -23,7 +25,6 @@ public class DashboardService {
     CustomerService customerService;
     @Autowired
     private OrderDetailRepository orderDetailRepository;
-
     @Autowired
     StaffAccountRepository staffAccountRepository;
 
@@ -54,6 +55,11 @@ public class DashboardService {
             for(OrderDetail orderDetail : orderDetails){
                 if(Long.valueOf(orderDetail.getProductSell().getCategory().getId()).equals(Category_ID)){
                     float orderDetailTotal = orderDetail.getQuantity() * orderDetail.getProductSell().getCost();
+                    // Apply discount if promotion is available
+                    if (orderDetail.getPromotion() != null) {
+                        float discount = orderDetail.getPromotion().getDiscount() / 100.0F;
+                        orderDetailTotal -= orderDetailTotal * discount;
+                    }
                     totalRevenue += orderDetailTotal;
                 }
             }
@@ -76,7 +82,15 @@ public class DashboardService {
                 TopSellProductResponse topSellProductResponse = productSalesMap.getOrDefault(productId, new TopSellProductResponse());
                 topSellProductResponse.setProduct_Name(product.getPName());
                 topSellProductResponse.setUnitSold(topSellProductResponse.getUnitSold() != null ? topSellProductResponse.getUnitSold() + orderDetail.getQuantity() : orderDetail.getQuantity());
-                topSellProductResponse.setRevenueSold(topSellProductResponse.getRevenueSold() != null ? topSellProductResponse.getRevenueSold() + (orderDetail.getQuantity() * product.getCost()) : orderDetail.getQuantity() * product.getCost());
+
+                float orderDetailRevenue = orderDetail.getQuantity() * product.getCost();
+                // Apply discount if promotion is available
+                if (orderDetail.getPromotion() != null) {
+                    float discount = orderDetail.getPromotion().getDiscount() / 100.0F;
+                    orderDetailRevenue -= orderDetailRevenue * discount;
+                }
+                topSellProductResponse.setRevenueSold(topSellProductResponse.getRevenueSold() != null ? topSellProductResponse.getRevenueSold() + orderDetailRevenue : orderDetailRevenue);
+
                 productSalesMap.put(productId, topSellProductResponse);
             }
         }
@@ -123,6 +137,11 @@ public class DashboardService {
             for(OrderDetail orderDetail : orderDetails){
                 if(Long.valueOf(orderDetail.getProductSell().getCategory().getId()).equals(Category_ID)){
                     float orderDetailTotal = orderDetail.getQuantity() * orderDetail.getProductSell().getCost();
+                    // Apply discount if promotion is available
+                    if (orderDetail.getPromotion() != null) {
+                        float discount = orderDetail.getPromotion().getDiscount() / 100.0F;
+                        orderDetailTotal -= orderDetailTotal * discount;
+                    }
                     totalRevenue += orderDetailTotal;
                 }
             }
@@ -153,7 +172,15 @@ public class DashboardService {
                 TopSellProductResponse topSellProductResponse = productSalesMap.getOrDefault(productId, new TopSellProductResponse());
                 topSellProductResponse.setProduct_Name(product.getPName());
                 topSellProductResponse.setUnitSold(topSellProductResponse.getUnitSold() != null ? topSellProductResponse.getUnitSold() + orderDetail.getQuantity() : orderDetail.getQuantity());
-                topSellProductResponse.setRevenueSold(topSellProductResponse.getRevenueSold() != null ? topSellProductResponse.getRevenueSold() + (orderDetail.getQuantity() * product.getCost()) : orderDetail.getQuantity() * product.getCost());
+
+                float orderDetailRevenue = orderDetail.getQuantity() * product.getCost();
+                // Apply discount if promotion is available
+                if (orderDetail.getPromotion() != null) {
+                    float discount = orderDetail.getPromotion().getDiscount() / 100.0F;
+                    orderDetailRevenue -= orderDetailRevenue * discount;
+                }
+                topSellProductResponse.setRevenueSold(topSellProductResponse.getRevenueSold() != null ? topSellProductResponse.getRevenueSold() + orderDetailRevenue : orderDetailRevenue);
+
                 productSalesMap.put(productId, topSellProductResponse);
             }
         }
@@ -392,5 +419,72 @@ public class DashboardService {
                 })
                 .sorted(Comparator.comparingInt(DiscountEffectivenessResponse::getNumberUse).reversed())
                 .collect(Collectors.toList());
+    }
+
+    public Map<String, Float> getDailyAverageRevenuePerMonth(String startMonthYear, String endMonthYear) {
+        Map<String, Float> dailyAverageRevenueMap = new HashMap<>();
+
+        try {
+            // Parse input months and years
+            SimpleDateFormat monthYearFormat = new SimpleDateFormat("yyyy-MM");
+            Date startDate = monthYearFormat.parse(startMonthYear);
+            Date endDate = monthYearFormat.parse(endMonthYear);
+
+            // Adjust end date to include the whole month
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(endDate);
+            cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+            endDate = cal.getTime();
+
+            List<DailyRevenueProjection> dailyRevenues = orderDetailRepository.findDailyRevenueBetweenDates(startDate, endDate);
+
+            // Use a map to aggregate total revenue per month
+            Map<String, Float> monthlyRevenueMap = new HashMap<>();
+            Map<String, Integer> dailyCountMap = new HashMap<>();
+
+            for (DailyRevenueProjection dailyRevenue : dailyRevenues) {
+                String month = new SimpleDateFormat("yyyy-MM").format(dailyRevenue.getPurchaseDate());
+
+                monthlyRevenueMap.put(month, monthlyRevenueMap.getOrDefault(month, 0.0f) + dailyRevenue.getTotalRevenue());
+                dailyCountMap.put(month, dailyCountMap.getOrDefault(month, 0) + 1);
+            }
+
+            // Calculate daily average revenue for each month
+            for (Map.Entry<String, Float> entry : monthlyRevenueMap.entrySet()) {
+                String month = entry.getKey();
+                Float totalRevenue = entry.getValue();
+                Integer dayCount = dailyCountMap.get(month);
+
+                dailyAverageRevenueMap.put(month, totalRevenue / dayCount);
+            }
+        } catch (ParseException e) {
+            // Log the error or handle it as needed
+            e.printStackTrace();
+        }
+
+        return dailyAverageRevenueMap;
+    }
+
+    public Map<String, Double> getDailyRevenue(String startDateStr, String endDateStr) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date startDate = sdf.parse(startDateStr);
+        Date endDate = sdf.parse(endDateStr);
+
+        List<DailyRevenueProjection> dailyRevenues = orderDetailRepository.findDailyRevenue(startDate, endDate);
+
+        Map<String, Double> dailyRevenueMap = new HashMap<>();
+
+        for (DailyRevenueProjection revenue : dailyRevenues) {
+            String date = sdf.format(revenue.getPurchaseDate());
+            double totalRevenue = (double) revenue.getTotalRevenue();
+
+            if (dailyRevenueMap.containsKey(date)) {
+                totalRevenue += dailyRevenueMap.get(date);
+            }
+
+            dailyRevenueMap.put(date, totalRevenue);
+        }
+
+        return dailyRevenueMap;
     }
 }

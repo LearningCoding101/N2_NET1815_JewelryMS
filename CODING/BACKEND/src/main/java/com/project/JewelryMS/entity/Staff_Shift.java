@@ -10,27 +10,27 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-@Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity
 @Table(name="Staff_Shift")
 public class Staff_Shift implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long PK_StaffShift;
+    private Long PK_StaffShift;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "staff_id", referencedColumnName = "PK_staffID")
     @JsonBackReference
-    StaffAccount staffAccount;
+    private StaffAccount staffAccount;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "shift_id", referencedColumnName = "shiftID")
     @EqualsAndHashCode.Exclude
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @JsonBackReference
-    Shift shift;
+    private Shift shift;
 
 //    @Transient
 //    private int staffId;

@@ -107,7 +107,7 @@ public class StaffAccountService {
         Account account = accountOpt.get();
         account.setEmail(staffAccountRequest.getEmail());
         account.setAUsername(staffAccountRequest.getUsername());
-        account.setAPassword(passwordEncoder.encode(staffAccountRequest.getPassword()));
+//        account.setAPassword(passwordEncoder.encode(staffAccountRequest.getPassword()));
         account.setAccountName(staffAccountRequest.getAccountName());
         account.setRole(staffAccountRequest.getRole()); // Update role from request
 

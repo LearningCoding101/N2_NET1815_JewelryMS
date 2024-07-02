@@ -49,4 +49,17 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
             "FROM OrderDetail od JOIN od.productSell ps JOIN od.purchaseOrder po " +
             "WHERE FUNCTION('YEAR', po.purchaseDate) = :year")
     OrderDetailProjection findTotalQuantityAndRevenueInYear(Year year);
+
+    @Query("SELECT FUNCTION('DATE', po.purchaseDate) AS purchaseDate, SUM(od.quantity * ps.cost) AS totalRevenue " +
+            "FROM OrderDetail od JOIN od.productSell ps JOIN od.purchaseOrder po " +
+            "WHERE po.purchaseDate BETWEEN :startDate AND :endDate " +
+            "GROUP BY FUNCTION('DATE', po.purchaseDate)")
+    List<DailyRevenueProjection> findDailyRevenueBetweenDates(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+
+    @Query("SELECT FUNCTION('DATE', po.purchaseDate) AS purchaseDate, SUM(od.quantity * ps.cost) AS totalRevenue " +
+            "FROM OrderDetail od JOIN od.productSell ps JOIN od.purchaseOrder po " +
+            "WHERE po.purchaseDate BETWEEN :startDate AND :endDate " +
+            "GROUP BY FUNCTION('DATE', po.purchaseDate)")
+    List<DailyRevenueProjection> findDailyRevenue(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+
 }

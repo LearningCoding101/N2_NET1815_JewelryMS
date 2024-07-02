@@ -25,7 +25,7 @@ public class StaffAccountRequest {
 
     private String username;
 
-    private String password;
+//    private String password;
 
     private String accountName;
 

@@ -4,6 +4,8 @@ import com.project.JewelryMS.entity.Shift;
 import com.project.JewelryMS.entity.StaffAccount;
 import com.project.JewelryMS.entity.Staff_Shift;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,4 +20,5 @@ public interface StaffShiftRepository extends JpaRepository<Staff_Shift, Long> {
             LocalDateTime startDate,
             LocalDateTime endDate
     );
+
 }

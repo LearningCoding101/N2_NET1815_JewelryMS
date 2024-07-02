@@ -2,10 +2,7 @@ package com.project.JewelryMS.controller;
 
 
 import com.project.JewelryMS.entity.Customer;
-import com.project.JewelryMS.model.Customer.CreateCustomerRequest;
-import com.project.JewelryMS.model.Customer.CustomerDeleteRequest;
-import com.project.JewelryMS.model.Customer.CustomerRequest;
-import com.project.JewelryMS.model.Customer.ViewCustomerPointRequest;
+import com.project.JewelryMS.model.Customer.*;
 import com.project.JewelryMS.service.CustomerService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,16 +21,16 @@ public class CustomerController {
     // Create a new customer
     @PostMapping
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_MANAGER')")
-    public ResponseEntity<Customer> createCustomer(@RequestBody CreateCustomerRequest createCustomerRequest) {
-        Customer customer = customerService.createCustomer(createCustomerRequest);
-        return ResponseEntity.ok(customer);
+    public ResponseEntity<CustomerResponse> createCustomer(@RequestBody CreateCustomerRequest createCustomerRequest) {
+        CustomerResponse customerResponse = customerService.createCustomer(createCustomerRequest);
+        return ResponseEntity.ok(customerResponse);
     }
 
     // Get all customers
     @GetMapping
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_MANAGER')")
-    public ResponseEntity<List<Customer>> readAllCustomer() {
-        List<Customer> customerList = customerService.readAllCustomer();
+    public ResponseEntity<List<CustomerResponse>> readAllCustomer() {
+        List<CustomerResponse> customerList = customerService.readAllCustomers();
         return ResponseEntity.ok(customerList);
     }
 
@@ -48,24 +45,24 @@ public class CustomerController {
     // Get a single customer by ID
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_MANAGER')")
-    public ResponseEntity<Customer> readCustomerFromId(@RequestParam Long id) {
-        Customer customer = customerService.getCustomerById(id);
+    public ResponseEntity<CustomerResponse> readCustomerFromId(@PathVariable Long id) {
+        CustomerResponse customer = customerService.getCustomerById(id);
         return ResponseEntity.ok(customer);
     }
 
     // Get a single customer by phone number
     @GetMapping("/by-phone-number")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_MANAGER')")
-    public ResponseEntity<Customer> readCustomerFromPhoneNumber(@RequestParam String id) {
-        Customer customer = customerService.getCustomerByPhoneNumber(id);
+    public ResponseEntity<CustomerResponse> readCustomerFromPhoneNumber(@RequestParam String id) {
+        CustomerResponse customer = customerService.getCustomerByPhoneNumber(id);
         return ResponseEntity.ok(customer);
     }
 
     // Get all active customers
     @GetMapping("/active")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_MANAGER')")
-    public ResponseEntity<List<Customer>> readAllActiveCustomer() {
-        List<Customer> customerList = customerService.readAllActiveCustomers();
+    public ResponseEntity<List<CustomerResponse>> readAllActiveCustomer() {
+        List<CustomerResponse> customerList = customerService.readAllActiveCustomers();
         return ResponseEntity.ok(customerList);
     }
 

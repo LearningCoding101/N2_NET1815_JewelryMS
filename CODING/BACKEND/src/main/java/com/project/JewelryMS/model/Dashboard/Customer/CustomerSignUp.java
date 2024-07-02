@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CustomerSignUp {
-    int staffId;
     String staffName;
     int numberSignUp;
 }

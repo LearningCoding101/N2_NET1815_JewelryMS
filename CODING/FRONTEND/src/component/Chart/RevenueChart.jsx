@@ -86,7 +86,6 @@ function RevenueChart() {
           callback: function (value, index, values) {
             const date = new Date(dataPoints[value].date);
             const month = date.getMonth();
-            console.log(dataPoints[value]);
             return months[month]; // Display month name
           },
         },
@@ -102,8 +101,7 @@ function RevenueChart() {
   };
 
   return (
-    <div>
-      <h2>Daily Revenue Over Time</h2>
+    <div className="DailyRevenueOverTime">
       <Line data={data} options={options} />
     </div>
   );
