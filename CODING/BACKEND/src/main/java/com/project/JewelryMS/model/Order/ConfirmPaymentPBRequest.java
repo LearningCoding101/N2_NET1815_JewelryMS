@@ -9,5 +9,5 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 public class ConfirmPaymentPBRequest {
     Long order_ID;
-    MultipartFile image;
+    String image;
 }

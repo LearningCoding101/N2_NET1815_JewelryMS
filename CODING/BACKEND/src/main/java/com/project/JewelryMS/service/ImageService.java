@@ -80,4 +80,32 @@ public class ImageService {
         }
     }
 
+    public String uploadImageByPathService(String base64EncodedFile) {
+        // Remove the prefix if it exists
+        if (base64EncodedFile.startsWith("data:image/")) {
+            base64EncodedFile = base64EncodedFile.substring(base64EncodedFile.indexOf(",") + 1);
+        }
+
+        String url = "https://api.imgbb.com/1/upload?key=" + apiKey;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("image", base64EncodedFile);
+        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+        if (response.getStatusCode().is2xxSuccessful()) {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                ImgbbResponse imgbbResponse = mapper.readValue(response.getBody(), ImgbbResponse.class);
+                String imageUrl = imgbbResponse.getData().getUrl();
+                return imageUrl;
+            } catch (IOException e) {
+                return "Failed to parse Imgbb response";
+            }
+        } else {
+            return "Failed to upload image";
+        }
+    }
+
 }

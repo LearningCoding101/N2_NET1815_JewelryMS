@@ -15,6 +15,7 @@ import com.project.JewelryMS.service.ProductSellService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ModelAttribute;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -290,7 +291,7 @@ public class OrderHandlerService {
 
             ProductSell product = item.getProductSell();
             ProductResponse response = new ProductResponse();
-
+            response.setOrderDetail_ID(item.getPK_ODID());
             response.setQuantity(item.getQuantity());
             response.setProductID(product.getProductID());
             response.setName(product.getPName());
@@ -392,17 +393,24 @@ public class OrderHandlerService {
         orderService.saveOrder(orderToUpdate);
     }
 
-    public String updateOrderBuyStatus(ConfirmPaymentPBRequest confirmPaymentPBRequest){
-        Optional<PurchaseOrder> orderOptional = orderRepository.findById(confirmPaymentPBRequest.getOrder_ID());
-        if(orderOptional.isPresent()){
+    public String updateOrderBuyStatus(ConfirmPaymentPBRequest confirmPaymentPBRequest) {
+        Long orderId = confirmPaymentPBRequest.getOrder_ID();
+        if (orderId == null) {
+            return "Xác nhận qui trình thanh toán thất bại: Order ID is null";
+        }
+
+        Optional<PurchaseOrder> orderOptional = orderRepository.findById(orderId);
+        if (orderOptional.isPresent()) {
             PurchaseOrder purchaseOrder = orderOptional.get();
+
+            // Assuming imageService.uploadImageByPathService can handle base64 encoded string
             String image = imageService.uploadImageByPathService(confirmPaymentPBRequest.getImage());
             purchaseOrder.setImage(image);
             purchaseOrder.setStatus(3);
             orderRepository.save(purchaseOrder);
             return "Xác nhận qui trình thanh toán thành công";
         }
-        return "Xác nhận qui trình thanh toán thất bại";
+        return "Xác nhận qui trình thanh toán thất bại: Order not found";
     }
 
 

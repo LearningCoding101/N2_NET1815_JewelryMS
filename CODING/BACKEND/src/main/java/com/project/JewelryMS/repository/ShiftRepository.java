@@ -44,6 +44,8 @@ public interface ShiftRepository extends JpaRepository<Shift, Long> {
     // List all shifts
     @Query("SELECT s FROM Shift s")
     List<Shift> listAll();
+    @Query("SELECT s FROM Shift s WHERE s.startTime BETWEEN :startDate AND :endDate")
+    List<Shift> findAllByDateRange(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
     // Find shifts by the actual ID
     @Query("SELECT s FROM Shift s WHERE s.shiftID = :shiftID")

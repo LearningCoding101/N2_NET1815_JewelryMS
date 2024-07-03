@@ -21,6 +21,11 @@ public interface ProductSellRepository extends JpaRepository<ProductSell, Long> 
     @Query("SELECT p.PK_promotionID FROM Promotion p JOIN p.productSell ps WHERE ps.productID = :productSellId")
     List<Long> findPromotionIdsByProductSellId(@Param("productSellId") long productSellId);
 
+    // This query can be optimized to fetch promotions in one go if needed
+    @Query("SELECT ps.productID, p.PK_promotionID FROM ProductSell ps " +
+            "JOIN ps.promotion p WHERE ps.pStatus = true")
+    List<Object[]> findAllPromotionIds();
+
     @Query("SELECT ps FROM ProductSell ps " +
             "LEFT JOIN FETCH ps.category c " +
             "LEFT JOIN FETCH ps.promotion p " +

@@ -187,11 +187,11 @@ public class OrderController {
     }
 
     @PatchMapping("process-payment-PB")
-    public ResponseEntity<String> confirmPaymentProductBuy(@ModelAttribute ConfirmPaymentPBRequest confirmPaymentPBRequest){
-        if(confirmPaymentPBRequest!=null){
+    public ResponseEntity<String> confirmPaymentProductBuy(@RequestBody ConfirmPaymentPBRequest confirmPaymentPBRequest) {
+        if (confirmPaymentPBRequest != null && confirmPaymentPBRequest.getOrder_ID() != null) {
             String response = orderHandlerService.updateOrderBuyStatus(confirmPaymentPBRequest);
             return ResponseEntity.ok(response);
-        }else {
+        } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Xác nhận quy trình thanh toán thất bại");
         }
     }

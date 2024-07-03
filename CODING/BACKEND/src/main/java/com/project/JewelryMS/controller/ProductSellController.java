@@ -36,7 +36,6 @@ public class ProductSellController {
     @GetMapping
     public ResponseEntity<List<ProductSellResponse>> readAllProductSell() {
         List<ProductSellResponse> allProductSell = productSellService.getAllProductSellResponses();
-        System.out.println("Read Product Sell ");
         return ResponseEntity.ok(allProductSell);
     }
 

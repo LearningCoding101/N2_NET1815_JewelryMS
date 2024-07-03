@@ -13,6 +13,7 @@ import java.util.List;
 @ToString
 
 public class ProductResponse {
+    private long orderDetail_ID;
     private int quantity;
     private long productID;
     private float carat;

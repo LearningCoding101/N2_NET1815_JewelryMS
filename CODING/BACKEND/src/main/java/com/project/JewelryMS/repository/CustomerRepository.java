@@ -42,4 +42,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
     List<Customer> findAllByCreateDateBetween(LocalDateTime startDate, LocalDateTime endDate);
 
+    @Query("SELECT COUNT(c) FROM Customer c WHERE FUNCTION('YEAR', c.createDate) = :year")
+    Long findCustomerSignupsByYear(@Param("year") String year);
 }

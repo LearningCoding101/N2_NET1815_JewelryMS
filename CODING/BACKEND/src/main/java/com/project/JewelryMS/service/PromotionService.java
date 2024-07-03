@@ -73,7 +73,7 @@ public class PromotionService {
         validateDateOrder(promotion.getStartDate(), promotion.getEndDate());
 
         Date currentDate = new Date();
-        promotion.setStatus(!promotion.getEndDate().before(currentDate));
+        promotion.setStatus(!(promotion.getEndDate().before(currentDate) || promotion.getEndDate().equals(currentDate)));
 
         return promotionRepository.save(promotion);
     }

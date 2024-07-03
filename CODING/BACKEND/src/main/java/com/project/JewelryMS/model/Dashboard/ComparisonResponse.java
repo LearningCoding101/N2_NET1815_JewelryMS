@@ -8,7 +8,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ComparisonResponse {
-    private long totalQuantityDifference;
     private float totalRevenueDifference;
-    private long totalCustomerAccountsDifference;
 }
