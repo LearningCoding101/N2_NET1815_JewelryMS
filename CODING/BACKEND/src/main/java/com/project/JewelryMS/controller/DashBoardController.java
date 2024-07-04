@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -76,17 +77,6 @@ public class DashBoardController {
         return ResponseEntity.ok(dashboardService.getCustomerSignUpsByStaff(revenueDateRequest));
     }
 
-//    @GetMapping("compare-sale-day")
-//    public ComparisonResponse compareDay(@RequestParam("date1") String date1, @RequestParam("date2") String date2) {
-//        DayComparisonRequest request = new DayComparisonRequest(LocalDate.parse(date1), LocalDate.parse(date2));
-//        return dashboardService.compareDay(request);
-//    }
-//
-//    @GetMapping("compare-sale-month")
-//    public ComparisonResponse compareMonth(@RequestParam("month1") String month1, @RequestParam("month2") String month2) {
-//        MonthComparisonRequest request = new MonthComparisonRequest(month1, month2);
-//        return dashboardService.compareMonth(request);
-//    }
 
     @GetMapping("compare-sale-year")
     public YearComparisonResponse comparationYear(@RequestParam("year1") String year1, @RequestParam("year2") String year2) {
@@ -122,11 +112,13 @@ public class DashBoardController {
         }
     }
 
-    @GetMapping("/customer-purchase-history")
-    public ResponseEntity<List<CustomerPurchaseHistoryResponse>> getCustomerPurchaseHistory() {
-        List<CustomerPurchaseHistoryResponse> response = dashboardService.getCustomerPurchaseHistory();
-        return ResponseEntity.ok(response);
+    @GetMapping("/customer-products-trend")
+    public ResponseEntity<List<ProductSellTrendResponse>> getTopProductsForAllCustomers() {
+        List<ProductSellTrendResponse> responses = dashboardService.getTopProductsForAllCustomers();
+        return ResponseEntity.ok(responses);
     }
+
+
     @GetMapping("/monthlyAverageRevenue")
     public ResponseEntity<Map<String, Float>> getMonthlyAverageRevenue(
             @RequestParam String startMonthYear, @RequestParam String endMonthYear) {
@@ -138,7 +130,7 @@ public class DashBoardController {
         }
     }
 
-    @GetMapping("/dailyAverageRevenue")
+    @GetMapping("/daily-revenue")
     public ResponseEntity<Map<String, Double>> getDailyRevenue(
             @RequestParam String startDate, @RequestParam String endDate) {
         try {
@@ -147,5 +139,11 @@ public class DashBoardController {
         } catch (ParseException e) {
             return ResponseEntity.badRequest().body(null);
         }
+    }
+
+    @GetMapping("/customer-purchase-history")
+    public ResponseEntity<List<CustomerPurchaseHistoryResponse>> getAllCustomerPurchaseHistories() {
+        List<CustomerPurchaseHistoryResponse> response = dashboardService.getAllCustomerPurchaseHistories();
+        return ResponseEntity.ok(response);
     }
 }

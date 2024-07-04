@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 public class ProductSellService {
     private static final Logger logger = LoggerFactory.getLogger(ProductSellService.class);
 
-    private Float pricingRatio = 1.20F;
 
     @Autowired
     ProductSellRepository productSellRepository;
@@ -200,7 +199,7 @@ public class ProductSellService {
 
         return totalPrice / 1000.0F;
     }
-
+    private Float pricingRatio = 1.20F;
     public Float GetPricingRatio() {
         return pricingRatio;
     }

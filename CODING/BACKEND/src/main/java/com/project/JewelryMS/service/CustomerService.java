@@ -1,11 +1,8 @@
 package com.project.JewelryMS.service;
 
 import com.project.JewelryMS.entity.Customer;
-import com.project.JewelryMS.model.Customer.CreateCustomerRequest;
-import com.project.JewelryMS.model.Customer.CustomerRequest;
-import com.project.JewelryMS.model.Customer.CustomerResponse;
+import com.project.JewelryMS.model.Customer.*;
 import com.project.JewelryMS.model.OrderDetail.CalculatePointsRequest;
-import com.project.JewelryMS.model.Customer.ViewCustomerPointRequest;
 import com.project.JewelryMS.repository.CustomerRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +48,34 @@ public class CustomerService {
         return "Not Found Customer ID";
     }
 
+    public List<CustomerSearchResponse> findCustomersByKeyword(String keyword) {
+        List<Customer> customers;
+        try {
+            // Try to parse keyword as Long (for ID search)
+            Long id = Long.parseLong(keyword);
+            customers = customerRepository.findCustomersByLongKeyword(id);
+        } catch (NumberFormatException e) {
+            // If parsing as Long fails, treat it as a String search
+            customers = customerRepository.findCustomersByStringKeyword(keyword);
+        }
+
+        return customers.stream()
+                .map(this::convertToCustomerSearchResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    private CustomerSearchResponse convertToCustomerSearchResponseDTO(Customer customer) {
+        CustomerSearchResponse response = new CustomerSearchResponse();
+        response.setPK_CustomerID(customer.getPK_CustomerID());
+        response.setEmail(customer.getEmail());
+        response.setPhoneNumber(customer.getPhoneNumber());
+        response.setGender(customer.getGender());
+        response.setCreateDate(customer.getCreateDate());
+        response.setPointAmount(customer.getPointAmount());
+        response.setStatus(customer.isStatus());
+        return response;
+    }
+
     public CustomerResponse createCustomer(CreateCustomerRequest createCustomerRequest) {
         Customer customer = new Customer();
 
@@ -84,15 +109,6 @@ public class CustomerService {
         return response;
     }
 
-    public CustomerResponse getCustomerById(long id) {
-        Optional<Customer> customerOptional = customerRepository.findById(id);
-        return customerOptional.map(this::convertToCustomerResponse).orElse(null);
-    }
-
-    public CustomerResponse getCustomerByPhoneNumber(String phoneNumber) {
-        Optional<Customer> customerOptional = customerRepository.findByPhoneNumber(phoneNumber);
-        return customerOptional.map(this::convertToCustomerResponse).orElse(null);
-    }
 
     public List<CustomerResponse> readAllCustomers() {
         List<Customer> customers = customerRepository.findAll();
@@ -173,5 +189,12 @@ public class CustomerService {
                 .collect(Collectors.groupingBy(Customer::getGender, Collectors.counting()));
 
         return genderCount;
+    }
+
+     public String getCustomerNameById(Long customerId) {
+        // This method should fetch the customer's name using the customer repository.
+        // Assuming there is a method in CustomerRepository to fetch the customer by ID.
+        Optional<Customer> customerOptional = customerRepository.findById(customerId);
+        return customerOptional.map(Customer::getCusName).orElse("Unknown");
     }
 }

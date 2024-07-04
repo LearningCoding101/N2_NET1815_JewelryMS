@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -16,7 +17,7 @@ public class StaffProfileResponse {
     private String email;
     private String username;
     private String accountName;
-    private LocalDateTime startDate;
+    private LocalDate startDate;
     private String phone;
     private float salary;
     private int status;

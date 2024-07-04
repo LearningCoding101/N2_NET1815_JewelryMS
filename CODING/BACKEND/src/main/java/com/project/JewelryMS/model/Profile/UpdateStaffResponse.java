@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 public class UpdateStaffResponse {
     String email;
     String username;
-    String accountname;
+    String accountName;
     String phone;
 }

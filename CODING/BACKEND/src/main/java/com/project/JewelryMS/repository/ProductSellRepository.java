@@ -32,5 +32,6 @@ public interface ProductSellRepository extends JpaRepository<ProductSell, Long> 
             "WHERE ps.productID = :productSellId AND ps.pStatus = true")
     Optional<ProductSell> findByIdWithCategoryAndPromotion(@Param("productSellId") long productSellId);
 
-
+    @Query("SELECT MAX(p.productCode) FROM ProductSell p WHERE p.productCode LIKE :codePrefix")
+    String findMaxProductCodeByPrefix(String codePrefix);
 }

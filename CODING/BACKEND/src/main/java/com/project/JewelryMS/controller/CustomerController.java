@@ -6,10 +6,12 @@ import com.project.JewelryMS.model.Customer.*;
 import com.project.JewelryMS.service.CustomerService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 @RestController
 @RequestMapping("/api/customer")
@@ -42,22 +44,6 @@ public class CustomerController {
         return ResponseEntity.ok(rank);
     }
 
-    // Get a single customer by ID
-    @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_MANAGER')")
-    public ResponseEntity<CustomerResponse> readCustomerFromId(@PathVariable Long id) {
-        CustomerResponse customer = customerService.getCustomerById(id);
-        return ResponseEntity.ok(customer);
-    }
-
-    // Get a single customer by phone number
-    @GetMapping("/by-phone-number")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_MANAGER')")
-    public ResponseEntity<CustomerResponse> readCustomerFromPhoneNumber(@RequestParam String id) {
-        CustomerResponse customer = customerService.getCustomerByPhoneNumber(id);
-        return ResponseEntity.ok(customer);
-    }
-
     // Get all active customers
     @GetMapping("/active")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_MANAGER')")
@@ -88,6 +74,14 @@ public class CustomerController {
     public ResponseEntity<String> updateCustomerPoints(@RequestBody ViewCustomerPointRequest viewPointsRequest) {
         customerService.updateCustomerPoints(viewPointsRequest);
         return ResponseEntity.ok("Customer points updated successfully");
+    }
+
+    @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_MANAGER')")
+    public ResponseEntity<List<CustomerSearchResponse>> findCustomersByCriteria(
+            @RequestParam String keyword) {
+        List<CustomerSearchResponse> customerList = customerService.findCustomersByKeyword(keyword);
+        return ResponseEntity.ok(customerList);
     }
 }
 

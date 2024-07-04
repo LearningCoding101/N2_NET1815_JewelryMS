@@ -24,4 +24,10 @@ public interface OrderRepository extends JpaRepository<PurchaseOrder, Long> {
 
     @Query("SELECT SUM(od.quantity) FROM OrderDetail od WHERE FUNCTION('YEAR', od.purchaseOrder.purchaseDate) = :year AND od.purchaseOrder.orderBuyDetails IS EMPTY")
     Long findTotalQuantityByYear(@Param("year") String year);
+
+    @Query("SELECT po FROM PurchaseOrder po JOIN FETCH po.orderDetails od ")
+    List<PurchaseOrder> findAllPaidOrders();
+
+    @Query("SELECT po FROM PurchaseOrder po LEFT JOIN FETCH po.customer LEFT JOIN FETCH po.staffAccount ")
+    List<PurchaseOrder> findAllWithDetails();
 }

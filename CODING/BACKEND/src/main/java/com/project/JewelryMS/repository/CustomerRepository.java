@@ -44,4 +44,16 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
     @Query("SELECT COUNT(c) FROM Customer c WHERE FUNCTION('YEAR', c.createDate) = :year")
     Long findCustomerSignupsByYear(@Param("year") String year);
+
+    @Query("SELECT c FROM Customer c WHERE " +
+            "LOWER(c.email) LIKE LOWER(concat('%', :keyword, '%')) OR " +
+            "LOWER(c.phoneNumber) LIKE LOWER(concat('%', :keyword, '%')) OR " +
+            "LOWER(c.gender) LIKE LOWER(concat('%', :keyword, '%')) OR " +
+            "LOWER(c.cusName) LIKE LOWER(concat('%', :keyword, '%'))")
+    List<Customer> findCustomersByStringKeyword(@Param("keyword") String keyword);
+
+    @Query("SELECT c FROM Customer c WHERE c.PK_CustomerID = :id")
+    List<Customer> findCustomersByLongKeyword(@Param("id") Long id);
+
+
 }

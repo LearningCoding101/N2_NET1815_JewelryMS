@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -35,7 +36,7 @@ public class StaffAccount {
     private float salary;
 
     @Column(name = "startDate")
-    private LocalDateTime startDate;
+    private LocalDate startDate;
 
     @OneToMany(mappedBy = "staffAccount", fetch = FetchType.EAGER)//Change fetch type for schedule
     @JsonIgnoreProperties

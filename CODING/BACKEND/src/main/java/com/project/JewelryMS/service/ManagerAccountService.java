@@ -58,7 +58,7 @@ public class ManagerAccountService {
     account.setAccountName(createManagerAccountRequest.getAccountName());
     account.setEmail(createManagerAccountRequest.getEmail());
     account.setAPassword(passwordEncoder.encode(createManagerAccountRequest.getAPassword()));
-    account.setAUsername(createManagerAccountRequest.getAUsername());
+    account.setAUsername(createManagerAccountRequest.getUsername());
     account.setRole(RoleEnum.ROLE_MANAGER);
     account.setStatus(1);
     Account account1 =  authenticationRepository.save(account);

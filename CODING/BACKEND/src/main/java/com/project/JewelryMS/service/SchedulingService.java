@@ -79,80 +79,6 @@ public class SchedulingService {
         return assignStaffToShift(staffId, shiftId);
     }
 
-//    // Method to view schedule
-//    public Map<String, Map<String, List<StaffShiftResponse>>> getScheduleMatrix(LocalDate startDate, LocalDate endDate) {
-//        String[] shiftTypes = {"Morning", "Afternoon", "Evening"};
-//        Map<String, Map<String, List<StaffShiftResponse>>> matrix = new ConcurrentHashMap<>();
-//
-//        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE, dd-MM-yyyy");
-//        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm a");
-//
-//        List<Future<?>> futures = new ArrayList<>();
-//
-//        cleanupShiftsWithoutStaff(startDate, endDate);
-//
-//        for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
-//            String formattedDate = date.format(dateFormatter);
-//            matrix.putIfAbsent(formattedDate, new ConcurrentHashMap<>());
-//
-//            for (String shiftType : shiftTypes) {
-//                LocalDate finalDate = date;
-//                futures.add(executorService.submit(() -> {
-//                    List<Shift> shifts = shiftRepository.findAllByDateAndType(finalDate, shiftType);
-//                    List<StaffShiftResponse> shiftResponses = new ArrayList<>();
-//
-//                    shifts.parallelStream().forEach(shift -> {
-//                        List<StaffAccount> staffAccounts = staffAccountRepository.findAllByShift(shift);
-//                        String formattedStartTime = shift.getStartTime().format(timeFormatter);
-//                        String formattedEndTime = shift.getEndTime().format(timeFormatter);
-//                        StaffShiftResponse staffShift = new StaffShiftResponse(
-//                                shift.getShiftID(),
-//                                formattedStartTime,
-//                                formattedEndTime,
-//                                shiftType,
-//                                shift.getStatus(),
-//                                shift.getWorkArea(),
-//                                shift.getRegister(),
-//                                staffAccounts.stream()
-//                                        .map(s -> new StaffShiftResponse.StaffResponse(
-//                                                s.getStaffID(),
-//                                                s.getAccount().getAccountName(),
-//                                                s.getAccount().getEmail(),
-//                                                s.getAccount().getUsername()))
-//                                        .collect(Collectors.toList())
-//                        );
-//                        shiftResponses.add(staffShift);
-//                    });
-//
-//                    matrix.get(formattedDate).put(shiftType, shiftResponses);
-//                }));
-//            }
-//        }
-//
-//        for (Future<?> future : futures) {
-//            try {
-//                future.get();
-//            } catch (InterruptedException | ExecutionException e) {
-//                // Use a proper logging framework
-//                e.printStackTrace();
-//            }
-//        }
-//        return matrix;
-//    }
-//
-//    @Transactional
-//    public void cleanupShiftsWithoutStaff(LocalDate startDate, LocalDate endDate) {
-//        // Retrieve all shifts within the date range
-//        List<Shift> shifts = shiftRepository.findAllByStartTimeBetween(startDate.atStartOfDay(), endDate.plusDays(1).atStartOfDay().minusNanos(1));
-//
-//        // Iterate through each shift and remove if no staff are assigned
-//        for (Shift shift : shifts) {
-//            if (shift.getStaffShifts().isEmpty()) {
-//                // Delete the shift from the database
-//                shiftRepository.delete(shift);
-//            }
-//        }
-//    }
 
     // Method to view schedule
     public Map<String, Map<String, List<StaffShiftResponse>>> getScheduleMatrix(LocalDate startDate, LocalDate endDate) {
@@ -165,8 +91,11 @@ public class SchedulingService {
         // Fetch all shifts within the date range
         List<Shift> shifts = shiftRepository.findAllByStartTimeBetween(startDate.atStartOfDay(), endDate.plusDays(1).atStartOfDay().minusNanos(1));
 
+        // Update status of past shifts
+        updateStatusOfPastShifts(shifts);
+
         // Cleanup shifts without staff
-        cleanupShiftsWithoutStaff(shifts);
+        cleanupShifts(shifts);
 
         // Fetch all staff accounts assigned to any shift within the date range
         List<StaffAccount> staffAccounts = staffAccountRepository.findAllStaffAccountsByShifts(startDate.atStartOfDay(), endDate.plusDays(1).atStartOfDay().minusNanos(1));
@@ -219,7 +148,7 @@ public class SchedulingService {
     }
 
     @Transactional
-    public void cleanupShiftsWithoutStaff(List<Shift> shifts) {
+    public void cleanupShifts(List<Shift> shifts) {
         // Remove shifts without staff
         shifts.removeIf(shift -> {
             if (shift.getStaffShifts().isEmpty()) {
@@ -228,6 +157,17 @@ public class SchedulingService {
                 return true;
             }
             return false;
+        });
+    }
+
+    @Transactional
+    public void updateStatusOfPastShifts(List<Shift> shifts) {
+        LocalDate today = LocalDate.now();
+        shifts.forEach(shift -> {
+            if (shift.getEndTime().toLocalDate().isBefore(today)) {
+                shift.setStatus("Inactive");
+                shiftRepository.save(shift);
+            }
         });
     }
 
@@ -820,5 +760,4 @@ public class SchedulingService {
         Collections.shuffle(singleShiftTypes);
         return singleShiftTypes.get(0);
     }
-
 }

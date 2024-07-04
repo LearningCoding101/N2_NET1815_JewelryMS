@@ -62,4 +62,11 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
             "GROUP BY FUNCTION('DATE', po.purchaseDate)")
     List<DailyRevenueProjection> findDailyRevenue(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
 
+    @Query("SELECT od.purchaseOrder.customer.PK_CustomerID, od.productSell.pName, SUM(od.quantity) " +
+            "FROM OrderDetail od " +
+            "GROUP BY od.purchaseOrder.customer.PK_CustomerID, od.productSell.pName " +
+            "ORDER BY od.purchaseOrder.customer.PK_CustomerID, SUM(od.quantity) DESC")
+    List<Object[]> findTopProductsForAllCustomers();
+
+
 }

@@ -8,14 +8,13 @@ import static com.project.JewelryMS.service.DashboardService.convertLocalDateToD
 
 public class TestMainApplication {
     public static void main(String[] args){
-            LocalDate localDate = LocalDate.of(2024, 6, 25);
-            LocalDateTime localDateTime = localDate.atTime(LocalTime.MAX);
-            System.out.println(localDateTime);
+            String a = "RingOP";
+            String ab = a.substring(0, 3);
+            System.out.println(ab);
+
         }
 
-        public static Date convertLocalDateToDate(LocalDate localDate) {
-            return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        }
+
 
 
 }

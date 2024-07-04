@@ -48,9 +48,6 @@ public class ProductBuy {
     @Column(name = "pbStatus")
     private boolean pbStatus;
 
-    @Column(name = "paymentStatus")
-    private boolean paymentStatus;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="FK_categoryID", referencedColumnName = "id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})

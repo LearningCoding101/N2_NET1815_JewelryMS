@@ -407,13 +407,49 @@ public class OrderHandlerService {
             String image = imageService.uploadImageByPathService(confirmPaymentPBRequest.getImage());
             purchaseOrder.setImage(image);
             purchaseOrder.setStatus(3);
+            List<ProductBuy> productBuyList = new ArrayList<>();
+            for(OrderBuyDetail orderBuyDetail: purchaseOrder.getOrderBuyDetails()){
+                productBuyList.add(orderBuyDetail.getProductBuy());
+            }
+            for(ProductBuy productBuy: productBuyList){
+                ProductSell productSell = new ProductSell();
+                productSell.setPStatus(true);
+                productSell.setChi(productBuy.getChi());
+                productSell.setCarat(productBuy.getCarat());
+                productSell.setMetalType(productBuy.getMetalType());
+                productSell.setGemstoneType(productBuy.getGemstoneType());
+                productSell.setPName(productBuy.getPbName());
+                productSell.setImage(productBuy.getImage());
+                productSell.setCategory(productBuy.getCategory());
+                productSell.setPDescription(productBuy.getPbName());
+                productSell.setManufactureCost(0.0F);
+                productSell.setManufacturer("N/A");
+                Float cost = productSellService.calculateProductSellCost(productBuy.getChi(), productBuy.getCarat(), productBuy.getGemstoneType(), productBuy.getMetalType(), 0.0F);
+                productSell.setCost(cost);
+                String categoryCode = getCategoryCode(productBuy.getCategory().getName());
+                String nextCode = getNextProductCode(categoryCode);
+                productSell.setProductCode(nextCode);
+                productSellRepository.save(productSell);
+            }
             orderRepository.save(purchaseOrder);
             return "Xác nhận qui trình thanh toán thành công";
         }
         return "Xác nhận qui trình thanh toán thất bại: Order not found";
     }
 
+    private String getCategoryCode(String categoryName) {
+        // Take the first three letters of the category name
+        return categoryName.substring(0, 3).toUpperCase();
+    }
 
+    private String getNextProductCode(String categoryCode) {
+        String maxCode = productSellRepository.findMaxProductCodeByPrefix(categoryCode + "%");
+        if (maxCode == null) {
+            return categoryCode + "001";
+        }
+        int nextNumber = Integer.parseInt(maxCode.substring(3)) + 1;
+        return categoryCode + String.format("%03d", nextNumber);
+    }
 
     public void sendConfirmationEmail(Long orderId, String recipientEmail) {
         // Prepare EmailDetail object

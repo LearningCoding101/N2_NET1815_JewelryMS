@@ -90,7 +90,7 @@ public class ProfileService {
         Optional<StaffAccount> staffOptional = staffAccountRepository.findById(staffId);
         if (staffOptional.isPresent()) {
             StaffAccount staffAccount = staffOptional.get();
-            staffAccount.getAccount().setAccountName(updateStaffRequest.getAccountname());
+            staffAccount.getAccount().setAccountName(updateStaffRequest.getAccountName());
             staffAccount.getAccount().setAUsername(updateStaffRequest.getUsername());
             staffAccount.getAccount().setEmail(updateStaffRequest.getEmail());
             staffAccount.setPhoneNumber(updateStaffRequest.getPhone());

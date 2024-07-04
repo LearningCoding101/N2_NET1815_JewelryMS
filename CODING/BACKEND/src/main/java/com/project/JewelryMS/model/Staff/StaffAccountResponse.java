@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 //import java.sql.Date;
@@ -17,7 +18,7 @@ public class StaffAccountResponse {
     private int staffID;
     private String phoneNumber;
     private float salary;
-    private LocalDateTime startDate;
+    private LocalDate startDate;
     private String accountName;
     private RoleEnum role;
     private int status;
