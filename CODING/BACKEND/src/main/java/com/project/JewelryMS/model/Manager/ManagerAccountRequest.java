@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ManagerAccountRequest {
     String email;
-    String aUsername;
+    String username;
     String aPassword;
     String accountName;
     RoleEnum role;

@@ -46,7 +46,7 @@ public class ManagerAccountService {
         return new ManagerAccountResponse(
                 account.getPK_userID(),
                 account.getEmail(),
-                account.getAUsername(),
+                account.getUsername(),
                 account.getAccountName(),
                 account.getRole(),
                 account.getStatus()
@@ -72,7 +72,7 @@ public class ManagerAccountService {
             if (existingAccountOpt.isPresent()) {
                 Account existingStaffAccount = existingAccountOpt.get();
                 existingStaffAccount.setAccountName(managerAccountRequest.getAccountName());
-                existingStaffAccount.setAUsername(managerAccountRequest.getAUsername());
+                existingStaffAccount.setAUsername(managerAccountRequest.getUsername());
                 existingStaffAccount.setEmail(managerAccountRequest.getEmail());
                 existingStaffAccount.setAPassword(passwordEncoder.encode(managerAccountRequest.getAPassword()));
                 existingStaffAccount.setRole(managerAccountRequest.getRole());

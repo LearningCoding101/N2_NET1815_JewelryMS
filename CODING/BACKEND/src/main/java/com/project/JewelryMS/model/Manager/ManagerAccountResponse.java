@@ -13,7 +13,7 @@ public class ManagerAccountResponse {
 
     String email;
 
-    String aUsername;
+    String username;
 
     String accountName;
 
