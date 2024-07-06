@@ -2,7 +2,6 @@ package com.project.JewelryMS.controller;
 
 import com.project.JewelryMS.entity.Shift;
 import com.project.JewelryMS.entity.Staff_Shift;
-import com.project.JewelryMS.model.Shift.AssignStaffByDayOfWeekRequest;
 import com.project.JewelryMS.model.Shift.AssignStaffByShiftTypePatternRequest;
 import com.project.JewelryMS.model.Shift.AssignStaffToMultipleDaysRequest;
 import com.project.JewelryMS.model.Staff.StaffAccountResponse;
@@ -141,6 +140,18 @@ public class SchedulingController {
         }
     }
 
+    @PutMapping("/update-shift-register")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    public ResponseEntity<?> updateShiftRegister(@RequestParam long shiftId, @RequestParam int register) {
+        try {
+            Shift updatedShift = schedulingService.updateShiftRegister(shiftId, register);
+            return ResponseEntity.ok("Shift register updated successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to update shift register: " + e.getMessage());
+        }
+    }
+
     @PostMapping("/assignStaffToDateRange")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
     public ResponseEntity<?> assignStaffToDateRange(@RequestBody AssignStaffToMultipleDaysRequest request) {
@@ -200,6 +211,7 @@ public class SchedulingController {
 //        );
 //        return ResponseEntity.ok(staffShiftResponses);
 //    }
+
     @PostMapping("/assignRandomStaffShiftPattern")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
     public ResponseEntity<?> assignRandomStaffShiftPattern(
@@ -226,6 +238,47 @@ public class SchedulingController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to remove all staff from shifts in range: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/assign-cashier-day")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
+    public ResponseEntity<?> assignCashierToDay(@RequestParam int staffId, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date, @RequestParam String shiftType, @RequestParam int register) {
+        try {
+            StaffShiftResponse staffShift = schedulingService.assignCashierToDay(staffId, date, shiftType, register);
+            return ResponseEntity.ok("Staff assigned to day successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to assign staff to day: " + e.getMessage());
+        }
+    }
+
+    // Endpoint to assign a cashier to a specific shift
+    @PostMapping("/assign-cashier/{staffId}/to-shift/{shiftId}")
+    public ResponseEntity<Staff_Shift> assignCashierToShift(
+            @PathVariable int staffId,
+            @PathVariable long shiftId
+    ) {
+        try {
+            Staff_Shift assignedStaffShift = schedulingService.assignCashierToShift(staffId, shiftId);
+            return ResponseEntity.ok(assignedStaffShift);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(null); // Handle bad request error
+        }
+    }
+
+    // Endpoint to assign cashiers based on shift patterns for a date range
+    @PostMapping("/assign-cashiers-by-pattern")
+    public ResponseEntity<List<StaffAccountResponse>> assignCashiersByShiftTypePattern(
+            @RequestBody Map<String, List<Integer>> cashierShiftPatterns,
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate
+    ) {
+        try {
+            List<StaffAccountResponse> assignedCashiers = schedulingService.assignCashierByShiftTypePattern(cashierShiftPatterns, startDate, endDate);
+            return ResponseEntity.ok(assignedCashiers);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(null); // Handle bad request error
         }
     }
 }

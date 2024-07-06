@@ -73,6 +73,7 @@ public class SchedulingService {
         // Save the new Staff_Shift entity to the database
         return staffShiftRepository.save(staffShift);
     }
+
     // Method to assign a shift to a staff member
     @Transactional
     public Staff_Shift assignShiftToStaff(int shiftId, int staffId) {
@@ -322,6 +323,19 @@ public class SchedulingService {
     }
 
     @Transactional
+    public Shift updateShiftRegister(long shiftId, int register) {
+        // Fetch the shift entity from the database
+        Shift shift = shiftRepository.findById(shiftId)
+                .orElseThrow(() -> new RuntimeException("Shift not found"));
+
+        // Update the register station for cashier
+        shift.setRegister(register);
+
+        // Save the updated shift entity to the database
+        return shiftRepository.save(shift);
+    }
+
+    @Transactional
     public List<StaffShiftResponse> assignStaffToDateRange(List<Integer> staffIds, LocalDate startDate, LocalDate endDate, List<String> shiftTypes) {
         List<StaffShiftResponse> staffShiftResponses = new CopyOnWriteArrayList<>();
         ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -499,60 +513,6 @@ public class SchedulingService {
         }
     }
 
-    //Original shift type pattern, unused
-//    @Transactional
-//    public List<StaffShiftResponse> assignStaffByShiftTypePattern(
-//            Map<String, List<Integer>> staffShiftPatterns, LocalDate startDate, LocalDate endDate) {
-//
-//        List<StaffShiftResponse> staffShiftResponses = new CopyOnWriteArrayList<>();
-//        int totalDays = (int) ChronoUnit.DAYS.between(startDate, endDate) + 1;
-//        List<LocalDate> dates = IntStream.range(0, totalDays)
-//                .mapToObj(startDate::plusDays)
-//                .filter(date -> date.getDayOfWeek() != DayOfWeek.SUNDAY)
-//                .toList();
-//
-//        // Create a map to track how often each staff ID appears
-//        Map<Integer, Integer> staffFrequency = new HashMap<>();
-//        for (List<Integer> staffIds : staffShiftPatterns.values()) {
-//            for (int staffId : staffIds) {
-//                staffFrequency.put(staffId, staffFrequency.getOrDefault(staffId, 0) + 1);
-//            }
-//        }
-//
-//        List<Future<?>> futures = new ArrayList<>();
-//
-//        for (Map.Entry<String, List<Integer>> entry : staffShiftPatterns.entrySet()) {
-//            String shiftType = entry.getKey();
-//            List<Integer> staffIds = entry.getValue();
-//
-//            for (int staffId : staffIds) {
-//                int frequency = staffFrequency.get(staffId);
-//                for (int i = 0; i < dates.size(); i += frequency) {
-//                    LocalDate date = dates.get(i);
-//                    futures.add(executorService.submit(() -> {
-//                        try {
-//                            StaffShiftResponse response = assignStaffToDay(staffId, date, shiftType);
-//                            staffShiftResponses.add(response);
-//                        } catch (ShiftAssignmentException e) {
-//                            System.out.println("Staff ID " + staffId + " is already assigned on " + date + " for " + shiftType + " shift.");
-//                        }
-//                    }));
-//                }
-//            }
-//        }
-//
-//        // Wait for all tasks to complete
-//        for (Future<?> future : futures) {
-//            try {
-//                future.get();
-//            } catch (InterruptedException | ExecutionException e) {
-//                e.printStackTrace();  // Handle exception
-//            }
-//        }
-//
-//        return staffShiftResponses;
-//    }
-
     //A modified version of the shift Type pattern, modified by demand by the front end team
     @Transactional
     public List<StaffAccountResponse> assignStaffByShiftTypePattern(
@@ -712,6 +672,7 @@ public class SchedulingService {
                 .collect(Collectors.toList());
     }
 
+
     @Scheduled(fixedRate = 1209600000) // 2 weeks in milliseconds
     public void scheduleShiftsAutomatically() {
         List<Integer> staffIds = getAllStaffIds();
@@ -727,10 +688,10 @@ public class SchedulingService {
                 .collect(Collectors.toList());
     }
 
-
     private Future<?> assignShift(ExecutorService executorService, int staffId, LocalDate date, String shiftType, List<StaffShiftResponse> staffShiftResponses) {
         return executorService.submit(() -> {
             try {
+                // Ensure only assigning to sales shifts
                 StaffShiftResponse response = assignStaffToDay(staffId, date, shiftType);
                 synchronized (staffShiftResponses) {
                     staffShiftResponses.add(response);
@@ -745,6 +706,7 @@ public class SchedulingService {
         return executorService.submit(() -> {
             try {
                 String shiftType = getRandomSingleShiftType();
+                // Ensure only assigning to sales shifts
                 StaffShiftResponse response = assignStaffToDay(staffId, date, shiftType);
                 synchronized (staffShiftResponses) {
                     staffShiftResponses.add(response);
@@ -760,4 +722,202 @@ public class SchedulingService {
         Collections.shuffle(singleShiftTypes);
         return singleShiftTypes.get(0);
     }
+
+    ////EXTRA METHODS FOR ASSIGNING CASHIERS:
+    //Assign cashier to a shift
+    @Transactional
+    public Staff_Shift assignCashierToShift(int staffId, long shiftId) {
+        // Fetch the staff and shift entities from the database
+        StaffAccount staff = staffAccountRepository.findById(staffId)
+                .orElseThrow(() -> new RuntimeException("Staff not found"));
+        Shift shift = shiftRepository.findById(shiftId)
+                .orElseThrow(() -> new RuntimeException("Shift not found"));
+
+        // Check if the shift's work area is 'cashier'
+        if (!"cashier".equalsIgnoreCase(shift.getWorkArea())) {
+            throw new RuntimeException("Shift work area must be 'cashier'");
+        }
+
+        // Check if the register is between 1 and 10
+        if (shift.getRegister() < 1 || shift.getRegister() > 10) {
+            throw new RuntimeException("Shift register must be between 1 and 10");
+        }
+
+        // Check if the staff member is already assigned to another cashier shift on the same date and shift type
+        boolean isAssigned = staff.getStaffShifts().stream()
+                .anyMatch(ss -> ss.getShift().getStartTime().toLocalDate().equals(shift.getStartTime().toLocalDate())
+                        && ss.getShift().getShiftType().equals(shift.getShiftType())
+                        && "cashier".equalsIgnoreCase(ss.getShift().getWorkArea())
+                        && ss.getShift().getRegister() != shift.getRegister());
+
+        if (isAssigned) {
+            throw new RuntimeException("Staff is already assigned to another cashier shift on the same date and shift type");
+        }
+
+        // Check if the staff member is already assigned to this shift
+        if (staff.getStaffShifts().stream().anyMatch(ss -> ss.getShift().equals(shift))) {
+            throw new RuntimeException("Staff is already assigned to this shift");
+        }
+
+        // Create a new Staff_Shift entity
+        Staff_Shift staffShift = new Staff_Shift();
+        staffShift.setStaffAccount(staff);
+        staffShift.setShift(shift);
+
+        // Save the new Staff_Shift entity to the database
+        return staffShiftRepository.save(staffShift);
+    }
+
+    /*
+    * Cashiers cannot be assigned to multiple shifts at different register stations (register)
+    * on the same day and shift type.
+    *
+    * Each shift assignment respects the constraint that a cashier works at only one station
+    * (register) at a time for each shift type (Morning, Afternoon, Evening).
+    */
+
+    @Transactional
+    public StaffShiftResponse assignCashierToDay(int staffId, LocalDate date, String shiftType, int register) {
+        try {
+            StaffAccount staff = staffAccountRepository.findById(staffId)
+                    .orElseThrow(() -> new ShiftAssignmentException("Staff not found"));
+
+            // Check if the staff member is already assigned to another cashier shift on the same date and shift type
+            boolean isAssigned = staff.getStaffShifts().stream()
+                    .anyMatch(ss -> ss.getShift().getStartTime().toLocalDate().equals(date)
+                            && ss.getShift().getShiftType().equals(shiftType)
+                            && "cashier".equalsIgnoreCase(ss.getShift().getWorkArea())
+                            && ss.getShift().getRegister() != register);
+
+            if (isAssigned) {
+                throw new ShiftAssignmentException("Cashier is already assigned to another shift during this period on this day. Please choose a different shift or cashier.");
+            }
+
+            // Find or create a shift for the specified date, shift type, and register
+            Shift shift = findOrCreateShift(date, shiftType, register);
+
+            // Create a new Staff_Shift entity
+            Staff_Shift staffShift = new Staff_Shift();
+            staffShift.setStaffAccount(staff);
+            staffShift.setShift(shift);
+
+            // Save the new Staff_Shift entity to the database
+            staffShift = staffShiftRepository.save(staffShift);
+
+            // Convert the new Staff_Shift entity to a StaffShiftResponse and return it
+            return toStaffShiftResponse(staffShift);
+        } catch (Exception e) {
+            // Handle any unexpected exceptions and log them
+            throw new RuntimeException("Failed to assign cashier to day", e);
+        }
+    }
+
+
+    private Shift findOrCreateShift(LocalDate date, String shiftType, int register) {
+        // Find existing shift or create a new one
+        Shift shift = shiftRepository.findAllByDateAndType(date, shiftType)
+                .stream()
+                .filter(s -> "cashier".equalsIgnoreCase(s.getWorkArea()) && s.getRegister() == register)
+                .findFirst()
+                .orElse(null);
+
+        if (shift == null) {
+            CreateShiftRequest createShiftRequest = new CreateShiftRequest();
+            createShiftRequest.setShiftType(shiftType);
+            createShiftRequest.setStatus("Active");
+            createShiftRequest.setWorkArea("cashier");
+            createShiftRequest.setRegister(register);
+
+            String startTime, endTime;
+            endTime = switch (shiftType) {
+                case "Morning" -> {
+                    startTime = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 08";
+                    yield date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 12";
+                }
+                case "Afternoon" -> {
+                    startTime = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 13";
+                    yield date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 17";
+                }
+                case "Evening" -> {
+                    startTime = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 17";
+                    yield date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 21";
+                }
+                default -> throw new RuntimeException("Invalid shift type");
+            };
+
+            createShiftRequest.setStartTime(startTime);
+            createShiftRequest.setEndTime(endTime);
+
+            ShiftRequest createdShift = shiftService.createShift(createShiftRequest);
+            shift = shiftRepository.findById((long) createdShift.getShiftID())
+                    .orElseThrow(() -> new RuntimeException("Shift not found"));
+        }
+
+        return shift;
+    }
+
+    @Transactional
+    public List<StaffAccountResponse> assignCashierByShiftTypePattern(
+            Map<String, List<Integer>> cashierShiftPatterns, LocalDate startDate, LocalDate endDate) {
+
+        List<StaffShiftResponse> cashierShiftResponses = new CopyOnWriteArrayList<>();
+        int totalDays = (int) ChronoUnit.DAYS.between(startDate, endDate) + 1;
+        List<LocalDate> dates = IntStream.range(0, totalDays)
+                .mapToObj(startDate::plusDays)
+                .filter(date -> date.getDayOfWeek() != DayOfWeek.SUNDAY)
+                .toList();
+
+        // Create a map to track how often each cashier ID appears
+        Map<Integer, Integer> cashierFrequency = new HashMap<>();
+        for (List<Integer> cashierIds : cashierShiftPatterns.values()) {
+            for (int cashierId : cashierIds) {
+                cashierFrequency.put(cashierId, cashierFrequency.getOrDefault(cashierId, 0) + 1);
+            }
+        }
+
+        List<Future<?>> futures = new ArrayList<>();
+
+        for (Map.Entry<String, List<Integer>> entry : cashierShiftPatterns.entrySet()) {
+            String shiftType = entry.getKey();
+            List<Integer> cashierIds = entry.getValue();
+
+            for (int cashierId : cashierIds) {
+                int frequency = cashierFrequency.get(cashierId);
+                for (int i = 0; i < dates.size(); i += frequency) {
+                    LocalDate date = dates.get(i);
+                    futures.add(executorService.submit(() -> {
+                        try {
+                            StaffShiftResponse response = assignCashierToDay(cashierId, date, shiftType, 1); // Assuming register 1 for simplicity
+                            cashierShiftResponses.add(response);
+                        } catch (ShiftAssignmentException e) {
+                            System.out.println("Cashier ID " + cashierId + " is already assigned on " + date + " for " + shiftType + " shift.");
+                        }
+                    }));
+                }
+            }
+        }
+
+        // Wait for all tasks to complete
+        for (Future<?> future : futures) {
+            try {
+                future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();  // Handle exception
+            }
+        }
+
+        // Collect unique cashier IDs from the responses
+        Set<Integer> cashierIds = cashierShiftResponses.stream()
+                .flatMap(response -> response.getStaff().stream())
+                .map(StaffShiftResponse.StaffResponse::getStaffID)
+                .collect(Collectors.toSet());
+
+        // Fetch cashier accounts and map to responses
+        List<StaffAccount> cashierAccounts = staffAccountRepository.findAllById(cashierIds);
+        return cashierAccounts.stream()
+                .map(this::mapToStaffAccountResponse)
+                .collect(Collectors.toList());
+    }
+
+    //NO RANDOM AUTOMATIC GENERATED FOR CASHIER, THEY SHALL BE APPOINTED BY HANDS
 }
