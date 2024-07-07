@@ -1,18 +1,16 @@
 package com.project.JewelryMS.service;
 
 import com.project.JewelryMS.entity.Category;
+import com.project.JewelryMS.entity.PricingRatio;
 import com.project.JewelryMS.entity.ProductBuy;
 import com.project.JewelryMS.model.Order.CreateProductBuyRequest;
 import com.project.JewelryMS.model.ProductBuy.CalculatePBRequest;
 import com.project.JewelryMS.model.ProductBuy.CreateProductBuyResponse;
 import com.project.JewelryMS.model.ProductBuy.ProductBuyResponse;
 import com.project.JewelryMS.repository.CategoryRepository;
+import com.project.JewelryMS.repository.PricingRatioRepository;
 import com.project.JewelryMS.repository.ProductBuyRepository;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.fileupload.disk.DiskFileItem;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.fileupload.util.Streams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 //import org.springframework.util.Base64Utils;
@@ -35,8 +33,8 @@ public class ProductBuyService {
     private ApiService apiService;
     @Autowired
     private ImageService imageService;
-
-
+    @Autowired
+    private PricingRatioRepository pricingRatioRepository;
 
     public Long createProductBuy(CreateProductBuyRequest request) {
         ProductBuy productBuy = new ProductBuy();
@@ -146,7 +144,35 @@ public class ProductBuyService {
 
         return totalPrice / 1000.0F;
     }
+    private Float goldPrice;
+    @Autowired
+    public ProductBuyService(ApiService apiService, PricingRatioRepository pricingRatioRepository) {
+        this.apiService = apiService;
+        this.pricingRatioRepository = pricingRatioRepository;
+        initializeGoldPrice();
+    }
 
+    private void initializeGoldPrice() {
+        this.goldPrice = Float.parseFloat(apiService.getGoldBuyPricecalculate("http://api.btmc.vn/api/BTMCAPI/getpricebtmc?key=3kd8ub1llcg9t45hnoh8hmn7t5kc2v"));
+    }
+    public Float getPricingRatioPB(){
+        Optional<PricingRatio> pricingRatioOptional = pricingRatioRepository.findById(1L);
+        if(pricingRatioOptional.isPresent()){
+            PricingRatio pricingRatio1 = pricingRatioOptional.get();
+            return pricingRatio1.getPricingRatioPB();
+        }
+        return 0.0F;
+    }
+
+    public Float updatePricingRatioPB(Float newRatio) {
+        Optional<PricingRatio> pricingRatioOptional = pricingRatioRepository.findById(1L);
+        if(pricingRatioOptional.isPresent()) {
+            PricingRatio pricingRatio = pricingRatioOptional.get();
+            pricingRatio.setPricingRatioPB(newRatio);
+            pricingRatioRepository.save(pricingRatio);
+        }
+        return newRatio;
+    }
     public CreateProductBuyResponse mapToCreateProductBuyResponse(ProductBuy productBuy) {
         CreateProductBuyResponse response = new CreateProductBuyResponse();
         response.setProductBuyID(productBuy.getPK_ProductBuyID());

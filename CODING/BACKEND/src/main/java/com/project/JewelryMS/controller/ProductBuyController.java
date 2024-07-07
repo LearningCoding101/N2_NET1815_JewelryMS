@@ -71,4 +71,11 @@ public class ProductBuyController {
         return ResponseEntity.ok(productBuyService.calculateProductBuyCost(createProductBuyRequest));
     }
 
+    // Adjust pricing ratio
+    @PostMapping("/adjust-ratio/{ratio}")
+    public ResponseEntity<Float> adjustRatio(@PathVariable Float ratio) {
+        productBuyService.updatePricingRatioPB(ratio);
+        return ResponseEntity.ok(ratio);
+    }
+
 }

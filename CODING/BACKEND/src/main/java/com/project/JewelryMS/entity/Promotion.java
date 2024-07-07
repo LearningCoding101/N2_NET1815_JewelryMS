@@ -35,8 +35,9 @@ public class Promotion {
     @Max(100)
     private Integer discount;
 
-    @ManyToMany(mappedBy = "promotion", fetch = FetchType.LAZY)
-    private List<ProductSell> productSell ;
+    @OneToMany(mappedBy = "promotion", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("promotion")
+    private List<ProductSell_Promotion> productSellPromotions;
 
     @OneToMany(mappedBy = "promotion")
     @JsonIgnoreProperties

@@ -1,13 +1,18 @@
 package com.project.JewelryMS.service;
 
+import com.project.JewelryMS.entity.ProductSell;
+import com.project.JewelryMS.entity.ProductSell_Promotion;
 import com.project.JewelryMS.entity.Promotion;
 import com.project.JewelryMS.model.Promotion.CreatePromotionRequest;
 import com.project.JewelryMS.model.Promotion.PromotionRequest;
 import com.project.JewelryMS.model.Promotion.PromotionResponse;
+import com.project.JewelryMS.repository.ProductSellPromotionRepository;
+import com.project.JewelryMS.repository.ProductSellRepository;
 import com.project.JewelryMS.repository.PromotionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,6 +29,11 @@ public class PromotionService {
     @Autowired
     PromotionRepository promotionRepository;
 
+    @Autowired
+    ProductSellPromotionRepository productSellPromotionRepository;
+
+    @Autowired
+    ProductSellRepository productSellRepository;
     private String formatDate(Date date) {
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
         return dateFormatter.format(date);
@@ -54,6 +64,7 @@ public class PromotionService {
                 .collect(Collectors.toList());
     }
 
+
     public Promotion createPromotion(CreatePromotionRequest createPromotionRequest) {
         Promotion promotion = new Promotion();
         promotion.setCode(createPromotionRequest.getCode());
@@ -72,11 +83,37 @@ public class PromotionService {
         }
         validateDateOrder(promotion.getStartDate(), promotion.getEndDate());
 
+        // Get the current date
         Date currentDate = new Date();
-        promotion.setStatus(!(promotion.getEndDate().before(currentDate) || promotion.getEndDate().equals(currentDate)));
 
-        return promotionRepository.save(promotion);
+        // Format the date as "YYYY-MM-DD"
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String formattedDate = dateFormat.format(currentDate);
+        Date parsedDate = new Date();
+        try {
+            parsedDate = dateFormat.parse(formattedDate);
+        } catch (ParseException e) {
+            System.err.println("Error parsing date: " + e.getMessage());
+        }
+        promotion.setStatus(promotion.getEndDate().equals(parsedDate) || promotion.getEndDate().after(parsedDate));
+
+        Promotion savedPromotion = promotionRepository.save(promotion);
+
+        List<ProductSell> productSells = productSellRepository.findAllById(createPromotionRequest.getProductSell_IDs());
+        List<ProductSell_Promotion> productSellPromotions = productSells.stream()
+                .map(productSell -> {
+                    ProductSell_Promotion psp = new ProductSell_Promotion();
+                    psp.setProductSell(productSell);
+                    psp.setPromotion(savedPromotion);
+                    return psp;
+                })
+                .collect(Collectors.toList());
+
+        productSellPromotionRepository.saveAll(productSellPromotions);
+
+        return savedPromotion;
     }
+
 
     public PromotionResponse getPromotionById(long PK_promotionID) {
         Promotion promotion = promotionRepository.findById(PK_promotionID).orElse(null);

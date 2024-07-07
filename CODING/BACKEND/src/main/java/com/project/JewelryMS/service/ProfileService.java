@@ -2,8 +2,8 @@ package com.project.JewelryMS.service;
 
 import com.project.JewelryMS.entity.Account;
 import com.project.JewelryMS.enumClass.RoleEnum;
-import com.project.JewelryMS.entity.Shift;
 import com.project.JewelryMS.entity.StaffAccount;
+import com.project.JewelryMS.model.AccountResponse;
 import com.project.JewelryMS.model.Profile.*;
 import com.project.JewelryMS.repository.AuthenticationRepository;
 import com.project.JewelryMS.repository.ShiftRepository;
@@ -11,10 +11,9 @@ import com.project.JewelryMS.repository.StaffAccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.Date;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ProfileService {
@@ -65,7 +64,7 @@ public class ProfileService {
         Optional<Account> authenticationOptional = authenticationRepository.findById(adminId);
         if (authenticationOptional.isPresent() && authenticationOptional.get().getRole() == RoleEnum.ROLE_ADMIN) {
             Account account = authenticationOptional.get();
-            account.setAccountName(updateAdminRequest.getAccountname());
+            account.setAccountName(updateAdminRequest.getAccountName());
             account.setAUsername(updateAdminRequest.getUsername());
             account.setEmail(updateAdminRequest.getEmail());
             authenticationRepository.save(account);
@@ -128,5 +127,16 @@ public class ProfileService {
 //        return null; // Staff not found
 //    }
 
-
+    public List<StaffListResponse> getAllAccounts() {
+        List<Account> accounts = authenticationRepository.findAllAccounts();
+        return accounts.parallelStream()
+                .map(a -> new StaffListResponse(
+                        a.getRole(),
+                        a.getEmail(),
+                        a.getAUsername(),
+                        a.getAccountName(),
+                        a.getStatus() != null ? a.getStatus() : 0 // handle null status
+                ))
+                .collect(Collectors.toList());
+    }
 }

@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 public class UpdateAdminResponse {
     String email;
     String username;
-    String accountname;
+    String accountName;
 }

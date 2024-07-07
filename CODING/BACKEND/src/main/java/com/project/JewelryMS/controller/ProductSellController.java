@@ -3,7 +3,7 @@ package com.project.JewelryMS.controller;
 
 import com.project.JewelryMS.entity.ProductSell;
 import com.project.JewelryMS.model.ProductSell.*;
-import com.project.JewelryMS.service.ImageService;
+import com.project.JewelryMS.model.Promotion.AssignPromotionRequest;
 import com.project.JewelryMS.service.ProductSellService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,21 +63,38 @@ public class ProductSellController {
     // Adjust pricing ratio
     @PostMapping("/adjust-ratio/{ratio}")
     public ResponseEntity<Float> adjustRatio(@PathVariable Float ratio) {
-        productSellService.updatePricingRatio(ratio);
+        productSellService.updatePricingRatioPS(ratio);
         return ResponseEntity.ok(ratio);
     }
 
     // Add promotions to a ProductSell
     @PostMapping("/promotions")
-    public ResponseEntity<ProductSell> addPromotionsToProductSell(@RequestBody AddPromotionsRequest request) {
+    public ResponseEntity<String> addPromotionsToProductSell(@RequestBody AddPromotionsRequest request) {
         ProductSell updatedProductSell = productSellService.addPromotionsToProductSell(request);
-        return ResponseEntity.ok(updatedProductSell);
+        return ResponseEntity.ok("Add Successfully");
     }
 
     // Remove promotions from a ProductSell
     @DeleteMapping("/promotions")
-    public ResponseEntity<ProductSell> removePromotionsFromProductSell(@RequestBody RemovePromotionRequest request) {
+    public ResponseEntity<String> removePromotionsFromProductSell(@RequestBody RemovePromotionRequest request) {
         ProductSell updatedProductSell = productSellService.removePromotionsFromProductSell(request);
-        return ResponseEntity.ok(updatedProductSell);
+        return ResponseEntity.ok("Remove Successfully");
+    }
+    @PostMapping("/assign")
+    public ResponseEntity<String> assignPromotionToProductSells(@RequestBody AssignPromotionRequest request) {
+        productSellService.assignPromotionToProductSells(request);
+        return ResponseEntity.ok("Promotion assigned to product sells successfully");
+    }
+
+    @DeleteMapping("/remove")
+    public ResponseEntity<String> removePromotionFromProductSells(@RequestBody AssignPromotionRequest request) {
+        productSellService.removePromotionFromProductSells(request);
+        return ResponseEntity.ok("Promotion removed from product sells successfully");
+    }
+
+    @DeleteMapping("/remove-all-promotion-from-product")
+    public ResponseEntity<String> removeAllPromotionsFromProductSells(@RequestBody List<Long> productSellIds) {
+        productSellService.removeAllPromotionsFromProductSells(productSellIds);
+        return ResponseEntity.ok("All promotions removed from product sells successfully");
     }
 }

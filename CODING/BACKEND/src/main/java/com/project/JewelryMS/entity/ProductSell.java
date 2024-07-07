@@ -27,14 +27,9 @@ public class ProductSell {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Category category;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "ProductSell_Promotion",
-            joinColumns = @JoinColumn(name = "productsellID", referencedColumnName = "PK_productID"),
-            inverseJoinColumns = @JoinColumn(name = "promotionID", referencedColumnName = "PK_promotionID")
-    )
+    @OneToMany(mappedBy = "productSell", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnoreProperties("productSell")
-    private List<Promotion> promotion ;
+    private List<ProductSell_Promotion> productSellPromotions;
 
     @Column(name = "chi")
     private int chi;

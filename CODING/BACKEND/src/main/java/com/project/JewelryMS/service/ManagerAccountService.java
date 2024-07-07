@@ -54,15 +54,15 @@ public class ManagerAccountService {
     }
 
     public ManagerAccountResponse createManagerAccount(CreateManagerAccountRequest createManagerAccountRequest){
-    Account account = new Account();
-    account.setAccountName(createManagerAccountRequest.getAccountName());
-    account.setEmail(createManagerAccountRequest.getEmail());
-    account.setAPassword(passwordEncoder.encode(createManagerAccountRequest.getAPassword()));
-    account.setAUsername(createManagerAccountRequest.getUsername());
-    account.setRole(RoleEnum.ROLE_MANAGER);
-    account.setStatus(1);
-    Account account1 =  authenticationRepository.save(account);
-    return getManagerAccountById(account1.getPK_userID());
+        Account account = new Account();
+        account.setAccountName(createManagerAccountRequest.getAccountName());
+        account.setEmail(createManagerAccountRequest.getEmail());
+        account.setAPassword(passwordEncoder.encode(createManagerAccountRequest.getAPassword()));
+        account.setAUsername(createManagerAccountRequest.getUsername());
+        account.setRole(RoleEnum.ROLE_MANAGER);
+        account.setStatus(1);
+        Account account1 =  authenticationRepository.save(account);
+        return getManagerAccountById(account1.getPK_userID());
     }
 
     // Update

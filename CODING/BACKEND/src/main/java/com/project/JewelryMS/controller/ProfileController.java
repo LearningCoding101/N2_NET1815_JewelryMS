@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("api")
@@ -64,4 +67,9 @@ public class ProfileController {
         }
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<List<StaffListResponse>> getAllAccounts() {
+        List<StaffListResponse> accounts = profileService.getAllAccounts();
+        return ResponseEntity.ok(accounts);
+    }
 }

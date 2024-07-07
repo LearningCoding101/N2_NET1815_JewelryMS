@@ -14,11 +14,13 @@ import java.util.Optional;
 @Repository
 public interface PromotionRepository extends JpaRepository<Promotion, Long> {
     List<Promotion> findByStatus(boolean b);
+
     List<Promotion> findByCode(String n);
+
     @Query("SELECT p FROM Promotion p")
     List<Promotion> findAllPromotion();
 
-    @Query("SELECT ps.productID FROM ProductSell ps JOIN ps.promotion p WHERE p.PK_promotionID = :promotionID")
+    @Query("SELECT psp.productSell.productID FROM ProductSell_Promotion psp WHERE psp.promotion.PK_promotionID = :promotionID")
     List<Long> findProductSellIdsByPromotionId(@Param("promotionID") Long promotionID);
 
 
