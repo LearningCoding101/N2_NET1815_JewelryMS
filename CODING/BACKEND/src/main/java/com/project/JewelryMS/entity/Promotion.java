@@ -23,23 +23,23 @@ import java.util.List;
 public class Promotion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long PK_promotionID;
-    String code;
-    String description;
-    Date startDate;
-    Date endDate;
-    boolean status;
+    private long PK_promotionID;
+    private String code;
+    private String description;
+    private Date startDate;
+    private Date endDate;
+    private boolean status;
 
     @Column(name="discount")
     @Min(0)
     @Max(100)
     private Integer discount;
 
-    @OneToMany(mappedBy = "promotion", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "promotion", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("promotion")
     private List<ProductSell_Promotion> productSellPromotions;
 
-    @OneToMany(mappedBy = "promotion")
-    @JsonIgnoreProperties
+    @OneToMany(mappedBy = "promotion", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("promotion")
     private List<OrderDetail> orderDetails;
 }

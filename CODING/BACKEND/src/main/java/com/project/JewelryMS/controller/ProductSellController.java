@@ -80,7 +80,8 @@ public class ProductSellController {
         ProductSell updatedProductSell = productSellService.removePromotionsFromProductSell(request);
         return ResponseEntity.ok("Remove Successfully");
     }
-    @PostMapping("/assign")
+
+    @PostMapping("/assign-promotion-to-various-products")
     public ResponseEntity<String> assignPromotionToProductSells(@RequestBody AssignPromotionRequest request) {
         productSellService.assignPromotionToProductSells(request);
         return ResponseEntity.ok("Promotion assigned to product sells successfully");

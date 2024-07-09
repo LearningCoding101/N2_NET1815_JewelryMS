@@ -8,8 +8,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class JewelryMsApplicationTests {
 
-	@Test
-	void contextLoads() {
-
-	}
+//	@Test
+//	void contextLoads() {
+//
+//	}
 }

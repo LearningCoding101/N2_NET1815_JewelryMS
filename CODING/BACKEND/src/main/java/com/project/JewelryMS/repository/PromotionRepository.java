@@ -23,6 +23,4 @@ public interface PromotionRepository extends JpaRepository<Promotion, Long> {
     @Query("SELECT psp.productSell.productID FROM ProductSell_Promotion psp WHERE psp.promotion.PK_promotionID = :promotionID")
     List<Long> findProductSellIdsByPromotionId(@Param("promotionID") Long promotionID);
 
-
-
 }

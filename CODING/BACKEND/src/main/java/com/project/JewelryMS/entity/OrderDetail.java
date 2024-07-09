@@ -6,7 +6,6 @@ import lombok.*;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
-
 @Entity
 @Data
 @AllArgsConstructor
@@ -14,27 +13,25 @@ import java.sql.Timestamp;
 public class OrderDetail implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long PK_ODID;
+    private Long PK_ODID;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_ProductID", referencedColumnName = "PK_ProductID")
-    ProductSell productSell;
-
+    private ProductSell productSell;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_OrderID", referencedColumnName = "PK_OrderID")
     @EqualsAndHashCode.Exclude
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    PurchaseOrder purchaseOrder;
+    private PurchaseOrder purchaseOrder;
 
-    Integer quantity;
+    private Integer quantity;
 
     @Column(name = "guaranteeEndDate")
-    Timestamp guaranteeEndDate;
+    private Timestamp guaranteeEndDate;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "FK_Promotion_ID", referencedColumnName = "PK_promotionID")
+    @JoinColumn(name = "FK_Promotion_ID", referencedColumnName = "PK_promotionID", nullable = true)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    Promotion promotion;
-
+    private Promotion promotion;
 }

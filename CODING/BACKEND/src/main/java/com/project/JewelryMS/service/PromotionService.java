@@ -1,14 +1,17 @@
 package com.project.JewelryMS.service;
 
+import com.project.JewelryMS.entity.OrderDetail;
 import com.project.JewelryMS.entity.ProductSell;
 import com.project.JewelryMS.entity.ProductSell_Promotion;
 import com.project.JewelryMS.entity.Promotion;
 import com.project.JewelryMS.model.Promotion.CreatePromotionRequest;
 import com.project.JewelryMS.model.Promotion.PromotionRequest;
 import com.project.JewelryMS.model.Promotion.PromotionResponse;
+import com.project.JewelryMS.repository.OrderDetailRepository;
 import com.project.JewelryMS.repository.ProductSellPromotionRepository;
 import com.project.JewelryMS.repository.ProductSellRepository;
 import com.project.JewelryMS.repository.PromotionRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +36,9 @@ public class PromotionService {
     ProductSellPromotionRepository productSellPromotionRepository;
 
     @Autowired
+    OrderDetailRepository orderDetailRepository;
+
+    @Autowired
     ProductSellRepository productSellRepository;
     private String formatDate(Date date) {
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -44,15 +50,35 @@ public class PromotionService {
         promotionResponse.setPromotionID(promotion.getPK_promotionID());
         promotionResponse.setCode(promotion.getCode());
         promotionResponse.setDescription(promotion.getDescription());
-        promotionResponse.setDiscount(promotion.getDiscount());
-        promotionResponse.setStartDate(formatDate(promotion.getStartDate()));
-        promotionResponse.setEndDate(formatDate(promotion.getEndDate()));
-        promotionResponse.setStatus(promotion.isStatus());
-        List<Long> listPromotion = promotionRepository.findProductSellIdsByPromotionId(promotion.getPK_promotionID());
-        List<String> promotionIds = new ArrayList<>();
-        for (Long promotionId : listPromotion) {
-            promotionIds.add(String.valueOf(promotionId));
+
+        // Check if discount is null before accessing intValue()
+        if (promotion.getDiscount() != null) {
+            promotionResponse.setDiscount(promotion.getDiscount());
+        } else {
+            // Handle null case (optional based on your business logic)
+            promotionResponse.setDiscount(0); // Or set a default value
         }
+
+        // Set default values for startDate and endDate if they are null
+        if (promotion.getStartDate() != null) {
+            promotionResponse.setStartDate(formatDate(promotion.getStartDate()));
+        } else {
+            promotionResponse.setStartDate(null); // Or set a default date
+        }
+
+        if (promotion.getEndDate() != null) {
+            promotionResponse.setEndDate(formatDate(promotion.getEndDate()));
+        } else {
+            promotionResponse.setEndDate(null); // Or set a default date
+        }
+
+        promotionResponse.setStatus(promotion.isStatus());
+        promotionResponse.setStatus(promotion.isStatus());
+
+        List<Long> listPromotion = promotionRepository.findProductSellIdsByPromotionId(promotion.getPK_promotionID());
+        List<String> promotionIds = listPromotion.stream()
+                .map(String::valueOf)
+                .collect(Collectors.toList());
         promotionResponse.setProductSell_id(promotionIds);
         return promotionResponse;
     }
@@ -137,6 +163,7 @@ public class PromotionService {
     public List<PromotionResponse> readAllActivePromotion() {
         List<Promotion> activePromotions = promotionRepository.findByStatus(true);
         return activePromotions.stream()
+                .filter(promotion -> promotion.getStartDate() != null && promotion.getEndDate() != null) // Filter out promotions with null dates
                 .map(this::toPromotionResponse)
                 .collect(Collectors.toList());
     }
@@ -170,7 +197,7 @@ public class PromotionService {
             Date startDate = java.sql.Date.valueOf(promotionRequest.getStartDate());
             Date endDate = java.sql.Date.valueOf(promotionRequest.getEndDate());
 
-            validateEndDate(promotion, endDate);
+            validateEndDate(promotion, endDate); // Ensure this validation happens before setting endDate
             validateStartDate(promotion, startDate);
             validateDateOrder(startDate, endDate);
             validateDateDifference(startDate, endDate);
@@ -184,13 +211,13 @@ public class PromotionService {
                 promotion.setDiscount(promotionRequest.getDiscount());
                 promotionRepository.save(promotion);
             } else {
-                throw new RuntimeException("Can't Set Promotion <0 and >100");
+                throw new RuntimeException("Discount must be between 0 and 100");
             }
         }
     }
 
     private void validateEndDate(Promotion promotion, Date newEndDate) {
-        if (promotion.getEndDate().after(newEndDate)) {
+        if (promotion.getEndDate() != null && promotion.getEndDate().after(newEndDate)) {
             throw new IllegalArgumentException("End date cannot be earlier than the current end date");
         }
     }
@@ -216,13 +243,22 @@ public class PromotionService {
         }
     }
 
-    public void deletePromotionById(long id) {
-        Optional<Promotion> promotionUpdate = promotionRepository.findById(id);
-        promotionUpdate.ifPresent(promotion -> {
-            promotion.setStatus(false);
-            promotionRepository.save(promotion);
-        });
+    //Now possible to disable promotions in order details.
+    @Transactional
+    public void deletePromotionById(Long promotionId) {
+        Promotion promotion = promotionRepository.findById(promotionId)
+                .orElseThrow(() -> new IllegalArgumentException("Promotion not found with ID: " + promotionId));
+
+        // Check if order details associated with the promotion are not null
+        if (promotion.getOrderDetails() != null) {
+            for (OrderDetail orderDetail : promotion.getOrderDetails()) {
+                orderDetail.setPromotion(null); // Remove the association
+                orderDetailRepository.save(orderDetail); // Update OrderDetail entity
+            }
+        }
+
+        promotion.setStatus(false);
+        promotionRepository.save(promotion);
     }
+
 }
-
-
