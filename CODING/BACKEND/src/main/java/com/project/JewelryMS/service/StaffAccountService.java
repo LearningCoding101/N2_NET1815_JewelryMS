@@ -137,4 +137,12 @@ public class StaffAccountService {
             throw new RuntimeException("StaffAccount with ID " + id + " not found");
         }
     }
+
+    public List<StaffAccountResponse> getStaffWithoutShift() {
+        List<StaffAccount> staffWithoutShift = staffAccountRepository.findStaffWithoutShift();
+        return staffWithoutShift.stream()
+                .map(this::mapToStaffAccountResponse)
+                .collect(Collectors.toList());
+    }
+
 }

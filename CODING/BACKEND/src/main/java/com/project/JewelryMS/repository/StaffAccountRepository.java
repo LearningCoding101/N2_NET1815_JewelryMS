@@ -30,4 +30,6 @@ public interface StaffAccountRepository extends JpaRepository<StaffAccount, Inte
     @Query("SELECT DISTINCT sa FROM StaffAccount sa JOIN sa.staffShifts ss WHERE ss.shift.startTime >= :startDate AND ss.shift.startTime <= :endDate")
     List<StaffAccount> findAllStaffAccountsByShifts(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
+    @Query("SELECT s FROM StaffAccount s WHERE s.staffShifts IS EMPTY")
+    List<StaffAccount> findStaffWithoutShift();
 }

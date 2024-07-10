@@ -60,4 +60,10 @@ public class StaffAccountController {
         staffAccountService.deactivateStaffAccount(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/without-shift")
+    public ResponseEntity<List<StaffAccountResponse>> getStaffWithoutShift() {
+        List<StaffAccountResponse> staffWithoutShift = staffAccountService.getStaffWithoutShift();
+        return ResponseEntity.ok(staffWithoutShift);
+    }
 }
