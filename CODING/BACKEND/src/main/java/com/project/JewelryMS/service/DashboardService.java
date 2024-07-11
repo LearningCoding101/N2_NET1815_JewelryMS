@@ -27,6 +27,11 @@ public class DashboardService {
     private OrderDetailRepository orderDetailRepository;
     @Autowired
     StaffAccountRepository staffAccountRepository;
+    @Autowired
+    private PurchaseOrderRepository purchaseOrderRepository;
+    @Autowired
+    private ShiftRepository shiftRepository;
+
 
     public List<CategoryResponse> RevenueCategory(){
         Optional<List<Category>> optionalCategoryList = Optional.ofNullable(categoryRepository.findAllCategories());
@@ -545,5 +550,18 @@ public class DashboardService {
         return responses;
     }
 
+    public StaffStatisticsResponse getStaffStats(long staffId) {
+        long customerSignUps = customerRepository.countCustomerSignUpsByStaff(staffId);
+        Double revenueGenerated = purchaseOrderRepository.getTotalRevenueByStaff(staffId);
+        long salesCount = purchaseOrderRepository.getSalesCountByStaff(staffId);
+        long shiftsCount = shiftRepository.countShiftsByStaff(staffId);
 
+        return new StaffStatisticsResponse(
+                staffId,
+                customerSignUps,
+                revenueGenerated != null ? revenueGenerated : 0.0,
+                salesCount,
+                shiftsCount
+        );
+    }
 }

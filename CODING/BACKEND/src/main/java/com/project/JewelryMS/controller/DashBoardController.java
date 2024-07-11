@@ -146,4 +146,10 @@ public class DashBoardController {
         List<CustomerPurchaseHistoryResponse> response = dashboardService.getAllCustomerPurchaseHistories();
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/staff-statistics/{staffId}")
+    public ResponseEntity<StaffStatisticsResponse> getStaffStats(@RequestParam("staffId") long staffId) {
+        StaffStatisticsResponse response = dashboardService.getStaffStats(staffId);
+        return ResponseEntity.ok(response);
+    }
 }

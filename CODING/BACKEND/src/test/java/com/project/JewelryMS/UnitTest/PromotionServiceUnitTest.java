@@ -124,8 +124,8 @@ public class PromotionServiceUnitTest {
 
     @ParameterizedTest
     @CsvSource({
-            "1, NEW_CODE, New Description, 30, 2024-07-10, 2024-07-22",
-            "2, CODE456, Another Description, 25, 2024-08-01, 2024-08-10"
+            "1, NEW_CODE, New Description, 30, 2024-09-19, 2024-09-29",
+            "2, CODE456, Another Description, 25, 2024-12-01, 2024-12-10"
     })
     public void testUpdatePromotionDetails(long id, String code, String description, int discount, String startDate, String endDate) {
         Promotion promotion = new Promotion();

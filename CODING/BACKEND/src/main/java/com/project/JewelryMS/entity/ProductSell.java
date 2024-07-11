@@ -19,7 +19,7 @@ public class ProductSell {
     private long productID;
 
     @Column(name = "carat")
-    private float carat;
+    private Float carat;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="FK_categoryID", referencedColumnName = "id")
@@ -32,7 +32,7 @@ public class ProductSell {
     private List<ProductSell_Promotion> productSellPromotions;
 
     @Column(name = "chi")
-    private int chi;
+    private Integer chi;
 
     @Column(name = "cost")
     private float cost;

@@ -7,9 +7,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Data
 public class CreateProductSellRequest {
-    private float carat;
+    private Float carat;
     private long category_id;
-    private int chi;
+    private Integer chi;
     private String pdescription;
     private String gemstoneType;
     private MultipartFile image;

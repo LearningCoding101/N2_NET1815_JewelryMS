@@ -128,8 +128,8 @@ public class PromotionServiceIntegrationTest {
         updateRequest.setCode("NEWCODE");
         updateRequest.setDescription("Updated Description");
         updateRequest.setDiscount(15);
-        updateRequest.setStartDate(LocalDate.parse("2024-07-09"));
-        updateRequest.setEndDate(LocalDate.parse("2024-07-29"));
+        updateRequest.setStartDate(LocalDate.parse("2024-09-09"));
+        updateRequest.setEndDate(LocalDate.parse("2024-09-29"));
 
         promotionService.updatePromotionDetails(updateRequest);
 
@@ -137,8 +137,8 @@ public class PromotionServiceIntegrationTest {
         assertEquals("NEWCODE", promotion.getCode());
         assertEquals("Updated Description", promotion.getDescription());
         assertEquals(15, promotion.getDiscount());
-        assertEquals(java.sql.Date.valueOf("2024-07-09"), promotion.getStartDate());
-        assertEquals(java.sql.Date.valueOf("2024-07-29"), promotion.getEndDate());
+        assertEquals(java.sql.Date.valueOf("2024-09-09"), promotion.getStartDate());
+        assertEquals(java.sql.Date.valueOf("2024-09-29"), promotion.getEndDate());
     }
 
     @Test

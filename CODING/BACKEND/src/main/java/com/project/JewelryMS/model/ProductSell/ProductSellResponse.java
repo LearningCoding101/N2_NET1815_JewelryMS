@@ -12,9 +12,9 @@ import java.util.List;
 
 public class ProductSellResponse {
     private long productID;
-    private float carat;
-    private int chi;
-    private float cost;
+    private Float carat;
+    private Integer chi;
+    private Float cost;
     private String pDescription;
     private String gemstoneType;
     private String image;

@@ -10,10 +10,10 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductSellRequest {
-    private float carat;
+    private Float carat;
     private long category_id;
-    private int chi;
-    private float cost;
+    private Integer chi;
+    private Float cost;
     private String pdescription;
     private String gemstoneType;
     private MultipartFile image;

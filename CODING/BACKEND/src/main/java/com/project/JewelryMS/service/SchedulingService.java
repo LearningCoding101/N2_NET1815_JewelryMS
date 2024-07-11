@@ -671,17 +671,17 @@ public class SchedulingService {
                 .map(this::mapToStaffAccountResponse)
                 .collect(Collectors.toList());
     }
-
-
-    @Scheduled(fixedRate = 1209600000) // 2 weeks in milliseconds
-    public void scheduleShiftsAutomatically() {
-        List<Integer> staffIds = getAllStaffIds();
-        LocalDate startDate = LocalDate.now();
-        LocalDate endDate = startDate.plusDays(13); // Schedule for the next two weeks
-
-        assignRandomStaffShiftPattern(staffIds, startDate, endDate);
-    }
-
+//
+//
+//    @Scheduled(fixedRate = 1209600000) // 2 weeks in milliseconds
+//    public void scheduleShiftsAutomatically() {
+//        List<Integer> staffIds = getAllStaffIds();
+//        LocalDate startDate = LocalDate.now();
+//        LocalDate endDate = startDate.plusDays(13); // Schedule for the next two weeks
+//
+//        assignRandomStaffShiftPattern(staffIds, startDate, endDate);
+//    }
+//
     private List<Integer> getAllStaffIds() {
         return staffAccountRepository.findAllStaffAccountsByRoleStaff().stream()
                 .map(StaffAccount::getStaffID)

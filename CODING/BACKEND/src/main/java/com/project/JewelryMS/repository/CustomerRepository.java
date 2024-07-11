@@ -55,5 +55,9 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     @Query("SELECT c FROM Customer c WHERE c.PK_CustomerID = :id")
     List<Customer> findCustomersByLongKeyword(@Param("id") Long id);
 
+    @Query("SELECT COUNT(c) FROM Customer c WHERE c.staffAccount.staffID = :staffId AND c.createDate BETWEEN :startDate AND :endDate")
+    long countCustomerSignUpsByStaff(@Param("staffId") long staffId, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
+    @Query("SELECT COUNT(c) FROM Customer c WHERE c.staffAccount.staffID = :staffId")
+    long countCustomerSignUpsByStaff(@Param("staffId") long staffId);
 }
