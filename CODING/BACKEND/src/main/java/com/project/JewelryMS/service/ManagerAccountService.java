@@ -74,7 +74,6 @@ public class ManagerAccountService {
                 existingStaffAccount.setAccountName(managerAccountRequest.getAccountName());
                 existingStaffAccount.setAUsername(managerAccountRequest.getUsername());
                 existingStaffAccount.setEmail(managerAccountRequest.getEmail());
-                existingStaffAccount.setAPassword(passwordEncoder.encode(managerAccountRequest.getAPassword()));
                 existingStaffAccount.setRole(managerAccountRequest.getRole());
                 Account account = authenticationRepository.save(existingStaffAccount);
                 return getManagerAccountById(account.getPK_userID());

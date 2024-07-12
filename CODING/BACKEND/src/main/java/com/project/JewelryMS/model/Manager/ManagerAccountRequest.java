@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 public class ManagerAccountRequest {
     String email;
     String username;
-    String aPassword;
     String accountName;
     RoleEnum role;
 }

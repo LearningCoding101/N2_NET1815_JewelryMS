@@ -10,6 +10,7 @@ import com.project.JewelryMS.model.StaffShift.StaffShiftResponse;
 import com.project.JewelryMS.repository.ShiftRepository;
 import com.project.JewelryMS.repository.StaffAccountRepository;
 import com.project.JewelryMS.repository.StaffShiftRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.*;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,8 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
+import java.time.temporal.WeekFields;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -671,8 +674,7 @@ public class SchedulingService {
                 .map(this::mapToStaffAccountResponse)
                 .collect(Collectors.toList());
     }
-//
-//
+
 //    @Scheduled(fixedRate = 1209600000) // 2 weeks in milliseconds
 //    public void scheduleShiftsAutomatically() {
 //        List<Integer> staffIds = getAllStaffIds();
@@ -681,7 +683,55 @@ public class SchedulingService {
 //
 //        assignRandomStaffShiftPattern(staffIds, startDate, endDate);
 //    }
-//
+
+    @Scheduled(cron = "0 0 0 * * SAT") // Run every Saturday at midnight
+    public void scheduleShiftsAutomatically() {
+        List<Integer> staffIds = getAllStaffIds();
+        LocalDate today = LocalDate.now();
+        LocalDate startDate;
+        LocalDate endDate;
+
+        // Ensure this runs only on Saturdays
+        if (today.getDayOfWeek() != DayOfWeek.SATURDAY) {
+            return;
+        }
+
+        int currentWeek = today.get(WeekFields.ISO.weekOfMonth());
+        int currentMonth = today.getMonthValue();
+
+        if (currentWeek == 3) {
+            // Generate shifts for week 4 of the current month and weeks 1 and 2 of the next month
+            startDate = today.with(TemporalAdjusters.firstDayOfMonth()).plusWeeks(3).with(DayOfWeek.MONDAY);
+            endDate = startDate.plusWeeks(2).plusDays(6);
+        } else if (currentWeek == 2) {
+            // Generate shifts for week 3 of the current month
+            startDate = today.with(TemporalAdjusters.firstDayOfMonth()).plusWeeks(2).with(DayOfWeek.MONDAY);
+            endDate = startDate.plusDays(6);
+        } else if (currentWeek == 1) {
+            // Do not generate any shifts in week 1
+            return;
+        } else {
+            // Generate shifts for the next week
+            startDate = today.with(TemporalAdjusters.next(DayOfWeek.MONDAY));
+            endDate = startDate.plusDays(6);
+        }
+
+        // Ensure the dates are within the correct month/year boundaries
+        if (endDate.getMonthValue() != currentMonth) {
+            endDate = endDate.with(TemporalAdjusters.lastDayOfMonth());
+        }
+
+        assignRandomStaffShiftPattern(staffIds, startDate, endDate);
+    }
+
+    @PostConstruct
+    public void checkAndRunAutomationOnStartup() {
+        LocalDate today = LocalDate.now();
+        if (today.getDayOfWeek() == DayOfWeek.SATURDAY) {
+            scheduleShiftsAutomatically();
+        }
+    }
+
     private List<Integer> getAllStaffIds() {
         return staffAccountRepository.findAllStaffAccountsByRoleStaff().stream()
                 .map(StaffAccount::getStaffID)

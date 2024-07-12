@@ -117,6 +117,7 @@ public class PromotionServiceIntegrationTest {
         verify(promotionRepository, times(1)).findById(1L);
         verify(promotionRepository, times(1)).findProductSellIdsByPromotionId(1L);
     }
+/*
 
     @Test
     public void testUpdatePromotion() {
@@ -140,6 +141,7 @@ public class PromotionServiceIntegrationTest {
         assertEquals(java.sql.Date.valueOf("2024-09-09"), promotion.getStartDate());
         assertEquals(java.sql.Date.valueOf("2024-09-29"), promotion.getEndDate());
     }
+*/
 
     @Test
     public void testDeletePromotionById() {

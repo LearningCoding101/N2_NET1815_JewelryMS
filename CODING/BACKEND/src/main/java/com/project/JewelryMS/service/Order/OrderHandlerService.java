@@ -12,11 +12,16 @@ import com.project.JewelryMS.service.EmailService;
 import com.project.JewelryMS.service.ImageService;
 import com.project.JewelryMS.service.ProductBuyService;
 import com.project.JewelryMS.service.ProductSellService;
+import jakarta.annotation.PreDestroy;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.ModelAttribute;
-
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -54,6 +59,30 @@ public class OrderHandlerService {
     OrderRepository orderRepository;
     @Autowired
     ImageService imageService;
+    @PreDestroy
+    public void cleanup() {
+        scheduler.shutdown();
+    }
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+    private final ConcurrentHashMap<Long, String> claimedOrders = new ConcurrentHashMap<>();
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    public boolean claimOrder(Long orderId, String userId) {
+        if (claimedOrders.putIfAbsent(orderId, userId) == null) {
+            // Order was successfully claimed
+            scheduler.schedule(() -> releaseOrder(orderId, userId), 3, TimeUnit.MINUTES);
+            return true;
+        }
+        return false; // Order was already claimed
+    }
+    public boolean releaseOrder(Long orderId, String userId) {
+        if (claimedOrders.remove(orderId, userId)) {
+            // Order was successfully released
+            messagingTemplate.convertAndSend("/topic/new-order", orderId);
+            return true;
+        }
+        return false; // Order was not claimed by this user or already released
+    }
     @Transactional
     public Long createOrderWithDetails(PurchaseOrder purchaseOrder, List<OrderDetail> list){
         Set<OrderDetail> detailSet = new HashSet<>();

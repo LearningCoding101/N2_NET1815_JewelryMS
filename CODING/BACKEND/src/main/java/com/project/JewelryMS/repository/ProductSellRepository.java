@@ -40,4 +40,5 @@ public interface ProductSellRepository extends JpaRepository<ProductSell, Long> 
     @Query("SELECT MAX(p.productCode) FROM ProductSell p WHERE p.productCode LIKE :codePrefix")
     String findMaxProductCodeByPrefix(String codePrefix);
 
+    Optional<ProductSell> findByProductCode(String productCode);
 }

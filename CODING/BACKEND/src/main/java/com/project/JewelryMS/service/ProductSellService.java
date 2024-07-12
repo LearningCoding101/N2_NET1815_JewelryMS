@@ -376,7 +376,12 @@ public class ProductSellService {
             productSellPromotionRepository.deleteAll(psps);
         }
     }
+    public ProductSellResponse findByProductCode(String productCode) {
+        ProductSell productSell = productSellRepository.findByProductCode(productCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with code: " + productCode));
 
+        return mapProductSellToResponse(productSell);
+    }
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public class ResourceNotFoundException extends RuntimeException {
         public ResourceNotFoundException(String message) {

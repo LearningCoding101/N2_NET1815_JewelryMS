@@ -53,7 +53,8 @@ public class Filter extends OncePerRequestFilter {
             "/api/productSell/create",
             "/api/productBuy/**",
             "/api/order/**",
-            "/api/Dashboard/**"
+            "/api/Dashboard/**",
+            "/ws/**"
 
 
     );

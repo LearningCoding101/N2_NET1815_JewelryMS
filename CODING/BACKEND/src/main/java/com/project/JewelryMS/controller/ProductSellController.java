@@ -98,4 +98,10 @@ public class ProductSellController {
         productSellService.removeAllPromotionsFromProductSells(productSellIds);
         return ResponseEntity.ok("All promotions removed from product sells successfully");
     }
+
+    @GetMapping("/get-by-code")
+    public ResponseEntity<ProductSellResponse> getProductByCode(@RequestParam String productCode) {
+        ProductSellResponse productSellResponse = productSellService.findByProductCode(productCode);
+        return ResponseEntity.ok(productSellResponse);
+    }
 }

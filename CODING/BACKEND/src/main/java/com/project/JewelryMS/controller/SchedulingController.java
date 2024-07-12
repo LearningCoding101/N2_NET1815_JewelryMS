@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/scheduling")
 @SecurityRequirement(name = "api")
+@CrossOrigin(origins = "*")
 public class SchedulingController {
 
     @Autowired
