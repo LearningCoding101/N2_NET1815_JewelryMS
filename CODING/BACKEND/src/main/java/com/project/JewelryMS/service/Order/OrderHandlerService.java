@@ -92,6 +92,7 @@ public class OrderHandlerService {
         }
         purchaseOrder.setOrderDetails(detailSet);
         orderService.saveOrder(purchaseOrder);
+
         return purchaseOrder.getPK_OrderID();
     }
     public Long handleCreateOrderWithDetails(CreateOrderRequest orderRequest, List<CreateOrderDetailRequest> detailRequest, String email) {
@@ -122,12 +123,15 @@ public class OrderHandlerService {
                 OrderDetail orderDetail = new OrderDetail();
                 orderDetail.setQuantity(detail.getQuantity());
                 orderDetail.setProductSell(productSellService.getProductSellById(detail.getProductID()));
+                System.out.println(productSellService.getProductSellById(detail.getProductID()));
                 orderDetail.setPurchaseOrder(order);
-                orderDetails.add(orderDetail);
-            }
 
+            orderDetails.add(orderDetail);
+            }
+        System.out.println(orderDetails.toString());
         if (!orderDetails.isEmpty()) {
                 id = createOrderWithDetails(order, orderDetails);
+                System.out.println(id);
         }
         return id;
     }
@@ -142,6 +146,7 @@ public class OrderHandlerService {
             detailSet.add(detail);
         }
         purchaseOrder.setOrderBuyDetails(detailSet);
+        System.out.println(purchaseOrder.getPK_OrderID());
         orderService.saveOrder(purchaseOrder);
         return purchaseOrder.getPK_OrderID();
     }
