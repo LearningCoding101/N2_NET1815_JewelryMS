@@ -8,10 +8,12 @@ import com.project.JewelryMS.model.Dashboard.Customer.CustomerSignUp;
 import com.project.JewelryMS.model.Transition.TransitionResponse;
 import com.project.JewelryMS.service.DashboardService;
 import com.project.JewelryMS.service.TransitionService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
@@ -23,6 +25,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("api/Dashboard")
+@SecurityRequirement(name = "api")
 @CrossOrigin(origins = "*")
 public class DashBoardController {
     @Autowired
@@ -31,12 +34,14 @@ public class DashBoardController {
     private TransitionService transitionService;
 
     @GetMapping("/purchase-order-history")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<List<TransitionResponse>> getPurchaseOrderHistory() {
         List<TransitionResponse> purchaseOrderHistory = transitionService.getPurchaseOrderHistory();
         return ResponseEntity.ok(purchaseOrderHistory);
     }
 
     @GetMapping("revenue-category")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<List<CategoryResponse>> getAllRevenueCategory(@RequestParam("startTime") String startTime, @RequestParam("endTime") String endTime) {
         RevenueDateRequest revenueDateRequest = new RevenueDateRequest(LocalDate.parse(startTime), LocalDate.parse(endTime));
         List<CategoryResponse> revenueCategoryResponse = dashboardService.RevenueCategory(revenueDateRequest);
@@ -44,35 +49,41 @@ public class DashBoardController {
     }
 
     @GetMapping("top-selling-products")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<List<TopSellProductResponse>> getTopSellingProducts(@RequestParam("startTime") String startTime, @RequestParam("endTime") String endTime) {
         RevenueDateRequest revenueDateRequest = new RevenueDateRequest(LocalDate.parse(startTime), LocalDate.parse(endTime));
         return ResponseEntity.ok(dashboardService.getTopSellingProducts(revenueDateRequest));
     }
 
     @GetMapping("revenue-category-all")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<List<CategoryResponse>> getAllRevenueCategory() {
         List<CategoryResponse> revenueCategoryResponse = dashboardService.RevenueCategory();
         return ResponseEntity.ok(revenueCategoryResponse);
     }
 
     @GetMapping("top-selling-products-all")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<List<TopSellProductResponse>> getTopSellingProducts() {
         return ResponseEntity.ok(dashboardService.getTopSellingProducts());
     }
 
     @GetMapping("/loyalty-customers")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<List<CustomerLoyalty>> getCustomerLoyaltyStatistics(@RequestParam("startTime") String startTime, @RequestParam("endTime") String endTime) {
         RevenueDateRequest revenueDateRequest = new RevenueDateRequest(LocalDate.parse(startTime), LocalDate.parse(endTime));
         return ResponseEntity.ok(dashboardService.getCustomerLoyaltyStatistics(revenueDateRequest));
     }
 
     @GetMapping("demographic-customers")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<List<CustomerDemographics>> getCustomerDemoGraphic(@RequestParam("startTime") String startTime, @RequestParam("endTime") String endTime) {
         RevenueDateRequest revenueDateRequest = new RevenueDateRequest(LocalDate.parse(startTime), LocalDate.parse(endTime));
         return ResponseEntity.ok(dashboardService.getCustomerDemoGraphicResponse(revenueDateRequest));
     }
 
     @GetMapping("/customer-signups")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<List<CustomerSignUp>> getCustomerSignUpsByStaff(@RequestParam("startTime") String startTime, @RequestParam("endTime") String endTime) {
         RevenueDateRequest revenueDateRequest = new RevenueDateRequest(LocalDate.parse(startTime), LocalDate.parse(endTime));
         return ResponseEntity.ok(dashboardService.getCustomerSignUpsByStaff(revenueDateRequest));
@@ -80,11 +91,13 @@ public class DashBoardController {
 
 
     @GetMapping("compare-sale-year")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public YearComparisonResponse comparationYear(@RequestParam("year1") String year1, @RequestParam("year2") String year2) {
         YearComparisonRequest request = new YearComparisonRequest(year1, year2);
         return dashboardService.compareYear(request);
     }
     @GetMapping("/revenueByStaff")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<List<StaffRevenueResponse>> getRevenueGeneratedByStaff(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
@@ -96,12 +109,14 @@ public class DashBoardController {
         }
     }
     @GetMapping("discount-code-effectiveness")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public List<DiscountEffectivenessResponse> getDiscountCodeEffectiveness() {
         return dashboardService.getDiscountCodeEffectiveness();
     }
 
 
     @GetMapping("/salesByStaff")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<List<StaffSalesResponse>> getSalesMadeByStaff(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
@@ -114,6 +129,7 @@ public class DashBoardController {
     }
 
     @GetMapping("/customer-products-trend")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<List<ProductSellTrendResponse>> getTopProductsForAllCustomers() {
         List<ProductSellTrendResponse> responses = dashboardService.getTopProductsForAllCustomers();
         return ResponseEntity.ok(responses);
@@ -121,6 +137,7 @@ public class DashBoardController {
 
 
     @GetMapping("/monthlyAverageRevenue")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<Map<String, Float>> getMonthlyAverageRevenue(
             @RequestParam String startMonthYear, @RequestParam String endMonthYear) {
         Map<String, Float> dailyAverageRevenue = dashboardService.getDailyAverageRevenuePerMonth(startMonthYear, endMonthYear);
@@ -132,6 +149,7 @@ public class DashBoardController {
     }
 
     @GetMapping("/daily-revenue")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<Map<String, Double>> getDailyRevenue(
             @RequestParam String startDate, @RequestParam String endDate) {
         try {
@@ -143,12 +161,14 @@ public class DashBoardController {
     }
 
     @GetMapping("/customer-purchase-history")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<List<CustomerPurchaseHistoryResponse>> getAllCustomerPurchaseHistories() {
         List<CustomerPurchaseHistoryResponse> response = dashboardService.getAllCustomerPurchaseHistories();
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/staff-statistics")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<StaffStatisticsResponse> getStaffStats(@RequestParam("staffId") long staffId) {
         StaffStatisticsResponse response = dashboardService.getStaffStats(staffId);
         return ResponseEntity.ok(response);

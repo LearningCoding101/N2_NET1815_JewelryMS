@@ -3,14 +3,21 @@ package com.project.JewelryMS.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
 @Data
+@EqualsAndHashCode(exclude = "guarantee")
+@ToString(exclude = {"orderDetails", "guarantee"})
+
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "category.productSell", "promotion.productSell"})
 public class ProductSell {
     @Id
@@ -68,4 +75,34 @@ public class ProductSell {
     @OneToMany(mappedBy = "productSell")
     @JsonIgnoreProperties
     Set<OrderDetail> orderDetails;
+
+    @OneToOne(mappedBy = "productSell")
+    @JsonIgnoreProperties
+    @JsonManagedReference
+
+    Guarantee guarantee;
+    @Override
+    public int hashCode() {
+        return Objects.hash(productID, carat, chi, cost, pDescription, gemstoneType, manufacturer,
+                manufactureCost, metalType, pName, productCode, pStatus);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ProductSell that = (ProductSell) o;
+        return productID == that.productID &&
+                Float.compare(that.carat, carat) == 0 &&
+                chi == that.chi &&
+                Float.compare(that.cost, cost) == 0 &&
+                pStatus == that.pStatus &&
+                Objects.equals(pDescription, that.pDescription) &&
+                Objects.equals(gemstoneType, that.gemstoneType) &&
+                Objects.equals(manufacturer, that.manufacturer) &&
+                Objects.equals(manufactureCost, that.manufactureCost) &&
+                Objects.equals(metalType, that.metalType) &&
+                Objects.equals(pName, that.pName) &&
+                Objects.equals(productCode, that.productCode);
+    }
 }

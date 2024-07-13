@@ -3,6 +3,7 @@ package com.project.JewelryMS.controller;
 import com.project.JewelryMS.model.Guarantee.CreateGuaranteeRequest;
 import com.project.JewelryMS.model.Guarantee.GuaranteeRequest;
 import com.project.JewelryMS.model.Guarantee.GuaranteeResponse;
+import com.project.JewelryMS.model.ProductSell.ProductSellResponse;
 import com.project.JewelryMS.service.GuaranteeService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,14 +76,6 @@ public class GuaranteeController {
     public ResponseEntity<List<GuaranteeResponse>> readGuaranteesByCoverage(@RequestParam String coverage) {
         List<GuaranteeResponse> guaranteesByCoverage = guaranteeService.readAllGuaranteesByCoverage(coverage);
         return ResponseEntity.ok(guaranteesByCoverage);
-    }
-
-    // Get guarantee by product ID
-    @GetMapping("/by-product-id")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_MANAGER')")
-    public ResponseEntity<GuaranteeResponse> readGuaranteeByProductId(@RequestParam Long productId) {
-        GuaranteeResponse guarantee = guaranteeService.readGuaranteeByProductId(productId);
-        return ResponseEntity.ok(guarantee);
     }
 
     // Mark a guarantee as inactive

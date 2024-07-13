@@ -245,29 +245,30 @@ public class SchedulingService {
             createShiftRequest.setWorkArea("Sales");
             createShiftRequest.setRegister(0);
 
-            String startTime, endTime;
-            endTime = switch (shiftType) {
+            String startTime;
+            String endTime;
+            switch (shiftType) {
                 case "Morning" -> {
                     startTime = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 08";
-                    yield date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 12";
+                    endTime = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 12";
                 }
                 case "Afternoon" -> {
                     startTime = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 13";
-                    yield date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 16";
+                    endTime = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 16";
                 }
                 case "Evening" -> {
                     startTime = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 17";
-                    yield date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 21";
+                    endTime = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 21";
                 }
                 default -> throw new RuntimeException("Invalid shift type");
-            };
+            }
 
             createShiftRequest.setStartTime(startTime);
             createShiftRequest.setEndTime(endTime);
 
             ShiftRequest createdShift = shiftService.createShift(createShiftRequest);
             shift = shiftRepository.findById((long) createdShift.getShiftID())
-                    .orElseThrow(() -> new RuntimeException("Shift not found"));
+                    .orElseThrow(() -> new RuntimeException("Shift not found after creation"));
         }
 
         Staff_Shift staffShift = new Staff_Shift();
@@ -617,6 +618,9 @@ public class SchedulingService {
 
 //    If the list contains all staff types (staffId % 3 == 0, 1, 2),
 //      the schedule will be filled for the given period except for Sundays.
+
+
+    //Rework the Random pattern is a must
     @Transactional
     public List<StaffAccountResponse> assignRandomStaffShiftPattern(List<Integer> staffIds, LocalDate startDate, LocalDate endDate) {
         List<StaffShiftResponse> staffShiftResponses = new CopyOnWriteArrayList<>();
@@ -675,62 +679,64 @@ public class SchedulingService {
                 .collect(Collectors.toList());
     }
 
-//    @Scheduled(fixedRate = 1209600000) // 2 weeks in milliseconds
-//    public void scheduleShiftsAutomatically() {
-//        List<Integer> staffIds = getAllStaffIds();
-//        LocalDate startDate = LocalDate.now();
-//        LocalDate endDate = startDate.plusDays(13); // Schedule for the next two weeks
-//
-//        assignRandomStaffShiftPattern(staffIds, startDate, endDate);
-//    }
-
-    @Scheduled(cron = "0 0 0 * * SAT") // Run every Saturday at midnight
+    @Scheduled(fixedRate = 1209600000) // 2 weeks in milliseconds
     public void scheduleShiftsAutomatically() {
         List<Integer> staffIds = getAllStaffIds();
-        LocalDate today = LocalDate.now();
-        LocalDate startDate;
-        LocalDate endDate;
-
-        // Ensure this runs only on Saturdays
-        if (today.getDayOfWeek() != DayOfWeek.SATURDAY) {
-            return;
-        }
-
-        int currentWeek = today.get(WeekFields.ISO.weekOfMonth());
-        int currentMonth = today.getMonthValue();
-
-        if (currentWeek == 3) {
-            // Generate shifts for week 4 of the current month and weeks 1 and 2 of the next month
-            startDate = today.with(TemporalAdjusters.firstDayOfMonth()).plusWeeks(3).with(DayOfWeek.MONDAY);
-            endDate = startDate.plusWeeks(2).plusDays(6);
-        } else if (currentWeek == 2) {
-            // Generate shifts for week 3 of the current month
-            startDate = today.with(TemporalAdjusters.firstDayOfMonth()).plusWeeks(2).with(DayOfWeek.MONDAY);
-            endDate = startDate.plusDays(6);
-        } else if (currentWeek == 1) {
-            // Do not generate any shifts in week 1
-            return;
-        } else {
-            // Generate shifts for the next week
-            startDate = today.with(TemporalAdjusters.next(DayOfWeek.MONDAY));
-            endDate = startDate.plusDays(6);
-        }
-
-        // Ensure the dates are within the correct month/year boundaries
-        if (endDate.getMonthValue() != currentMonth) {
-            endDate = endDate.with(TemporalAdjusters.lastDayOfMonth());
-        }
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = startDate.plusDays(13); // Schedule for the next two weeks
 
         assignRandomStaffShiftPattern(staffIds, startDate, endDate);
     }
 
-    @PostConstruct
-    public void checkAndRunAutomationOnStartup() {
-        LocalDate today = LocalDate.now();
-        if (today.getDayOfWeek() == DayOfWeek.SATURDAY) {
-            scheduleShiftsAutomatically();
-        }
-    }
+//Attempt of reworking automatic shift
+
+//    @Scheduled(cron = "0 0 0 * * SAT") // Run every Saturday at midnight
+//    public void scheduleShiftsAutomatically() {
+//        List<Integer> staffIds = getAllStaffIds();
+//        LocalDate today = LocalDate.now();
+//        LocalDate startDate;
+//        LocalDate endDate;
+//
+//        // Ensure this runs only on Saturdays
+//        if (today.getDayOfWeek() != DayOfWeek.SATURDAY) {
+//            return;
+//        }
+//
+//        int currentWeek = today.get(WeekFields.ISO.weekOfMonth());
+//        int currentMonth = today.getMonthValue();
+//
+//        if (currentWeek == 3) {
+//            // Generate shifts for week 4 of the current month and weeks 1 and 2 of the next month
+//            startDate = today.with(TemporalAdjusters.firstDayOfMonth()).plusWeeks(3).with(DayOfWeek.MONDAY);
+//            endDate = startDate.plusWeeks(2).plusDays(6);
+//        } else if (currentWeek == 2) {
+//            // Generate shifts for week 3 of the current month
+//            startDate = today.with(TemporalAdjusters.firstDayOfMonth()).plusWeeks(2).with(DayOfWeek.MONDAY);
+//            endDate = startDate.plusDays(6);
+//        } else if (currentWeek == 1) {
+//            // Do not generate any shifts in week 1
+//            return;
+//        } else {
+//            // Generate shifts for the next week
+//            startDate = today.with(TemporalAdjusters.next(DayOfWeek.MONDAY));
+//            endDate = startDate.plusDays(6);
+//        }
+//
+//        // Ensure the dates are within the correct month/year boundaries
+//        if (endDate.getMonthValue() != currentMonth) {
+//            endDate = endDate.with(TemporalAdjusters.lastDayOfMonth());
+//        }
+//
+//        assignRandomStaffShiftPattern(staffIds, startDate, endDate);
+//    }
+//
+//    @PostConstruct
+//    public void checkAndRunAutomationOnStartup() {
+//        LocalDate today = LocalDate.now();
+//        if (today.getDayOfWeek() == DayOfWeek.SATURDAY) {
+//            scheduleShiftsAutomatically();
+//        }
+//    }
 
     private List<Integer> getAllStaffIds() {
         return staffAccountRepository.findAllStaffAccountsByRoleStaff().stream()
@@ -741,31 +747,37 @@ public class SchedulingService {
     private Future<?> assignShift(ExecutorService executorService, int staffId, LocalDate date, String shiftType, List<StaffShiftResponse> staffShiftResponses) {
         return executorService.submit(() -> {
             try {
-                // Ensure only assigning to sales shifts
                 StaffShiftResponse response = assignStaffToDay(staffId, date, shiftType);
                 synchronized (staffShiftResponses) {
                     staffShiftResponses.add(response);
                 }
             } catch (ShiftAssignmentException e) {
                 System.out.println("Staff ID " + staffId + " is already assigned on " + date + ".");
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException("Failed to assign shift for staff ID " + staffId + " on " + date + ": " + e.getMessage());
             }
         });
     }
+
 
     private Future<?> assignSingleShift(ExecutorService executorService, int staffId, LocalDate date, List<StaffShiftResponse> staffShiftResponses) {
         return executorService.submit(() -> {
             try {
                 String shiftType = getRandomSingleShiftType();
-                // Ensure only assigning to sales shifts
                 StaffShiftResponse response = assignStaffToDay(staffId, date, shiftType);
                 synchronized (staffShiftResponses) {
                     staffShiftResponses.add(response);
                 }
             } catch (ShiftAssignmentException e) {
                 System.out.println("Staff ID " + staffId + " is already assigned on " + date + ".");
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException("Failed to assign single shift for staff ID " + staffId + " on " + date + ": " + e.getMessage());
             }
         });
     }
+
 
     private String getRandomSingleShiftType() {
         List<String> singleShiftTypes = Arrays.asList("Morning", "Afternoon", "Evening");

@@ -50,7 +50,7 @@ public class DashboardService {
     }
 
     public Float CalculateCategoryTotal(Long Category_ID){
-        List<PurchaseOrder> orders = orderRepository.findAll();
+        List<PurchaseOrder> orders = orderRepository.findAllCompleteOrder();
 
         // Tính tổng doanh thu cho danh mục
         float totalRevenue = 0.0F;
@@ -73,7 +73,7 @@ public class DashboardService {
     }
 
     public List<TopSellProductResponse> getTopSellingProducts() {
-        List<PurchaseOrder> orders = orderRepository.findAll();
+        List<PurchaseOrder> orders = orderRepository.findAllCompleteOrder();
 
         // Sử dụng Map để lưu trữ số lượng và doanh thu bán hàng cho từng sản phẩm
         Map<Long, TopSellProductResponse> productSalesMap = new HashMap<>();

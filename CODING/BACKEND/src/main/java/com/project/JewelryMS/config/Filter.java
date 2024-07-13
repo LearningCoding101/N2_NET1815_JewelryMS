@@ -43,17 +43,14 @@ public class Filter extends OncePerRequestFilter {
             "/Info/GoldPrice",
             "/vnpay/**",
             "/code/**",
-            "/api/category/**",
-            "/productsell/**",
+            "/api/category",
+            "/api/category/{id}",
             "/api/account/loginGG",
-            "/api/productSell/readall",
+            "/api/productSell",
+            "/api/productSell/active",
             "/api/productSell/read/{id}",
-            "/api/productSell/**",
             "/images/uploadByPath",
-            "/api/productSell/create",
-            "/api/productBuy/**",
             "/api/order/**",
-            "/api/Dashboard/**",
             "/ws/**"
 
 

@@ -421,6 +421,7 @@ public class OrderHandlerService {
         PurchaseOrder orderToUpdate = orderService.getOrderById((long) orderID);
         System.out.println(orderToUpdate.toString());
         orderToUpdate.setStatus(3);
+        orderToUpdate.setPaymentType("VNPAY");
         calculateAndSetGuaranteeEndDate((long) orderID);
         sendConfirmationEmail((long) orderID, orderToUpdate.getEmail());
         System.out.println(orderToUpdate);
@@ -505,6 +506,7 @@ public class OrderHandlerService {
             if(orderToUpdate != null){
                 System.out.println(orderToUpdate);
                 orderToUpdate.setStatus(3);
+                orderToUpdate.setPaymentType("Tiền mặt");
                 calculateAndSetGuaranteeEndDate(request.getOrderID());
                 System.out.println(orderToUpdate);
                 sendConfirmationEmail(request.getOrderID(), orderToUpdate.getEmail());

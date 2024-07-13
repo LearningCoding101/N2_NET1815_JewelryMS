@@ -203,17 +203,17 @@ public class GuaranteeServiceUnitTest {
         assertEquals(1L, responses.get(0).getPK_guaranteeID());
     }
 
-    @Test
-    public void testReadGuaranteeByProductId() {
-        when(guaranteeRepository.findByProductId(1L)).thenReturn(guarantee);
-
-        GuaranteeResponse response = guaranteeService.readGuaranteeByProductId(1L);
-
-        assertNotNull(response);
-        assertEquals(1L, response.getPK_guaranteeID());
-        assertEquals("Full Coverage", response.getPolicyType());
-        assertEquals("Full", response.getCoverage());
-        assertEquals(12, response.getWarrantyPeriod());
-        assertTrue(response.isStatus());
-    }
+//    @Test
+//    public void testReadGuaranteeByProductId() {
+//        when(guaranteeRepository.findByProductId(1L)).thenReturn(guarantee);
+//
+//        GuaranteeResponse response = guaranteeService.readGuaranteeByProductId(1L);
+//
+//        assertNotNull(response);
+//        assertEquals(1L, response.getPK_guaranteeID());
+//        assertEquals("Full Coverage", response.getPolicyType());
+//        assertEquals("Full", response.getCoverage());
+//        assertEquals(12, response.getWarrantyPeriod());
+//        assertTrue(response.isStatus());
+//    }
 }

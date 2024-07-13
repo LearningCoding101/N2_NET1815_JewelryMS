@@ -16,9 +16,16 @@ public interface ProductSellRepository extends JpaRepository<ProductSell, Long> 
     @Query("SELECT ps FROM ProductSell ps " +
             "LEFT JOIN FETCH ps.category c " +
             "LEFT JOIN FETCH ps.productSellPromotions psp " +
+            "LEFT JOIN FETCH psp.promotion p ")
+    List<ProductSell> findAllWithCategoryAndPromotion();
+
+
+    @Query("SELECT ps FROM ProductSell ps " +
+            "LEFT JOIN FETCH ps.category c " +
+            "LEFT JOIN FETCH ps.productSellPromotions psp " +
             "LEFT JOIN FETCH psp.promotion p " +
             "WHERE ps.pStatus = true")
-    List<ProductSell> findAllWithCategoryAndPromotion();
+    List<ProductSell> findAllActiveWithCategoryAndPromotion();
 
     @Query("SELECT psp.promotion.PK_promotionID FROM ProductSell_Promotion psp " +
             "WHERE psp.productSell.productID = :productSellId")
@@ -40,5 +47,9 @@ public interface ProductSellRepository extends JpaRepository<ProductSell, Long> 
     @Query("SELECT MAX(p.productCode) FROM ProductSell p WHERE p.productCode LIKE :codePrefix")
     String findMaxProductCodeByPrefix(String codePrefix);
 
+    @Query
     Optional<ProductSell> findByProductCode(String productCode);
+
+    @Query("SELECT ps FROM ProductSell ps WHERE ps.guarantee.PK_guaranteeID = :guaranteeID ")
+    Optional<ProductSell> findByGuaranteeID(@Param("guaranteeID")Long guaranteeID);
 }

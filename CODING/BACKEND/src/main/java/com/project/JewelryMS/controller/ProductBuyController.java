@@ -5,9 +5,11 @@ import com.project.JewelryMS.model.Order.CreateProductBuyRequest;
 import com.project.JewelryMS.model.ProductBuy.CalculatePBRequest;
 import com.project.JewelryMS.model.ProductBuy.ProductBuyResponse;
 import com.project.JewelryMS.service.ProductBuyService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -16,12 +18,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping("api/productBuy")
+@SecurityRequirement(name = "api")
 @CrossOrigin(origins = "*")
 public class ProductBuyController {
     @Autowired
     private ProductBuyService productBuyService;
 
     @PostMapping("create-ProductBuys")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
     public ResponseEntity<List<Long>> saleCreateBuyOrder(@RequestBody(required = false) byte[] requestData) {
         try {
             String orderJson = new String(requestData); // Convert byte array to String
@@ -47,6 +51,7 @@ public class ProductBuyController {
 
     // Get all product buys
     @GetMapping
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
     public ResponseEntity<List<ProductBuyResponse>> getAllProductBuys() {
         List<ProductBuyResponse> productBuys = productBuyService.getAllProductBuys();
         return ResponseEntity.ok(productBuys);
@@ -54,6 +59,7 @@ public class ProductBuyController {
 
     // Get a product buy by ID
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
     public ResponseEntity<ProductBuyResponse> getProductBuyById(@PathVariable Long id) {
         ProductBuyResponse productBuy = productBuyService.getProductBuyById(id);
         return ResponseEntity.ok(productBuy);
@@ -61,18 +67,21 @@ public class ProductBuyController {
 
     // Delete a product buy by ID
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
     public ResponseEntity<String> deleteProductBuy(@PathVariable Long id) {
         String response = productBuyService.deleteProductBuy(id);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/calculate-cost")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
     public ResponseEntity<Float> calculateProductBuyCost(@RequestBody CalculatePBRequest createProductBuyRequest) {
         return ResponseEntity.ok(productBuyService.calculateProductBuyCost(createProductBuyRequest));
     }
 
     // Adjust pricing ratio
     @PostMapping("/adjust-ratio/{ratio}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
     public ResponseEntity<Float> adjustRatio(@PathVariable Float ratio) {
         productBuyService.updatePricingRatioPB(ratio);
         return ResponseEntity.ok(ratio);

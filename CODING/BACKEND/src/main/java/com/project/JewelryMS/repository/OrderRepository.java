@@ -11,7 +11,7 @@ import java.util.List;
 
 @Repository
 public interface OrderRepository extends JpaRepository<PurchaseOrder, Long> {
-    @Query("SELECT o FROM PurchaseOrder o WHERE o.purchaseDate BETWEEN :startDate AND :endDate")
+    @Query("SELECT o FROM PurchaseOrder o WHERE o.purchaseDate BETWEEN :startDate AND :endDate AND o.status = 3")
     List<PurchaseOrder> findOrdersByDateRange(LocalDateTime startDate, LocalDateTime endDate);
 
     @Query("SELECT o.purchaseOrder.customer.PK_CustomerID, o.purchaseOrder.customer.cusName, COUNT(o.purchaseOrder.PK_OrderID), o.productSell.pName, COUNT(o.productSell.pName) " +
@@ -30,4 +30,7 @@ public interface OrderRepository extends JpaRepository<PurchaseOrder, Long> {
 
     @Query("SELECT po FROM PurchaseOrder po LEFT JOIN FETCH po.customer LEFT JOIN FETCH po.staffAccount ")
     List<PurchaseOrder> findAllWithDetails();
+
+    @Query("SELECT po FROM PurchaseOrder po WHERE po.status = 3")
+    List<PurchaseOrder> findAllCompleteOrder();
 }

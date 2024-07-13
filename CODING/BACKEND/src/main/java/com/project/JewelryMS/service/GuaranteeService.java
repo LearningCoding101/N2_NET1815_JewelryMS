@@ -5,6 +5,7 @@ import com.project.JewelryMS.entity.ProductSell;
 import com.project.JewelryMS.model.Guarantee.CreateGuaranteeRequest;
 import com.project.JewelryMS.model.Guarantee.GuaranteeRequest;
 import com.project.JewelryMS.model.Guarantee.GuaranteeResponse;
+import com.project.JewelryMS.model.ProductSell.ProductSellResponse;
 import com.project.JewelryMS.repository.GuaranteeRepository;
 import com.project.JewelryMS.repository.ProductSellRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,9 +118,7 @@ public class GuaranteeService {
                 .collect(Collectors.toList());
     }
 
-    public GuaranteeResponse readGuaranteeByProductId(long productId) {
-        Guarantee guarantee = guaranteeRepository.findByProductId(productId);
-        return guarantee != null ? toGuaranteeResponse(guarantee) : null;
-    }
+
+
 }
 
