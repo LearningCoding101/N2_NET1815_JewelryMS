@@ -47,6 +47,8 @@ public class Filter extends OncePerRequestFilter {
             "/api/category/{id}",
             "/api/account/loginGG",
             "/api/productSell",
+            //remove sau
+            "/api/productSell/**",
             "/api/productSell/active",
             "/api/productSell/read/{id}",
             "/images/uploadByPath",
