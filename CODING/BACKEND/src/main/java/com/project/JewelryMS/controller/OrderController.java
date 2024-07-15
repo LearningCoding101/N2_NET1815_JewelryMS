@@ -2,6 +2,7 @@ package com.project.JewelryMS.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.project.JewelryMS.model.Dashboard.RevenueDateRequest;
 import com.project.JewelryMS.model.EmailDetail;
 import com.project.JewelryMS.model.Order.*;
 import com.project.JewelryMS.model.OrderDetail.*;
@@ -22,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
@@ -245,4 +247,16 @@ public class OrderController {
         }
     }
 
+    @GetMapping("search-customer-guarantee")
+    public ResponseEntity<List<CustomerOrderGuaranteeResponse>> searchCustomerGuarantee(@RequestParam String search) {
+        List<CustomerOrderGuaranteeResponse> response = orderHandlerService.searchCustomerGuarantee(search);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("search-order-date-guarantee")
+    public ResponseEntity<List<CustomerOrderGuaranteeResponse>> searchCustomerGuarantee(@RequestParam("startTime") String startTime, @RequestParam("endTime") String endTime) {
+        DateFilterOrderDate dateFilterOrderDate = new DateFilterOrderDate(LocalDate.parse(startTime), LocalDate.parse(endTime));
+        List<CustomerOrderGuaranteeResponse> response = orderHandlerService.getOrdersByDateRange(dateFilterOrderDate);
+        return ResponseEntity.ok(response);
+    }
 }

@@ -20,7 +20,7 @@ public class OrderDetailDTO {
     private boolean guaranteeStatus;
     private float carat;
     private Long categoryId;
-    private int chi;
+    private Float chi;
     private float cost;
     private String pDescription;
     private String gemstoneType;

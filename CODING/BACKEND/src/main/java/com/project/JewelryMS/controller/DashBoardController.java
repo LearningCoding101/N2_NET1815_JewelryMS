@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -171,6 +172,16 @@ public class DashBoardController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
     public ResponseEntity<StaffStatisticsResponse> getStaffStats(@RequestParam("staffId") long staffId) {
         StaffStatisticsResponse response = dashboardService.getStaffStats(staffId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/staff-statistics-range")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    public ResponseEntity<StaffStatisticsResponse> getStaffStatsInRange(
+            @RequestParam("staffId") long staffId,
+            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        StaffStatisticsResponse response = dashboardService.getStaffStatsInRange(staffId, startDate, endDate);
         return ResponseEntity.ok(response);
     }
 }

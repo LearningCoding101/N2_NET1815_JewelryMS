@@ -33,4 +33,7 @@ public interface OrderRepository extends JpaRepository<PurchaseOrder, Long> {
 
     @Query("SELECT po FROM PurchaseOrder po WHERE po.status = 3")
     List<PurchaseOrder> findAllCompleteOrder();
+
+    @Query("SELECT po FROM PurchaseOrder po WHERE po.customer.PK_CustomerID = :customerID")
+    List<PurchaseOrder> findByCustomerID(@Param("customerID") Long customerID);
 }

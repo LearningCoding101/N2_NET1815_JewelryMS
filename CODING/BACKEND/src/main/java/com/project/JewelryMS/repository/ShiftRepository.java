@@ -74,4 +74,7 @@ public interface ShiftRepository extends JpaRepository<Shift, Long> {
     // Count the total number of shifts worked by a specific staff member
     @Query("SELECT COUNT(s) FROM Shift s JOIN s.staffShifts ss WHERE ss.staffAccount.staffID = :staffId")
     long countShiftsByStaff(@Param("staffId") long staffId);
+
+    @Query("SELECT COUNT(s) FROM Shift s JOIN s.staffShifts ss WHERE ss.staffAccount.staffID = :staffId AND s.startTime BETWEEN :startDate AND :endDate")
+    long countShiftsByStaffAndDateRange(@Param("staffId") long staffId, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 }

@@ -13,7 +13,7 @@ public class CreateProductBuyRequest {
     private String metalType;
     private String gemstoneType;
     private String image;
-    private Integer metalWeight;
+    private Float metalWeight;
     private Float gemstoneWeight;
     private Float cost;
 }

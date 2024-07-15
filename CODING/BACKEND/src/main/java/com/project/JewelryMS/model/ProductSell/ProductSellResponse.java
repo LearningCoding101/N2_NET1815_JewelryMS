@@ -13,7 +13,7 @@ import java.util.List;
 public class ProductSellResponse {
     private long productID;
     private Float carat;
-    private Integer chi;
+    private Float chi;
     private Float cost;
     private String pDescription;
     private String gemstoneType;

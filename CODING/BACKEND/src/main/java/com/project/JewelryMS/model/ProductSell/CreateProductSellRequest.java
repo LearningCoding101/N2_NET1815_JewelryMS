@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class CreateProductSellRequest {
     private Float carat;
     private long category_id;
-    private Integer chi;
+    private Float chi;
     private String pdescription;
     private String gemstoneType;
     private MultipartFile image;

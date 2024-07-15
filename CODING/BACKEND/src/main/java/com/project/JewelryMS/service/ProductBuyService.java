@@ -36,6 +36,15 @@ public class ProductBuyService {
     @Autowired
     private PricingRatioRepository pricingRatioRepository;
 
+    public void initializeGoldPrice() {
+        String goldPriceStr = apiService.getGoldBuyPricecalculate("http://api.btmc.vn/api/BTMCAPI/getpricebtmc?key=3kd8ub1llcg9t45hnoh8hmn7t5kc2v");
+        if (goldPriceStr != null) {
+            this.goldPrice = Float.parseFloat(goldPriceStr);
+        } else {
+            throw new IllegalArgumentException("Gold price cannot be null");
+        }
+    }
+
     public Long createProductBuy(CreateProductBuyRequest request) {
         ProductBuy productBuy = new ProductBuy();
         productBuy.setPbName(request.getName());
@@ -128,33 +137,24 @@ public class ProductBuyService {
         String gemstoneType = createProductBuyRequest.getGemstoneType();
         String metalType = createProductBuyRequest.getMetalType();
         Float carat = createProductBuyRequest.getGemstoneWeight();
-        Integer chi = createProductBuyRequest.getMetalWeight();
+        Float chi = createProductBuyRequest.getMetalWeight();
         if (gemstoneType != null && carat != null) {
-            Float gemStonePrice = 100000000.0F; // Price per carat
+            Float gemStonePrice = 10000000.0F; // Price per carat
             totalGemPrice = ((gemStonePrice * carat) * 0.8F);
         }
 
         Float totalGoldPrice = 0.0F;
         if (metalType != null && chi != null) {
             Float goldPrice = Float.parseFloat(apiService.getGoldBuyPricecalculate("http://api.btmc.vn/api/BTMCAPI/getpricebtmc?key=3kd8ub1llcg9t45hnoh8hmn7t5kc2v"));
-            totalGoldPrice = (goldPrice / 10) * chi;
+            totalGoldPrice = goldPrice * chi;
         }
 
         totalPrice = (totalGemPrice + totalGoldPrice ); // Applying the markup
 
-        return totalPrice / 1000.0F;
+        return totalPrice ;
     }
     private Float goldPrice;
-    @Autowired
-    public ProductBuyService(ApiService apiService, PricingRatioRepository pricingRatioRepository) {
-        this.apiService = apiService;
-        this.pricingRatioRepository = pricingRatioRepository;
-        initializeGoldPrice();
-    }
 
-    private void initializeGoldPrice() {
-        this.goldPrice = Float.parseFloat(apiService.getGoldBuyPricecalculate("http://api.btmc.vn/api/BTMCAPI/getpricebtmc?key=3kd8ub1llcg9t45hnoh8hmn7t5kc2v"));
-    }
     public Float getPricingRatioPB(){
         Optional<PricingRatio> pricingRatioOptional = pricingRatioRepository.findById(1L);
         if(pricingRatioOptional.isPresent()){

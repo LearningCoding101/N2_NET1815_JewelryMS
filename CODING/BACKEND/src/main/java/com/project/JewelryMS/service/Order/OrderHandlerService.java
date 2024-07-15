@@ -3,10 +3,7 @@ package com.project.JewelryMS.service.Order;
 import com.project.JewelryMS.entity.*;
 import com.project.JewelryMS.model.EmailDetail;
 import com.project.JewelryMS.model.Order.*;
-import com.project.JewelryMS.model.OrderDetail.OrderDetailRequest;
 import com.project.JewelryMS.model.OrderDetail.OrderDetailResponse;
-import com.project.JewelryMS.model.OrderDetail.OrderPromotionRequest;
-import com.project.JewelryMS.model.OrderDetail.OrderTotalRequest;
 import com.project.JewelryMS.repository.*;
 import com.project.JewelryMS.service.EmailService;
 import com.project.JewelryMS.service.ImageService;
@@ -17,7 +14,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ModelAttribute;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -673,5 +672,95 @@ public class OrderHandlerService {
     }
 
     //Calculate and Set Guarantee End Date///////////////////////////////////////////////////////////////////////////////////////////////////
+
+    //Search Customer Name or Email or PhoneNumber ==> Customer ID
+    //What if customerName duplicate
+
+    public List<CustomerOrderGuaranteeResponse> searchCustomerGuarantee(String search) {
+        List<Customer> customers = customerRepository.findByCusNameContainingIgnoreCase(search);
+        if (customers.isEmpty()) {
+            customers = customerRepository.findByEmailContainingIgnoreCase(search);
+        }
+        if (customers.isEmpty()) {
+            customers = customerRepository.findByPhoneNumberContainingIgnoreCase(search);
+        }
+
+        return customers.stream()
+                .map(customer -> new CustomerOrderGuaranteeResponse(
+                        customer.getPK_CustomerID(),
+                        customer.getCusName(),
+                        orderRepository.findByCustomerID(customer.getPK_CustomerID()).stream()
+                                .map(OrderHandlerService::mapToOrderGuaranteeResponse)
+                                .collect(Collectors.toList())
+                ))
+                .collect(Collectors.toList());
+    }
+
+    public List<CustomerOrderGuaranteeResponse> getOrdersByDateRange(DateFilterOrderDate dateFilter) {
+
+        LocalDate startDate = dateFilter.getStartTime();
+        LocalDate endDate = dateFilter.getEndTime();
+
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 00:00:00
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX); // 23:59:59.999999999
+
+        List<PurchaseOrder> orders = orderRepository.findOrdersByDateRange(startDateTime, endDateTime);
+
+        return orders.stream()
+                .filter(order -> order.getCustomer() != null)
+                .map(order -> new CustomerOrderGuaranteeResponse(
+                        order.getCustomer().getPK_CustomerID(),
+                        order.getCustomer().getCusName(),
+                        orderRepository.findByCustomerID(order.getCustomer().getPK_CustomerID()).stream()
+                                .map(OrderHandlerService::mapToOrderGuaranteeResponse)
+                                .collect(Collectors.toList())
+                ))
+                .collect(Collectors.toList());
+    }
+
+    public static OrderGuaranteeResponse mapToOrderGuaranteeResponse(PurchaseOrder order) {
+        return new OrderGuaranteeResponse(
+                order.getPK_OrderID(),
+                order.getPaymentType(),
+                order.getPurchaseDate(),
+                order.getStatus(),
+                order.getTotalAmount(),
+                order.getStaffAccount().getStaffID(),
+                order.getStaffAccount().getAccount().getAccountName(),
+                order.getOrderDetails().stream().map(OrderHandlerService::mapToOrderDetailGuaranteeResponse).collect(Collectors.toList())
+        );
+    }
+
+    public static OrderDetailGuaranteeResponse mapToOrderDetailGuaranteeResponse(OrderDetail orderDetail) {
+        // Implement the mapping logic here
+        // For simplicity, assuming constructor and fields
+        ProductSell productSell = orderDetail.getProductSell();
+        Guarantee guarantee = orderDetail.getProductSell().getGuarantee();
+        return new OrderDetailGuaranteeResponse(
+                orderDetail.getPK_ODID(),
+                orderDetail.getQuantity(),
+                orderDetail.getGuaranteeEndDate(),
+                productSell.getProductID(),
+                productSell.getChi(),
+                productSell.getCarat(),
+                productSell.getPName(),
+                productSell.getPDescription(),
+                productSell.getImage(),
+                productSell.getGemstoneType(),
+                productSell.getMetalType(),
+                productSell.getCost(),
+                productSell.getProductCode(),
+                productSell.isPStatus(),
+                productSell.getManufacturer(),
+                productSell.getManufactureCost(),
+                guarantee.getPK_guaranteeID(),
+                guarantee.getCoverage(),
+                guarantee.getPolicyType(),
+                guarantee.isStatus(),
+                guarantee.getWarrantyPeriodMonth()
+        );
+    }
+
+
 
 }

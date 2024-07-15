@@ -15,7 +15,7 @@ public class OrderDetailGuarantee {
     private int warrantyPeriodMonth;
     private double carat;
     private Long categoryId;
-    private int chi;
+    private Float chi;
     private double cost;
     private String pDescription;
     private String gemstoneType;

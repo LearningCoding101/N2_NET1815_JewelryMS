@@ -1,6 +1,5 @@
 package com.project.JewelryMS.repository;
 
-
 import com.project.JewelryMS.entity.Customer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
-import java.time.YearMonth;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -29,11 +27,9 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
             "GROUP BY c.staffAccount.staffID, c.staffAccount.account.accountName")
     List<Object[]> findCustomerSignUpsByStaff(LocalDateTime startDate, LocalDateTime endDate);
 
-
     @Query("SELECT COUNT(c) FROM Customer c WHERE FUNCTION('DATE', c.createDate) = :date")
     long countCustomersOnDate(Date date);
-//DATE_FORMAT(c.createDate, '%Y-%m') = :month
-//  FUNCTION('YEAR_MONTH', c.createDate) = FUNCTION('YEAR_MONTH', :month)
+
     @Query("SELECT COUNT(c) FROM Customer c WHERE DATE_FORMAT(c.createDate, '%Y-%m') = :month")
     long countCustomersInMonth(@Param("month") String month);
 
@@ -55,9 +51,28 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     @Query("SELECT c FROM Customer c WHERE c.PK_CustomerID = :id")
     List<Customer> findCustomersByLongKeyword(@Param("id") Long id);
 
+    @Query("SELECT COUNT(c) FROM Customer c WHERE c.createDate BETWEEN :startDate AND :endDate")
+    long countCustomerSignUpsByStaffInRange(
+            @Param("startDate") Date startDate,
+            @Param("endDate") Date endDate);
+
     @Query("SELECT COUNT(c) FROM Customer c WHERE c.staffAccount.staffID = :staffId AND c.createDate BETWEEN :startDate AND :endDate")
-    long countCustomerSignUpsByStaff(@Param("staffId") long staffId, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+    long countCustomerSignUpsByStaffAndDateRange(
+            @Param("staffId") long staffId,
+            @Param("startDate") Date startDate,
+            @Param("endDate") Date endDate);
 
     @Query("SELECT COUNT(c) FROM Customer c WHERE c.staffAccount.staffID = :staffId")
     long countCustomerSignUpsByStaff(@Param("staffId") long staffId);
+
+    @Query("SELECT c FROM Customer c WHERE LOWER(c.cusName) LIKE LOWER(CONCAT('%', :cusName, '%'))")
+    List<Customer> findByCusNameContainingIgnoreCase(@Param("cusName") String cusName);
+
+    @Query("SELECT c FROM Customer c WHERE LOWER(c.email) LIKE LOWER(CONCAT('%', :email, '%'))")
+    List<Customer> findByEmailContainingIgnoreCase(@Param("email") String email);
+
+    @Query("SELECT c FROM Customer c WHERE LOWER(c.phoneNumber) LIKE LOWER(CONCAT('%', :phoneNumber, '%'))")
+    List<Customer> findByPhoneNumberContainingIgnoreCase(@Param("phoneNumber") String phoneNumber);
+
 }
+

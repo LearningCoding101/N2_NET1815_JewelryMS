@@ -25,4 +25,17 @@ public interface AuthenticationRepository extends JpaRepository<Account, Long> {
 
     @Query("SELECT a FROM Account a")
     List<Account> findAllAccounts();
+
+    //Handle Duplicate Exception
+    @Query("SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END FROM Account a WHERE a.aUsername = :aUsername")
+    boolean existsByAUsername(@Param("aUsername") String aUsername);
+
+    @Query("SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END FROM Account a WHERE a.email = :email")
+    boolean existsByEmail(@Param("email") String email);
+
+    @Query("SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END FROM Account a WHERE a.aUsername = :aUsername AND a.PK_userID <> :userId")
+    boolean existsByAUsernameAndPkUserIDNot(@Param("aUsername") String aUsername, @Param("userId") int userId);
+
+    @Query("SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END FROM Account a WHERE a.email = :email AND a.PK_userID <> :userId")
+    boolean existsByEmailAndPkUserIDNot(@Param("email") String email, @Param("userId") int userId);
 }

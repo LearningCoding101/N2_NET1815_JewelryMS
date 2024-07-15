@@ -7,6 +7,8 @@ import com.google.firebase.auth.FirebaseToken;
 import com.project.JewelryMS.entity.Account;
 import com.project.JewelryMS.enumClass.RoleEnum;
 import com.project.JewelryMS.entity.StaffAccount;
+import com.project.JewelryMS.exception.DuplicateEmailException;
+import com.project.JewelryMS.exception.DuplicateUsernameException;
 import com.project.JewelryMS.model.*;
 import com.project.JewelryMS.model.Staff.CreateStaffAccountRequest;
 import com.project.JewelryMS.repository.AuthenticationRepository;
@@ -46,7 +48,14 @@ public class AuthenticationService implements UserDetailsService {
 
     public CreateStaffAccountRequest register(CreateStaffAccountRequest createStaffAccountRequest){
         Account account = new Account();
+        if(authenticationRepository.existsByAUsername(createStaffAccountRequest.getUsername())){
+            throw new DuplicateUsernameException("Username is already taken.");
+        }
+        if(authenticationRepository.existsByEmail(createStaffAccountRequest.getUsername())){
+            throw new DuplicateEmailException("Email is already in use.");
+        }
         account.setAccountName(createStaffAccountRequest.getAccountName());
+
         account.setEmail(createStaffAccountRequest.getEmail());
         account.setAPassword(passwordEncoder.encode(createStaffAccountRequest.getPassword()));
         account.setAUsername(createStaffAccountRequest.getUsername());

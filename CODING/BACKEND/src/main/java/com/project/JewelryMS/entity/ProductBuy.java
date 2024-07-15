@@ -40,7 +40,7 @@ public class ProductBuy {
     private String image;
 
     @Column(name= "chi")
-    private Integer chi;
+    private Float chi;
 
     @Column(name = "carat")
     private Float carat;

@@ -208,7 +208,11 @@ public class ProductSellService {
 
     public ProductSellResponse createProductSell(CreateProductSellRequest request) {
         ProductSell productSell = new ProductSell();
-        productSell.setCarat(request.getCarat());
+        if(request.getCarat() != null) {
+            productSell.setCarat(request.getCarat());
+        }else{
+            productSell.setCarat(0.0F);
+        }
         // Set Category
         Optional<Category> categoryOpt = categoryRepository.findById(request.getCategory_id());
         if (categoryOpt.isPresent()) {
@@ -216,17 +220,29 @@ public class ProductSellService {
         } else {
             throw new IllegalArgumentException("Category ID not found");
         }
-        productSell.setChi(request.getChi());
+        if(request.getChi() != null) {
+            productSell.setChi(request.getChi());
+        }else{
+            productSell.setChi(0.0F);
+        }
         productSell.setCost(calculateProductSellCost(request.getChi(),request.getCarat(),request.getGemstoneType(),request.getMetalType(),request.getManufactureCost()));
         productSell.setPDescription(request.getPdescription());
         productSell.setPName(request.getPname());
-        productSell.setGemstoneType(request.getGemstoneType());
+        if(request.getGemstoneType() != null) {
+            productSell.setGemstoneType(request.getGemstoneType());
+        }else{
+            productSell.setGemstoneType("N/A");
+        }
         // Gọi phương thức uploadImageByPath và send MultipartFile file image
         String imageUrl = imageService.uploadImageByPathService(request.getImage());
         productSell.setImage(imageUrl);
         productSell.setManufacturer(request.getManufacturer());
         productSell.setManufactureCost(request.getManufactureCost());
-        productSell.setMetalType(request.getMetalType());
+        if(request.getMetalType()!=null) {
+            productSell.setMetalType(request.getMetalType());
+        }else{
+            productSell.setMetalType("N/A");
+        }
         productSell.setProductCode(request.getProductCode());
         productSell.setPStatus(true);
         // Save ProductSell
@@ -236,28 +252,28 @@ public class ProductSellService {
     private Float goldPrice;
 
     @PostConstruct
-    private void initializeGoldPrice() {
+    public void initializeGoldPrice() {
         this.goldPrice = Float.parseFloat(apiService.getGoldBuyPricecalculate("http://api.btmc.vn/api/BTMCAPI/getpricebtmc?key=3kd8ub1llcg9t45hnoh8hmn7t5kc2v"));
     }
 
-    public Float calculateProductSellCost(Integer chi, Float carat, String gemstoneType, String metalType, Float manufacturerCost){
+    public Float calculateProductSellCost(Float chi, Float carat, String gemstoneType, String metalType, Float manufacturerCost){
         Float totalGemPrice = 0.0F;
         Float totalPrice = 0.0F;
 
         if (gemstoneType != null && carat != null) {
-            Float gemStonePrice = 100000000.0F; // Price per carat
+            Float gemStonePrice = 10000000.0F; // Price per carat
             totalGemPrice = (gemStonePrice * carat);
         }
 
         Float totalGoldPrice = 0.0F;
         if (metalType != null && chi != null) {
             Float goldPrices = goldPrice;
-            totalGoldPrice = (goldPrices / 10) * chi;
+            totalGoldPrice = goldPrices  * chi;
         }
 
         totalPrice = (totalGemPrice + totalGoldPrice + manufacturerCost) * getPricingRatioPS();
 
-        return totalPrice / 1000.0F;
+        return totalPrice ;
     }
 
     public Float getPricingRatioPS(){

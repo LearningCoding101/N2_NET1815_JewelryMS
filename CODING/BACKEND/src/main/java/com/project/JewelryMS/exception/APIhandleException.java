@@ -15,8 +15,28 @@ public class APIhandleException {
     public ResponseEntity<Object> handleInvalidUsernamePassword(BadCredentialsException ex){
         return new ResponseEntity<>("Username or password not correct", HttpStatus.FORBIDDEN);
     }
-    @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
-    public ResponseEntity<Object> handleDuplicate(SQLIntegrityConstraintViolationException ex){
-        return new ResponseEntity<>("Duplicate ", HttpStatus.BAD_REQUEST);
+
+    @ExceptionHandler(DuplicateUsernameException.class)
+    public ResponseEntity<Object> handleDuplicateUsernameException(DuplicateUsernameException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(DuplicateEmailException.class)
+    public ResponseEntity<Object> handleDuplicateEmailException(DuplicateEmailException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
+    public ResponseEntity<Object> handleDuplicate(SQLIntegrityConstraintViolationException ex) {
+        String message = ex.getMessage().toLowerCase();
+
+        if (message.contains("account.UKd3xjtwxrpxnpf7j2x5f35kdwo")) {
+            return handleDuplicateUsernameException(new DuplicateUsernameException("Username is already taken."));
+        } else if (message.contains("account.UKcs5bnaggwuluahrdh8mbs1rpe")) {
+            return handleDuplicateEmailException(new DuplicateEmailException("Email is already in use."));
+        }
+
+        return new ResponseEntity<>("Duplicate", HttpStatus.BAD_REQUEST);
+    }
+
 }

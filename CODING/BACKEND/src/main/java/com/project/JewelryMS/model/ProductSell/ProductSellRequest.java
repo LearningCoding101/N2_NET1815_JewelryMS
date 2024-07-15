@@ -12,7 +12,7 @@ import java.util.List;
 public class ProductSellRequest {
     private Float carat;
     private long category_id;
-    private Integer chi;
+    private Float chi;
     private Float cost;
     private String pdescription;
     private String gemstoneType;

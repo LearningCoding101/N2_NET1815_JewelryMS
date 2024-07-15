@@ -16,8 +16,8 @@ public class ProductResponse {
     private long orderDetail_ID;
     private int quantity;
     private long productID;
-    private float carat;
-    private int chi;
+    private Float carat;
+    private Float chi;
     private float cost;
     private String Description;
     private String gemstoneType;

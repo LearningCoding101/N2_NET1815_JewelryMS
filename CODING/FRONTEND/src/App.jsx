@@ -56,6 +56,10 @@ import StaffPerformance from "./page/manager/staff-performance/StaffPerformance"
 import SaleComparision from "./page/manager/sales_comparision/SaleComparision";
 import Statistic_Account from "./page/admin/statisticAccount/StatisticAccount";
 import Performance from "./page/staff/performance/Performance";
+import CheckGuarantee from "./page/manager/checkGuarantee/CheckGuarantee";
+import ViewGuarantee from "./component/utility/viewGuarantee/ViewGuarantee";
+import ViewGuaranteeByDate from "./component/utility/viewGuarantee/ViewGuaranteeByDate";
+import ChatBox from "./component/utility/chat/Chatbox";
 
 const PrivateProute = ({ role }) => {
   console.log(role);
@@ -100,6 +104,7 @@ function App() {
           <Route path="changepassword" element={<ManagerChangePassword />} />
           <Route path="product" element={<ManagerProduct />} />
           <Route path="staff" element={<Manager_StaffAccount />} />
+          <Route path="chat" element={<ChatBox />} />
           <Route path="staff/assign" element={<ListStaffWithSchedule />} />
           <Route path="staff/assign-to" element={<AssignStaffForm />} />
           <Route path="staff/assign-to-many" element={<AssignMany />} />
@@ -113,6 +118,15 @@ function App() {
           <Route path="salecomparision" element={<SaleComparision />} />
           <Route path="transaction/detail/:orderID/OUTGOING" element={<Transaction_ProductBuy />} />
           <Route path="transaction/detail/:orderID/INGOING" element={<Transaction_ProductSell />} />
+          <Route path="check/guarantee" element={<CheckGuarantee />} />
+          <Route
+            path="transaction/detail/:orderID/OUTGOING"
+            element={<Transaction_ProductBuy />}
+          />
+          <Route
+            path="transaction/detail/:orderID/INGOING"
+            element={<Transaction_ProductSell />}
+          />
         </Route>
       </Route>
       <Route path="admin" element={<PrivateProute role="ROLE_ADMIN" />}>
@@ -125,6 +139,7 @@ function App() {
           <Route path="staff" element={<AdminAccountStaff />} />
           <Route path="analytic" element={<Analytic />} />
           <Route path="statictic/account" element={<Statistic_Account />} />
+          <Route path="chat" element={<ChatBox />} />
 
           <Route path="topproductsell" element={<TopProductSells />} />
           <Route path="statictic/account" element={<Statistic_Account />} />
@@ -140,6 +155,9 @@ function App() {
           <Route path="confirm-order" element={<DisplayOrder />} />
           <Route path="initialize-productbuy" element={<ProductBuy />} />
           <Route path="confirm-productbuy" element={<ConfirmProductBuy />} />
+          <Route path="trace/by-customer" element={<ViewGuarantee />} />
+          <Route path="trace/by-date" element={<ViewGuaranteeByDate />} />
+          <Route path="chat" element={<ChatBox />} />
 
           <Route path="product" element={<StaffProduct />} />
           <Route path="changepassword" element={<StaffChangePassword />} />
