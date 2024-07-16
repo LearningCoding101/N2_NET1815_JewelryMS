@@ -3,7 +3,6 @@ package com.project.JewelryMS.service;
 import com.project.JewelryMS.entity.Account;
 import com.project.JewelryMS.enumClass.RoleEnum;
 import com.project.JewelryMS.entity.StaffAccount;
-import com.project.JewelryMS.model.AccountResponse;
 import com.project.JewelryMS.model.Profile.*;
 import com.project.JewelryMS.repository.AuthenticationRepository;
 import com.project.JewelryMS.repository.ShiftRepository;
@@ -26,6 +25,9 @@ public class ProfileService {
     @Autowired
     private ShiftRepository shiftRepository;
 
+    @Autowired
+    ImageService imageService;
+
     public ManagerProfileResponse viewManagerProfile(Long managerId) {
         Optional<Account> authenticationOptional = authenticationRepository.findById(managerId);
         if (authenticationOptional.isPresent() && authenticationOptional.get().getRole() == RoleEnum.ROLE_MANAGER) {
@@ -36,16 +38,17 @@ public class ProfileService {
         return null;
     }
 
-    public UpdateManagerResponse updateManagerProfile(Long managerId, UpdateManagerResponse updateManagerRequest) {
+    public UpdateManager updateManagerProfile(Long managerId, UpdateManager updateManagerRequest) {
         Optional<Account> authenticationOptional = authenticationRepository.findById(managerId);
         if (authenticationOptional.isPresent() && authenticationOptional.get().getRole() == RoleEnum.ROLE_MANAGER) {
             Account account = authenticationOptional.get();
             account.setAccountName(updateManagerRequest.getAccountName());
             account.setAUsername(updateManagerRequest.getUsername());
             account.setEmail(updateManagerRequest.getEmail());
+            account.setAImage(imageService.uploadImageByPathService(updateManagerRequest.getImage()));
             authenticationRepository.save(account);
-            return new UpdateManagerResponse(account.getEmail(), account.getUsername(),
-                    account.getAccountName());
+            return new UpdateManager(account.getEmail(), account.getUsername(),
+                    account.getAccountName(), account.getAImage());
         }
         return null;
     }
@@ -60,16 +63,17 @@ public class ProfileService {
         return null;
     }
 
-    public UpdateAdminResponse updateAdminProfile(Long adminId, UpdateAdminResponse updateAdminRequest) {
+    public UpdateAdmin updateAdminProfile(Long adminId, UpdateAdmin updateAdminRequest) {
         Optional<Account> authenticationOptional = authenticationRepository.findById(adminId);
         if (authenticationOptional.isPresent() && authenticationOptional.get().getRole() == RoleEnum.ROLE_ADMIN) {
             Account account = authenticationOptional.get();
             account.setAccountName(updateAdminRequest.getAccountName());
             account.setAUsername(updateAdminRequest.getUsername());
             account.setEmail(updateAdminRequest.getEmail());
+            account.setAImage(imageService.uploadImageByPathService(updateAdminRequest.getImage()));
             authenticationRepository.save(account);
-            return new UpdateAdminResponse(account.getEmail(), account.getUsername(),
-                    account.getAccountName());
+            return new UpdateAdmin(account.getEmail(), account.getUsername(),
+                    account.getAccountName(), account.getAImage());
         }
         return null;
     }
@@ -85,17 +89,19 @@ public class ProfileService {
         return null;
     }
 
-    public UpdateStaffResponse updateStaffProfile(Integer staffId, UpdateStaffResponse updateStaffRequest) {
+    public UpdateStaff updateStaffProfile(Integer staffId, UpdateStaff updateStaffRequest) {
         Optional<StaffAccount> staffOptional = staffAccountRepository.findById(staffId);
         if (staffOptional.isPresent()) {
             StaffAccount staffAccount = staffOptional.get();
             staffAccount.getAccount().setAccountName(updateStaffRequest.getAccountName());
             staffAccount.getAccount().setAUsername(updateStaffRequest.getUsername());
             staffAccount.getAccount().setEmail(updateStaffRequest.getEmail());
+            String image = imageService.uploadImageByPathService(updateStaffRequest.getImage());
+            staffAccount.getAccount().setAImage(image);
             staffAccount.setPhoneNumber(updateStaffRequest.getPhone());
             staffAccountRepository.save(staffAccount);
-            return new UpdateStaffResponse(staffAccount.getAccount().getEmail(), staffAccount.getAccount().getUsername(),
-                    staffAccount.getAccount().getAccountName(), staffAccount.getPhoneNumber());
+            return new UpdateStaff(staffAccount.getAccount().getEmail(), staffAccount.getAccount().getUsername(),
+                    staffAccount.getAccount().getAccountName(), staffAccount.getPhoneNumber(), staffAccount.getAccount().getAImage());
         }
         return null;
     }
@@ -131,6 +137,7 @@ public class ProfileService {
         List<Account> accounts = authenticationRepository.findAllAccounts();
         return accounts.parallelStream()
                 .map(a -> new StaffListResponse(
+                        a.getPK_userID(),
                         a.getRole(),
                         a.getEmail(),
                         a.getAUsername(),

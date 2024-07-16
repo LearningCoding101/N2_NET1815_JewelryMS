@@ -60,6 +60,10 @@ import CheckGuarantee from "./page/manager/checkGuarantee/CheckGuarantee";
 import ViewGuarantee from "./component/utility/viewGuarantee/ViewGuarantee";
 import ViewGuaranteeByDate from "./component/utility/viewGuarantee/ViewGuaranteeByDate";
 import ChatBox from "./component/utility/chat/Chatbox";
+import StaffPerformanceRange from "./page/manager/staffPerformanceRange/StaffPerformanceRange";
+import InactiveProductSell from "./page/manager/inactiveProductSell/InactiveProductSell";
+import InactiveProductSellAdmin from "./page/manager/inactiveProductSell/InactiveProductSell";
+import AppraisalPage from "./page/staff/staff-appraise/Appraise";
 
 const PrivateProute = ({ role }) => {
   console.log(role);
@@ -116,9 +120,6 @@ function App() {
           {/* <Route path="transaction/detail/:orderID/:orderType" element={<TransactionDetail />} /> */}
           salecomparision
           <Route path="salecomparision" element={<SaleComparision />} />
-          <Route path="transaction/detail/:orderID/OUTGOING" element={<Transaction_ProductBuy />} />
-          <Route path="transaction/detail/:orderID/INGOING" element={<Transaction_ProductSell />} />
-          <Route path="check/guarantee" element={<CheckGuarantee />} />
           <Route
             path="transaction/detail/:orderID/OUTGOING"
             element={<Transaction_ProductBuy />}
@@ -127,6 +128,11 @@ function App() {
             path="transaction/detail/:orderID/INGOING"
             element={<Transaction_ProductSell />}
           />
+          <Route path="check/guarantee" element={<CheckGuarantee />} />
+          <Route path="transaction/detail/:orderID/OUTGOING" element={<Transaction_ProductBuy />} />
+          <Route path="transaction/detail/:orderID/INGOING" element={<Transaction_ProductSell />} />
+          <Route path="staff/range" element={<StaffPerformanceRange />} />
+          <Route path="inactive/product" element={<InactiveProductSell />} />
         </Route>
       </Route>
       <Route path="admin" element={<PrivateProute role="ROLE_ADMIN" />}>
@@ -143,6 +149,7 @@ function App() {
 
           <Route path="topproductsell" element={<TopProductSells />} />
           <Route path="statictic/account" element={<Statistic_Account />} />
+          <Route path="inactive/product" element={<InactiveProductSellAdmin />} />
         </Route>
       </Route>
       <Route path="staff" element={<PrivateProute role={"ROLE_STAFF"} />}>
@@ -158,6 +165,7 @@ function App() {
           <Route path="trace/by-customer" element={<ViewGuarantee />} />
           <Route path="trace/by-date" element={<ViewGuaranteeByDate />} />
           <Route path="chat" element={<ChatBox />} />
+          <Route path="appraise" element={<AppraisalPage />} />
 
           <Route path="product" element={<StaffProduct />} />
           <Route path="changepassword" element={<StaffChangePassword />} />

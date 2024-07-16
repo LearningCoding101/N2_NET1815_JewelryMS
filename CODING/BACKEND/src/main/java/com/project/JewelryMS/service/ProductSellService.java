@@ -33,6 +33,9 @@ public class ProductSellService {
     PromotionRepository promotionRepository;
 
     @Autowired
+    GuaranteeRepository guaranteeRepository;
+
+    @Autowired
     ApiService apiService;
 
     @Autowired
@@ -449,14 +452,38 @@ public class ProductSellService {
             super(message);
         }
     }
-
-    public ProductSellResponse readProductByGuaranteeId(long guaranteeId) {
-        Optional<ProductSell> productSellOptional = productSellRepository.findByGuaranteeID(guaranteeId);
-        if(productSellOptional.isPresent()){
-            ProductSell productSell = productSellOptional.get();
-            return mapToProductSellResponse(productSell);
+//        List<Customer> customers = customerRepository.findByCusNameContainingIgnoreCase(search);
+//        if (customers.isEmpty()) {
+//            customers = customerRepository.findByEmailContainingIgnoreCase(search);
+//        }
+//        if (customers.isEmpty()) {
+//            customers = customerRepository.findByPhoneNumberContainingIgnoreCase(search);
+//        }
+    public List<GuaranteeProductSellResponse> readProductByGuaranteeSearch(String search){
+        List<Guarantee> guarantees = guaranteeRepository.findByCoverageIgnoreCase(search);
+        if(guarantees.isEmpty()){
+            guarantees = guaranteeRepository.findByPolicyTypeIgnoreCase(search);
         }
-        return null;
+        if (guarantees.isEmpty()) {
+            try {
+                Integer searchInt = Integer.parseInt(search);
+                guarantees = guaranteeRepository.findByWarrantyPeriodMonth(searchInt);
+            } catch (NumberFormatException e) {
+                // Handle the case where search is not an integer
+                guarantees = List.of();
+            }
+        }
+        // Mapping Guarantee to GuaranteeProductSellResponse
+        return guarantees.stream()
+                .map(guarantee -> new GuaranteeProductSellResponse(
+                        guarantee.getPK_guaranteeID(),
+                        guarantee.getCoverage(),
+                        guarantee.getPolicyType(),
+                        guarantee.getWarrantyPeriodMonth(),
+                        guarantee.isStatus(),
+                        mapToProductSellResponse(guarantee.getProductSell())
+                ))
+                .collect(Collectors.toList());
     }
 }
 

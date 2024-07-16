@@ -12,5 +12,10 @@ import java.util.List;
 public class CustomerOrderGuaranteeResponse {
     Long customerID;
     String customerName;
+    String email;
+    Integer point;
+    String gender;
+    String phoneNumber;
+    Boolean status;
     List<OrderGuaranteeResponse> orders;
 }

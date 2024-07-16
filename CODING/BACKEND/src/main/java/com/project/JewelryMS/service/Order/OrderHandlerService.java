@@ -105,11 +105,6 @@ public class OrderHandlerService {
             order.setPaymentType(null);
         }
         order.setTotalAmount(orderRequest.getTotalAmount());
-        if (orderRequest.getCustomer_ID() != null) {
-            customerRepository.findById(orderRequest.getCustomer_ID()).ifPresent(order::setCustomer);
-        } else {
-            order.setCustomer(null);
-        }
 
         if (orderRequest.getStaff_ID() != null) {
             staffAccountRepository.findById(orderRequest.getStaff_ID()).ifPresent(order::setStaffAccount);
@@ -437,7 +432,6 @@ public class OrderHandlerService {
         if (orderOptional.isPresent()) {
             PurchaseOrder purchaseOrder = orderOptional.get();
 
-            // Assuming imageService.uploadImageByPathService can handle base64 encoded string
             String image = imageService.uploadImageByPathService(confirmPaymentPBRequest.getImage());
             purchaseOrder.setImage(image);
             purchaseOrder.setStatus(3);
@@ -508,7 +502,12 @@ public class OrderHandlerService {
                 orderToUpdate.setPaymentType("Tiền mặt");
                 calculateAndSetGuaranteeEndDate(request.getOrderID());
                 System.out.println(orderToUpdate);
-                sendConfirmationEmail(request.getOrderID(), orderToUpdate.getEmail());
+                if(orderToUpdate.getEmail() != null){
+                    if(!orderToUpdate.getEmail().trim().isEmpty()){
+                        sendConfirmationEmail(request.getOrderID(), orderToUpdate.getEmail());
+
+                    }
+                }
                 return orderService.saveOrder(orderToUpdate) != null;
             } else{
                 return false;
@@ -689,7 +688,13 @@ public class OrderHandlerService {
                 .map(customer -> new CustomerOrderGuaranteeResponse(
                         customer.getPK_CustomerID(),
                         customer.getCusName(),
+                        customer.getEmail(),
+                        customer.getPointAmount(),
+                        customer.getGender(),
+                        customer.getPhoneNumber(),
+                        customer.isStatus(),
                         orderRepository.findByCustomerID(customer.getPK_CustomerID()).stream()
+                                .filter(order -> order.getStaffAccount() != null)
                                 .map(OrderHandlerService::mapToOrderGuaranteeResponse)
                                 .collect(Collectors.toList())
                 ))
@@ -711,7 +716,13 @@ public class OrderHandlerService {
                 .map(order -> new CustomerOrderGuaranteeResponse(
                         order.getCustomer().getPK_CustomerID(),
                         order.getCustomer().getCusName(),
+                        order.getCustomer().getEmail(),
+                        order.getCustomer().getPointAmount(),
+                        order.getCustomer().getGender(),
+                        order.getCustomer().getPhoneNumber(),
+                        order.getCustomer().isStatus(),
                         orderRepository.findByCustomerID(order.getCustomer().getPK_CustomerID()).stream()
+                                .filter(order1 -> order1.getStaffAccount() != null)
                                 .map(OrderHandlerService::mapToOrderGuaranteeResponse)
                                 .collect(Collectors.toList())
                 ))

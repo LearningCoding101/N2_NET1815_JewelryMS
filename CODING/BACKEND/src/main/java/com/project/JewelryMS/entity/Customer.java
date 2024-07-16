@@ -44,6 +44,10 @@ public class Customer {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     StaffAccount staffAccount;
 
+    //For testing purposes
+    public <E> Customer(long l, String mail, String number, int i, boolean b, String male, Date date, String customer1, Object o, HashSet<E> es, Object o1) {
+    }
+
     public String getLoyaltyRank() {
         int totalPoints = this.pointAmount;
         if (totalPoints >= 0 && totalPoints <= 99) {

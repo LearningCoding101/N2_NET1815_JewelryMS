@@ -10,6 +10,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StaffListResponse {
+    private long id;
     private RoleEnum role;
     private String email;
     private String username;

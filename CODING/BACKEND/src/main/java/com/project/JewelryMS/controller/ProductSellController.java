@@ -5,7 +5,6 @@ import com.project.JewelryMS.entity.ProductSell;
 import com.project.JewelryMS.model.ProductSell.*;
 import com.project.JewelryMS.model.Promotion.AssignPromotionRequest;
 import com.project.JewelryMS.service.ProductSellService;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -126,13 +125,12 @@ public class ProductSellController {
         return ResponseEntity.ok("All promotions removed from product sells successfully");
     }
 
-    // Get product by guarantee ID
-    @GetMapping("/by-guarantee-id")
-
+    // Get product by guarantee coverage, policyType and warrantyPeriodMonth
+    @GetMapping("/search-product-by-guarantee")
     //@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_MANAGER')")
-    public ResponseEntity<ProductSellResponse> readGuaranteeByGuaranteeId(@RequestParam Long guaranteeId) {
-        ProductSellResponse productSellResponse = productSellService.readProductByGuaranteeId(guaranteeId);
-        return ResponseEntity.ok(productSellResponse);
+    public ResponseEntity<List<GuaranteeProductSellResponse>> searchProductByGuarantee(@RequestParam String search) {
+        List<GuaranteeProductSellResponse> guaranteeProductSellResponses = productSellService.readProductByGuaranteeSearch(search);
+        return ResponseEntity.ok(guaranteeProductSellResponses);
     }
 
     @GetMapping("/get-by-code")

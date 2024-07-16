@@ -11,9 +11,9 @@ import java.util.Optional;
 
 @Repository
 public interface ManagerAccountRepository extends JpaRepository<Account, Integer> {
-    @Query("SELECT a FROM Account a WHERE a.role = ROLE_MANAGER AND a.status = 1")
+    @Query("SELECT a FROM Account a WHERE a.role = ROLE_MANAGER")
     List<Account> findAllManagerAccounts();
 
-    @Query("SELECT a FROM Account a WHERE a.role = ROLE_MANAGER AND a.PK_userID = :id AND a.status = 1")
+    @Query("SELECT a FROM Account a WHERE a.role = ROLE_MANAGER AND a.PK_userID = :id")
     Optional<Account> findManagerAccountById(Integer id);
 }

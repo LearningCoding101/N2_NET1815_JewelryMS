@@ -42,7 +42,7 @@ public class ProductSell {
     private Float chi;
 
     @Column(name = "cost")
-    private float cost;
+    private Float cost;
 
     @Column(name = "pDescription", length = 255)
     private String pDescription;

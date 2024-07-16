@@ -13,4 +13,7 @@ public class CalculatePBRequest {
     private String gemstoneType;
     private Float metalWeight;
     private Float gemstoneWeight;
+    private Integer id;
+    private Float cost;
+
 }

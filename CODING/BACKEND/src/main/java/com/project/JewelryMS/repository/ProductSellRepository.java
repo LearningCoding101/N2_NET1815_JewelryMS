@@ -52,4 +52,6 @@ public interface ProductSellRepository extends JpaRepository<ProductSell, Long> 
 
     @Query("SELECT ps FROM ProductSell ps WHERE ps.guarantee.PK_guaranteeID = :guaranteeID ")
     Optional<ProductSell> findByGuaranteeID(@Param("guaranteeID")Long guaranteeID);
+
+
 }

@@ -31,9 +31,9 @@ public class APIhandleException {
         String message = ex.getMessage().toLowerCase();
 
         if (message.contains("account.UKd3xjtwxrpxnpf7j2x5f35kdwo")) {
-            return handleDuplicateUsernameException(new DuplicateUsernameException("Username is already taken."));
+            return handleDuplicateUsernameException(new DuplicateUsernameException("Username đã được sử dụng"));
         } else if (message.contains("account.UKcs5bnaggwuluahrdh8mbs1rpe")) {
-            return handleDuplicateEmailException(new DuplicateEmailException("Email is already in use."));
+            return handleDuplicateEmailException(new DuplicateEmailException("Email đã được sử dụng."));
         }
 
         return new ResponseEntity<>("Duplicate", HttpStatus.BAD_REQUEST);

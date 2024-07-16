@@ -1,5 +1,6 @@
 package com.project.JewelryMS.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -20,7 +21,7 @@ public class ProductBuy {
     @Column(name="PK_ProductBuyID")
     private Long PK_ProductBuyID;
 
-    @OneToMany(mappedBy = "productBuy")
+    @OneToMany(mappedBy = "productBuy", fetch = FetchType.EAGER)
     @JsonIgnoreProperties
     Set<OrderBuyDetail> orderBuyDetails = new HashSet<>();
 
@@ -48,8 +49,9 @@ public class ProductBuy {
     @Column(name = "pbStatus")
     private boolean pbStatus;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="FK_categoryID", referencedColumnName = "id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @JsonIgnore
     private Category category;
 }

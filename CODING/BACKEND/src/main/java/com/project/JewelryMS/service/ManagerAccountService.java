@@ -58,16 +58,17 @@ public class ManagerAccountService {
     public ManagerAccountResponse createManagerAccount(CreateManagerAccountRequest createManagerAccountRequest){
         Account account = new Account();
         if(authenticationRepository.existsByAUsername(createManagerAccountRequest.getUsername())){
-            throw new DuplicateUsernameException("Username is already taken.");
+            throw new DuplicateUsernameException("Username đã được sử dụng.");
         }
         if(authenticationRepository.existsByEmail(createManagerAccountRequest.getUsername())){
-            throw new DuplicateEmailException("Email is already in use.");
+            throw new DuplicateEmailException("Email đã được sử dụng.");
         }
         account.setAccountName(createManagerAccountRequest.getAccountName());
         account.setEmail(createManagerAccountRequest.getEmail());
         account.setAPassword(passwordEncoder.encode(createManagerAccountRequest.getAPassword()));
         account.setAUsername(createManagerAccountRequest.getUsername());
         account.setRole(RoleEnum.ROLE_MANAGER);
+        account.setAImage("https://i.ibb.co/Gxz9md6/avatar-trang-4.jpg");
         account.setStatus(1);
         Account account1 =  authenticationRepository.save(account);
         return getManagerAccountById(account1.getPK_userID());
@@ -80,10 +81,10 @@ public class ManagerAccountService {
             if (existingAccountOpt.isPresent()) {
                 Account account = existingAccountOpt.get();
                 if (authenticationRepository.existsByAUsernameAndPkUserIDNot(account.getAUsername(), id)) {
-                    throw new DuplicateUsernameException("Username is already taken.");
+                    throw new DuplicateUsernameException("Username đã được sử dụng.");
                 }
                 if (authenticationRepository.existsByEmailAndPkUserIDNot(account.getEmail(), id)) {
-                    throw new DuplicateEmailException("Email is already in use.");
+                    throw new DuplicateEmailException("Email đã được sử dụng.");
                 }
                 account.setAccountName(managerAccountRequest.getAccountName());
                 account.setAUsername(managerAccountRequest.getUsername());

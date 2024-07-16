@@ -15,7 +15,7 @@ import java.util.Optional;
 @Repository
 public interface StaffAccountRepository extends JpaRepository<StaffAccount, Integer> {
 
-   @Query("SELECT sa FROM StaffAccount sa JOIN sa.account a WHERE a.role = 'ROLE_STAFF' AND a.status = 1")
+   @Query("SELECT sa FROM StaffAccount sa JOIN sa.account a WHERE a.role = 'ROLE_STAFF'")
         List<StaffAccount> findAllStaffAccountsByRoleStaff();
 
    @Query("SELECT sa FROM StaffAccount sa JOIN sa.account a WHERE a.role = 'ROLE_STAFF' AND a.status = 1 AND sa.staffID = :id")
@@ -32,4 +32,11 @@ public interface StaffAccountRepository extends JpaRepository<StaffAccount, Inte
 
     @Query("SELECT s FROM StaffAccount s WHERE s.staffShifts IS EMPTY")
     List<StaffAccount> findStaffWithoutShift();
+
+    @Query("SELECT sa FROM StaffAccount sa WHERE sa.account.email = :email")
+    StaffAccount findByEmail(@Param("email") String email);
+
+    @Query("SELECT sa.account.email FROM StaffAccount sa WHERE sa.staffID = :staffId")
+    String findEmailByStaffId(@Param("staffId") long staffId);
+
 }

@@ -18,4 +18,8 @@ public class PricingRatio {
 
     Float pricingRatioPS;
     Float pricingRatioPB;
+
+    //For testing purposes
+    public PricingRatio(long id, float pricingRatio) {
+    }
 }

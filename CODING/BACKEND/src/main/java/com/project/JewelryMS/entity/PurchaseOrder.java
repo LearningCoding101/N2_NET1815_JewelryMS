@@ -21,8 +21,9 @@ public class PurchaseOrder implements Serializable {
     @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL, orphanRemoval = true)
     Set<OrderDetail> orderDetails = new HashSet<>();
 
-    @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonIgnoreProperties("orderBuyDetails")
+
     Set<OrderBuyDetail> orderBuyDetails = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY)

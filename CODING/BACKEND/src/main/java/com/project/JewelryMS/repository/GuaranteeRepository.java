@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,4 +33,14 @@ public interface GuaranteeRepository extends JpaRepository<Guarantee, Long> {
     List<Guarantee> listAllGuarantees();
 
     Optional<Guarantee> findByProductSell(ProductSell productSell);
+
+
+    @Query("SELECT g FROM Guarantee g WHERE LOWER(g.coverage) LIKE LOWER(CONCAT('%', :coverage, '%'))")
+    List<Guarantee> findByCoverageIgnoreCase(@RequestParam("coverage") String coverage);
+
+    @Query("SELECT g FROM Guarantee g WHERE LOWER(g.policyType) LIKE LOWER(CONCAT('%', :policyType, '%'))")
+    List<Guarantee> findByPolicyTypeIgnoreCase(@RequestParam("policyType") String policyType);
+
+    @Query("SELECT g FROM Guarantee g WHERE g.warrantyPeriodMonth = :warrantyPeriodMonth")
+    List<Guarantee> findByWarrantyPeriodMonth(@Param("warrantyPeriodMonth") Integer warrantyPeriodMonth);
 }

@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
@@ -22,9 +21,9 @@ public class ProfileController {
 
     @PutMapping("/managers/{managerId}")
     @PreAuthorize("hasRole('ROLE_MANAGER')")
-    public ResponseEntity<UpdateManagerResponse> updateManagerProfile(@PathVariable Long managerId,
-                                                                      @RequestBody UpdateManagerResponse updateManagerRequest) {
-        UpdateManagerResponse updatedProfile = profileService.updateManagerProfile(managerId, updateManagerRequest);
+    public ResponseEntity<UpdateManager> updateManagerProfile(@PathVariable Long managerId,
+                                                              @RequestBody UpdateManager updateManagerRequest) {
+        UpdateManager updatedProfile = profileService.updateManagerProfile(managerId, updateManagerRequest);
         if (updatedProfile != null) {
             return ResponseEntity.ok(updatedProfile);
         } else {
@@ -45,9 +44,9 @@ public class ProfileController {
 
     @PutMapping("/admins/{adminId}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<UpdateAdminResponse> updateAdminProfile(@PathVariable Long adminId,
-                                                                  @RequestBody UpdateAdminResponse updateAdminRequest) {
-        UpdateAdminResponse updatedProfile = profileService.updateAdminProfile(adminId, updateAdminRequest);
+    public ResponseEntity<UpdateAdmin> updateAdminProfile(@PathVariable Long adminId,
+                                                          @RequestBody UpdateAdmin updateAdminRequest) {
+        UpdateAdmin updatedProfile = profileService.updateAdminProfile(adminId, updateAdminRequest);
         if (updatedProfile != null) {
             return ResponseEntity.ok(updatedProfile);
         } else {
@@ -57,9 +56,9 @@ public class ProfileController {
 
     @PutMapping("/staff/{staffId}")
     @PreAuthorize("hasRole('ROLE_STAFF')")
-    public ResponseEntity<UpdateStaffResponse> updateStaffProfile(@PathVariable Integer staffId,
-                                                                  @RequestBody UpdateStaffResponse updateStaffRequest) {
-        UpdateStaffResponse updatedProfile = profileService.updateStaffProfile(staffId, updateStaffRequest);
+    public ResponseEntity<UpdateStaff> updateStaffProfile(@PathVariable Integer staffId,
+                                                          @RequestBody UpdateStaff updateStaffRequest) {
+        UpdateStaff updatedProfile = profileService.updateStaffProfile(staffId, updateStaffRequest);
         if (updatedProfile != null) {
             return ResponseEntity.ok(updatedProfile);
         } else {
@@ -67,7 +66,7 @@ public class ProfileController {
         }
     }
 
-    @GetMapping("/all")
+    @GetMapping("/profile/all")
     public ResponseEntity<List<StaffListResponse>> getAllAccounts() {
         List<StaffListResponse> accounts = profileService.getAllAccounts();
         return ResponseEntity.ok(accounts);

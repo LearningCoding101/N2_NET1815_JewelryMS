@@ -7,8 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateAdminResponse {
-    String email;
-    String username;
-    String accountName;
+public class UpdateManager {
+    private String email;
+    private String username;
+    private String accountName;
+    String image;
 }

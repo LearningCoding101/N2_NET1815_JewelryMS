@@ -7,8 +7,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateManagerResponse {
-    private String email;
-    private String username;
-    private String accountName;
+public class UpdateStaff {
+    String email;
+    String username;
+    String accountName;
+    String phone;
+    String image;
 }

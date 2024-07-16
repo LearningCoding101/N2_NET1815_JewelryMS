@@ -15,4 +15,5 @@ public class CreateProductBuyResponse {
     private String gemstoneType;
     private String image;
     private Float cost;
+
 }

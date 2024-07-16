@@ -33,11 +33,11 @@ class ProfileControllerTest {
     @Test
     void updateManagerProfile() {
         Long managerId = 1L;
-        UpdateManagerResponse request = new UpdateManagerResponse();
-        UpdateManagerResponse updatedProfile = new UpdateManagerResponse();
+        UpdateManager request = new UpdateManager();
+        UpdateManager updatedProfile = new UpdateManager();
         when(profileService.updateManagerProfile(managerId, request)).thenReturn(updatedProfile);
 
-        ResponseEntity<UpdateManagerResponse> response = profileController.updateManagerProfile(managerId, request);
+        ResponseEntity<UpdateManager> response = profileController.updateManagerProfile(managerId, request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(updatedProfile, response.getBody());
@@ -58,11 +58,11 @@ class ProfileControllerTest {
     @Test
     void updateAdminProfile() {
         Long adminId = 1L;
-        UpdateAdminResponse request = new UpdateAdminResponse();
-        UpdateAdminResponse updatedProfile = new UpdateAdminResponse();
+        UpdateAdmin request = new UpdateAdmin();
+        UpdateAdmin updatedProfile = new UpdateAdmin();
         when(profileService.updateAdminProfile(adminId, request)).thenReturn(updatedProfile);
 
-        ResponseEntity<UpdateAdminResponse> response = profileController.updateAdminProfile(adminId, request);
+        ResponseEntity<UpdateAdmin> response = profileController.updateAdminProfile(adminId, request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(updatedProfile, response.getBody());
@@ -71,11 +71,11 @@ class ProfileControllerTest {
     @Test
     void updateStaffProfile() {
         Integer staffId = 1;
-        UpdateStaffResponse request = new UpdateStaffResponse();
-        UpdateStaffResponse updatedProfile = new UpdateStaffResponse();
+        UpdateStaff request = new UpdateStaff();
+        UpdateStaff updatedProfile = new UpdateStaff();
         when(profileService.updateStaffProfile(staffId, request)).thenReturn(updatedProfile);
 
-        ResponseEntity<UpdateStaffResponse> response = profileController.updateStaffProfile(staffId, request);
+        ResponseEntity<UpdateStaff> response = profileController.updateStaffProfile(staffId, request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(updatedProfile, response.getBody());

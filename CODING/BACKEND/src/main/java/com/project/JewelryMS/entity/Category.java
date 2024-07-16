@@ -32,7 +32,7 @@ public class Category {
     private List<ProductSell> productSell;
 
 
-    @OneToMany(mappedBy = "category")
+    @OneToMany(mappedBy = "category", fetch = FetchType.EAGER)
     @JsonIgnoreProperties("category")
     private List<ProductBuy> productBuy;
 }

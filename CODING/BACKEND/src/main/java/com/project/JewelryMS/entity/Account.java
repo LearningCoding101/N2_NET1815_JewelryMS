@@ -39,7 +39,8 @@ public class Account implements UserDetails {
             @Enumerated(value = EnumType.STRING)
     RoleEnum role;
 
-
+    @Column(name ="aImage")
+    String aImage;
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
     @JsonIgnoreProperties("account")
     private StaffAccount staffAccount;

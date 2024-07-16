@@ -4,6 +4,7 @@ import com.project.JewelryMS.entity.*;
 import com.project.JewelryMS.model.Dashboard.*;
 import com.project.JewelryMS.model.Dashboard.Customer.*;
 import com.project.JewelryMS.repository.*;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,17 +17,17 @@ import java.util.stream.Collectors;
 @Service
 public class DashboardService {
     @Autowired
-    CategoryRepository categoryRepository;
+    private CategoryRepository categoryRepository;
     @Autowired
-    OrderRepository orderRepository;
+    private OrderRepository orderRepository;
     @Autowired
-    CustomerRepository customerRepository;
+    private CustomerRepository customerRepository;
     @Autowired
-    CustomerService customerService;
+    private CustomerService customerService;
     @Autowired
     private OrderDetailRepository orderDetailRepository;
     @Autowired
-    StaffAccountRepository staffAccountRepository;
+    private StaffAccountRepository staffAccountRepository;
     @Autowired
     private PurchaseOrderRepository purchaseOrderRepository;
     @Autowired
@@ -52,7 +53,7 @@ public class DashboardService {
     public Float CalculateCategoryTotal(Long Category_ID){
         List<PurchaseOrder> orders = orderRepository.findAllCompleteOrder();
 
-        // Tính tổng doanh thu cho danh mục
+        // Tính tổng doanh thu cho category
         float totalRevenue = 0.0F;
 
         for(PurchaseOrder order : orders){
@@ -75,7 +76,7 @@ public class DashboardService {
     public List<TopSellProductResponse> getTopSellingProducts() {
         List<PurchaseOrder> orders = orderRepository.findAllCompleteOrder();
 
-        // Sử dụng Map để lưu trữ số lượng và doanh thu bán hàng cho từng sản phẩm
+        // Sử dụng Map để lưu trữ amount và doanh thu bán hàng cho từng product
         Map<Long, TopSellProductResponse> productSalesMap = new HashMap<>();
 
         for (PurchaseOrder order : orders) {
@@ -100,7 +101,7 @@ public class DashboardService {
             }
         }
 
-        // Chuyển Map sang List và sắp xếp theo số lượng bán ra hoặc doanh thu
+        // convert Map sang List và sắp xếp theo sales amount or doanh thu
         List<TopSellProductResponse> topSellProductResponses = new ArrayList<>(productSalesMap.values());
         topSellProductResponses.sort(Comparator.comparing(TopSellProductResponse::getUnitSold).reversed());
         return topSellProductResponses;
@@ -497,12 +498,12 @@ public class DashboardService {
 
             List<Map.Entry<String, Integer>> sortedProducts = productCountMap.entrySet().stream()
                     .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                    .collect(Collectors.toList());
+                    .toList();
 
             ProductSellTrendResponse response = new ProductSellTrendResponse();
             response.setCustomerName(customerService.getCustomerNameById(customerId));
 
-            if (sortedProducts.size() > 0) response.setProductTop1(sortedProducts.get(0).getKey());
+            if (!sortedProducts.isEmpty()) response.setProductTop1(sortedProducts.get(0).getKey());
             if (sortedProducts.size() > 1) response.setProductTop2(sortedProducts.get(1).getKey());
             if (sortedProducts.size() > 2) response.setProductTop3(sortedProducts.get(2).getKey());
 
@@ -551,38 +552,61 @@ public class DashboardService {
     }
 
     public StaffStatisticsResponse getStaffStats(long staffId) {
-        long customerSignUps = customerRepository.countCustomerSignUpsByStaff(staffId);
-        Double revenueGenerated = purchaseOrderRepository.getTotalRevenueByStaff(staffId);
-        long salesCount = purchaseOrderRepository.getSalesCountByStaff(staffId);
-        long shiftsCount = shiftRepository.countShiftsByStaff(staffId);
+        // Fetch the email of the staff using the staff ID
+        String email = staffAccountRepository.findEmailByStaffId(staffId);
 
-        return mapToStaffStatisticsResponse(staffId, customerSignUps, revenueGenerated, salesCount, shiftsCount);
+        // Fetch the statistics using the email
+        long customerSignUps = customerRepository.countCustomerSignUpsByStaffEmail(email);
+        Double revenueGenerated = purchaseOrderRepository.getTotalRevenueByStaffEmail(email);
+        long salesCount = purchaseOrderRepository.getSalesCountByStaffEmail(email);
+        long shiftsCount = shiftRepository.countShiftsByStaffEmail(email);
+
+        return mapToStaffStatisticsResponse(email,staffId, customerSignUps, revenueGenerated, salesCount, shiftsCount);
     }
 
-    public StaffStatisticsResponse getStaffStatsInRange(long staffId, LocalDate startDate, LocalDate endDate) {
+
+    public StaffStatisticsResponse getStaffStatsInRange(String email, LocalDate startDate, LocalDate endDate) {
+        StaffAccount staffAccount = staffAccountRepository.findByEmail(email);
+        if (staffAccount == null) {
+            throw new EntityNotFoundException("Staff not found with email: " + email);
+        }
+
+        long staffId = staffAccount.getStaffID();
         LocalDateTime startDateTime = startDate.atStartOfDay();
         LocalDateTime endDateTime = endDate.plusDays(1).atStartOfDay();
 
-        long customerSignUps = customerRepository.countCustomerSignUpsByStaffAndDateRange(
-                staffId,
+        long customerSignUps = customerRepository.countCustomerSignUpsByStaffEmailAndDateRange(
+                email,
                 Date.from(startDateTime.atZone(ZoneId.systemDefault()).toInstant()),
                 Date.from(endDateTime.atZone(ZoneId.systemDefault()).toInstant())
         );
-        Double revenueGenerated = purchaseOrderRepository.getTotalRevenueByStaffAndDateRange(staffId, startDate.atStartOfDay(), endDate.plusDays(1).atStartOfDay());
-        long salesCount = purchaseOrderRepository.getSalesCountByStaffAndDateRange(staffId, startDate.atStartOfDay(), endDate.plusDays(1).atStartOfDay());
-        long shiftsCount = shiftRepository.countShiftsByStaffAndDateRange(staffId, startDate.atStartOfDay(), endDate.plusDays(1).atStartOfDay());
+        Double revenueGenerated = purchaseOrderRepository.getTotalRevenueByStaffEmailAndDateRange(email, startDateTime, endDateTime);
+        if (revenueGenerated == null) {
+            revenueGenerated = 0.0;
+        }
+        Long salesCount = purchaseOrderRepository.getSalesCountByStaffEmailAndDateRange(email, startDateTime, endDateTime);
+        if (salesCount == null) {
+            salesCount = 0L;
+        }
+        Long shiftsCount = shiftRepository.countShiftsByStaffEmailAndDateRange(email, startDateTime, endDateTime);
+        if (shiftsCount == null) {
+            shiftsCount = 0L;
+        }
 
-        return mapToStaffStatisticsResponse(staffId, customerSignUps, revenueGenerated, salesCount, shiftsCount);
+        return mapToStaffStatisticsResponse(email, staffId, customerSignUps, revenueGenerated, salesCount, shiftsCount);
     }
+
 
     // Mapping function
-    private StaffStatisticsResponse mapToStaffStatisticsResponse(long staffId, long customerSignUps, Double revenueGenerated, long salesCount, long shiftsCount) {
-        return new StaffStatisticsResponse(
-                staffId,
-                customerSignUps,
-                revenueGenerated != null ? revenueGenerated : 0.0,
-                salesCount,
-                shiftsCount
-        );
+    private StaffStatisticsResponse mapToStaffStatisticsResponse(String email, long staffId, long customerSignUps, Double revenueGenerated, long salesCount, long shiftsCount) {
+        StaffStatisticsResponse response = new StaffStatisticsResponse();
+        response.setStaffId(staffId); // Set the staff ID
+        response.setEmail(email); // Set the email
+        response.setCustomerSignUps(customerSignUps);
+        response.setRevenueGenerated(revenueGenerated);
+        response.setSalesCount(salesCount);
+        response.setShiftsCount(shiftsCount);
+        return response;
     }
+
 }

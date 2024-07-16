@@ -81,9 +81,21 @@ public class ImageService {
     }
 
     public String uploadImageByPathService(String base64EncodedFile) {
-        // Remove the prefix if it exists
+        // Validate the base64 string
+        if (base64EncodedFile == null || base64EncodedFile.isEmpty()) {
+            return "Invalid base64 string: empty or null";
+        }
+
+        // Correct the base64 prefix if necessary
         if (base64EncodedFile.startsWith("data:image/")) {
             base64EncodedFile = base64EncodedFile.substring(base64EncodedFile.indexOf(",") + 1);
+        }
+
+        // Check if the base64 string is valid
+        try {
+            Base64.getDecoder().decode(base64EncodedFile);
+        } catch (IllegalArgumentException e) {
+            return "Invalid base64 string: unable to decode";
         }
 
         String url = "https://api.imgbb.com/1/upload?key=" + apiKey;
@@ -104,7 +116,7 @@ public class ImageService {
                 return "Failed to parse Imgbb response";
             }
         } else {
-            return "Failed to upload image";
+            return "Failed to upload image: " + response.getBody();
         }
     }
 
