@@ -1,0 +1,285 @@
+package com.project.JewelryMS.controller;
+
+import com.project.JewelryMS.entity.Shift;
+import com.project.JewelryMS.entity.Staff_Shift;
+import com.project.JewelryMS.model.Shift.AssignStaffByShiftTypePatternRequest;
+import com.project.JewelryMS.model.Shift.AssignStaffToMultipleDaysRequest;
+import com.project.JewelryMS.model.Staff.StaffAccountResponse;
+import com.project.JewelryMS.model.StaffShift.IdWrapper;
+import com.project.JewelryMS.model.StaffShift.StaffShiftResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+import com.project.JewelryMS.service.SchedulingService;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/api/scheduling")
+@SecurityRequirement(name = "api")
+@CrossOrigin(origins = "*")
+public class SchedulingController {
+
+    @Autowired
+    private SchedulingService schedulingService;
+
+    @PostMapping("/assignStaffToShift")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
+    public ResponseEntity<?> assignStaffToShift(@RequestParam int staffId, @RequestParam int shiftId) {
+        try {
+            Staff_Shift staffShift = schedulingService.assignStaffToShift(staffId, shiftId);
+            return ResponseEntity.ok("Staff assigned to shift successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to assign staff to shift: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/assignShiftToStaff")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
+    public ResponseEntity<?> assignShiftToStaff(@RequestParam int shiftId, @RequestParam int staffId) {
+        try {
+            Staff_Shift staffShift = schedulingService.assignShiftToStaff(shiftId, staffId);
+            return ResponseEntity.ok("Shift assigned to staff successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to assign shift to staff: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/scheduleMatrix")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
+    public ResponseEntity<?> getScheduleMatrix(@RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+                                               @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
+        try {
+            Map<String, Map<String, List<StaffShiftResponse>>> matrix = schedulingService.getScheduleMatrix(startDate, endDate);
+            return ResponseEntity.ok(matrix);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to fetch schedule matrix: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/assignMultipleStaffToShift")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
+    public ResponseEntity<?> assignMultipleStaffToShift(@RequestBody List<IdWrapper> staffIds, @RequestParam int shiftId) {
+        try {
+            List<Staff_Shift> staffShifts = schedulingService.assignMultipleStaffToShift(
+                    staffIds.stream().map(IdWrapper::getId).collect(Collectors.toList()), shiftId);
+            return ResponseEntity.ok("Staff assigned to shift successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to assign staff to shift: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/assignMultipleShiftsToStaff")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
+    public ResponseEntity<?> assignMultipleShiftsToStaff(@RequestParam int staffId, @RequestBody List<IdWrapper> shiftIds) {
+        try {
+            List<Staff_Shift> staffShifts = schedulingService.assignMultipleShiftsToStaff(
+                    staffId, shiftIds.stream().map(IdWrapper::getId).collect(Collectors.toList()));
+            return ResponseEntity.ok("Shifts assigned to staff successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to assign shifts to staff: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/removeStaffFromShift")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
+    public ResponseEntity<?> removeStaffFromShift(@RequestParam int staffId, @RequestParam int shiftId) {
+        try {
+            schedulingService.removeStaffFromShift(staffId, shiftId);
+            return ResponseEntity.ok("Unassigning staff from shift is complete.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to remove staff from shift: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/removeShiftFromStaff")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
+    public ResponseEntity<?> removeShiftFromStaff(@RequestParam int shiftId, @RequestParam int staffId) {
+        try {
+            schedulingService.removeShiftFromStaff(shiftId, staffId);
+            return ResponseEntity.ok("Unassigning shift from staff is complete.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to remove shift from staff: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/assignStaffToDay")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
+    public ResponseEntity<?> assignStaffToDay(@RequestParam int staffId, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date, @RequestParam String shiftType) {
+        try {
+            StaffShiftResponse staffShift = schedulingService.assignStaffToDay(staffId, date, shiftType);
+            return ResponseEntity.ok("Staff assigned to day successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to assign staff to day: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/updateShiftWorkArea")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    public ResponseEntity<?> updateShiftWorkArea(@RequestParam long shiftId, @RequestParam String newWorkArea) {
+        try {
+            Shift updatedShift = schedulingService.updateShiftWorkArea(shiftId, newWorkArea);
+            return ResponseEntity.ok("Shift work area updated successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to update shift work area: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/update-shift-register")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    public ResponseEntity<?> updateShiftRegister(@RequestParam long shiftId, @RequestParam int register) {
+        try {
+            Shift updatedShift = schedulingService.updateShiftRegister(shiftId, register);
+            return ResponseEntity.ok("Shift register updated successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to update shift register: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/assignStaffToDateRange")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
+    public ResponseEntity<?> assignStaffToDateRange(@RequestBody AssignStaffToMultipleDaysRequest request) {
+        try {
+            List<StaffShiftResponse> staffShiftResponses = schedulingService.assignStaffToDateRange(
+                    request.getStaffIds(),
+                    request.getStartDate(),
+                    request.getEndDate(),
+                    request.getShiftTypes());
+            return ResponseEntity.ok("Staff assigned to date range successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to assign staff to date range: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/assignStaffByShiftTypePattern")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
+    public ResponseEntity<?> assignStaffByShiftTypePattern(
+            @RequestBody AssignStaffByShiftTypePatternRequest request,
+            @RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+            @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
+        try {
+            List<StaffAccountResponse> staffAccountResponses = schedulingService.assignStaffByShiftTypePattern(
+                    request.getStaffShiftPatterns(), startDate, endDate);
+            return ResponseEntity.ok(staffAccountResponses);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to assign staff by shift type pattern: " + e.getMessage());
+        }
+    }
+
+
+    @DeleteMapping("/removeStaffFromShiftsInRange")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    public ResponseEntity<?> removeStaffFromShiftsInRange(@RequestParam int staffId,
+                                                          @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+                                                          @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
+        try {
+            schedulingService.removeStaffFromShiftsInRange(staffId, startDate, endDate);
+            return ResponseEntity.ok("Unassigning staff from shifts in the specified range is complete.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to remove staff from shifts in range: " + e.getMessage());
+        }
+    }
+
+    //    // New endpoint for assigning staff by day of the week with their specific preferences
+//    @PostMapping("/assignStaffByDayOfWeek")
+//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
+//    public ResponseEntity<List<StaffShiftResponse>> assignStaffByDayOfWeek(
+//            @RequestBody AssignStaffByDayOfWeekRequest request) {
+//        List<StaffShiftResponse> staffShiftResponses = schedulingService.assignStaffByDayOfWeek(
+//                request.getStaffAvailability(),
+//                request.getStartDate(),
+//                request.getEndDate()
+//        );
+//        return ResponseEntity.ok(staffShiftResponses);
+//    }
+
+    @PostMapping("/assignRandomStaffShiftPattern")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
+    public ResponseEntity<?> assignRandomStaffShiftPattern(
+            @RequestBody List<Integer> staffIds,
+            @RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+            @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
+        try {
+            List<StaffAccountResponse> staffAccountResponses = schedulingService.assignRandomStaffShiftPattern(staffIds, startDate, endDate);
+            return ResponseEntity.ok(staffAccountResponses);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to assign random staff shift pattern: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/removeAllStaffFromShiftsInRange")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    public ResponseEntity<?> removeAllStaffFromShiftsInRange(
+            @RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+            @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
+        try {
+            schedulingService.removeAllStaffFromShiftsInRange(startDate, endDate);
+            return ResponseEntity.ok("All staff removed from shifts in the specified range.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to remove all staff from shifts in range: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/assign-cashier-day")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
+    public ResponseEntity<?> assignCashierToDay(@RequestParam int staffId, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date, @RequestParam String shiftType, @RequestParam int register) {
+        try {
+            StaffShiftResponse staffShift = schedulingService.assignCashierToDay(staffId, date, shiftType, register);
+            return ResponseEntity.ok("Staff assigned to day successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to assign staff to day: " + e.getMessage());
+        }
+    }
+
+    // Endpoint to assign a cashier to a specific shift
+    @PostMapping("/assign-cashier/{staffId}/to-shift/{shiftId}")
+    public ResponseEntity<Staff_Shift> assignCashierToShift(
+            @PathVariable int staffId,
+            @PathVariable long shiftId
+    ) {
+        try {
+            Staff_Shift assignedStaffShift = schedulingService.assignCashierToShift(staffId, shiftId);
+            return ResponseEntity.ok(assignedStaffShift);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(null); // Handle bad request error
+        }
+    }
+
+    // Endpoint to assign cashiers based on shift patterns for a date range
+    @PostMapping("/assign-cashiers-by-pattern")
+    public ResponseEntity<List<StaffAccountResponse>> assignCashiersByShiftTypePattern(
+            @RequestBody Map<String, List<Integer>> cashierShiftPatterns,
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate
+    ) {
+        try {
+            List<StaffAccountResponse> assignedCashiers = schedulingService.assignCashierByShiftTypePattern(cashierShiftPatterns, startDate, endDate);
+            return ResponseEntity.ok(assignedCashiers);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(null); // Handle bad request error
+        }
+    }
+}

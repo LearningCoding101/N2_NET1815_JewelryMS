@@ -25,10 +25,12 @@ jobs:
 
       - name: Create CODING directory and clone FRONTEND
         run: |
+          rm -rf CODING/FRONTEND
           mkdir -p CODING/FRONTEND
           git clone --branch ${{ env.BRANCHFE }} ${{ env.FRONTEND_REPO }} CODING/FRONTEND
       - name: Create CODING directory and clone BACKEND
         run: |
+          rm -rf CODING/BACKEND
           mkdir -p CODING/BACKEND
           git clone --branch ${{ env.BRANCH }} ${{ env.BACKEND_REPO }} CODING/BACKEND
 
@@ -46,7 +48,11 @@ jobs:
           git config --global user.name "LearningCoding101"
           git config --global user.email "hahoang33322@gmail.com"
           git add .
-          git commit -m "Sync repositories and remove sensitive file"
-          git push origin ${{ env.BRANCH }}
+      
+          # Check if there are changes to commit
+          git diff --quiet && git diff --cached --quiet || {
+            git commit -m "Sync repositories and remove sensitive file"
+            git push origin ${{ env.BRANCH }} --no-verify
+          }
         env:
           GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
