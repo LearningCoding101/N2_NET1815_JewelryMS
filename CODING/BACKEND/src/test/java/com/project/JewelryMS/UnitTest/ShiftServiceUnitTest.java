@@ -17,7 +17,7 @@
 //import com.project.JewelryMS.model.Shift.CreateShiftRequest;
 //import com.project.JewelryMS.model.Shift.ShiftRequest;
 //import com.project.JewelryMS.repository.ShiftRepository;
-//import com.project.JewelryMS.service.ShiftService;
+//import com.project.JewelryMS.service.Shift.ShiftService;
 //import org.junit.jupiter.api.BeforeEach;
 //import org.junit.jupiter.api.Test;
 //import org.mockito.InjectMocks;

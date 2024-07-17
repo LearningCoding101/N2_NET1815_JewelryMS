@@ -1,6 +1,5 @@
 package com.project.JewelryMS.controller;
 
-import com.project.JewelryMS.entity.StaffAccount;
 import com.project.JewelryMS.model.Staff.*;
 import com.project.JewelryMS.service.StaffAccountService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

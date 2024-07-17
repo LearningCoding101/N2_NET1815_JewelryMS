@@ -5,6 +5,7 @@ import com.project.JewelryMS.entity.Shift;
 import com.project.JewelryMS.entity.StaffAccount;
 import com.project.JewelryMS.exception.DuplicateEmailException;
 import com.project.JewelryMS.exception.DuplicateUsernameException;
+import com.project.JewelryMS.entity.*;
 import com.project.JewelryMS.model.Staff.StaffAccountRequest;
 import com.project.JewelryMS.model.Staff.StaffAccountResponse;
 import com.project.JewelryMS.model.Staff.StaffAccountWithoutShiftResponse;
@@ -35,7 +36,6 @@ public class StaffAccountService {
 
     @Autowired
     PasswordEncoder passwordEncoder;
-    // Create
 
     // Read all
     public List<StaffAccountResponse> readAllStaffAccounts() {
@@ -43,12 +43,6 @@ public class StaffAccountService {
         return staffAccounts.stream()
                 .map(this::mapToStaffAccountResponse)
                 .collect(Collectors.toList());
-    }
-
-    // Read by ID
-    public StaffAccountResponse getStaffAccountById(Integer id) {
-        Optional<StaffAccount> staffAccountOptional = staffAccountRepository.findIDStaffAccount(id);
-        return staffAccountOptional.map(this::mapToStaffAccountResponse).orElse(null);
     }
 
     private StaffAccountResponse mapToStaffAccountResponse(StaffAccount staffAccount) {
@@ -79,20 +73,29 @@ public class StaffAccountService {
         StaffAccountResponse.ShiftResponse shiftResponse = new StaffAccountResponse.ShiftResponse();
         shiftResponse.setShiftID(shift.getShiftID());
         shiftResponse.setEndTime(shift.getEndTime());
-        shiftResponse.setRegister(shift.getRegister());
         shiftResponse.setShiftType(shift.getShiftType());
         shiftResponse.setStartTime(shift.getStartTime());
         shiftResponse.setStatus(shift.getStatus());
-        shiftResponse.setWorkArea(shift.getWorkArea());
+        // Map WorkArea
+        WorkArea workArea = shift.getWorkArea();
+        if (workArea != null) {
+            shiftResponse.setWorkAreaID(workArea.getWorkAreaID());
+        }
         return shiftResponse;
     }
 
+
+    // Read by ID
+    public StaffAccountResponse getStaffAccountById(Integer id) {
+        Optional<StaffAccount> staffAccountOptional = staffAccountRepository.findIDStaffAccount(id);
+        return staffAccountOptional.map(this::mapToStaffAccountResponse).orElse(null);
+    }
 
     // Update
     @Transactional
     public String updateStaffAccount(Integer id, StaffAccountRequest staffAccountRequest) {
         Optional<StaffAccount> existingStaffAccountOpt = staffAccountRepository.findById(id);
-        if (!existingStaffAccountOpt.isPresent()) {
+        if (existingStaffAccountOpt.isEmpty()) {
             throw new RuntimeException("StaffAccount with ID " + id + " not found");
         }
 
@@ -105,7 +108,7 @@ public class StaffAccountService {
 
         // Update account information
         Optional<Account> accountOpt = authenticationRepository.findById((long) existingStaffAccount.getAccount().getPK_userID());
-        if (!accountOpt.isPresent()) {
+        if (accountOpt.isEmpty()) {
             throw new RuntimeException("Account with ID " + existingStaffAccount.getAccount().getPK_userID() + " not found");
         }
         Account account = accountOpt.get();
@@ -130,7 +133,7 @@ public class StaffAccountService {
     }
 
     // Method to "delete" a StaffAccount by updating the Account status
-    public boolean deactivateStaffAccount(Integer id) {
+    public void deactivateStaffAccount(Integer id) {
         Optional<StaffAccount> staffAccountOpt = staffAccountRepository.findById(id);
         if (staffAccountOpt.isPresent()) {
             StaffAccount staffAccount = staffAccountOpt.get();
@@ -138,7 +141,6 @@ public class StaffAccountService {
             if (account != null) {
                 account.setStatus(0);
                 authenticationRepository.save(account);
-                return true;
             } else {
                 throw new RuntimeException("Account associated with StaffAccount ID " + id + " not found");
             }

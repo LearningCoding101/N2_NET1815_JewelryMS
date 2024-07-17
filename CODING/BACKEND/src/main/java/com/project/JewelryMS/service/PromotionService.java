@@ -189,7 +189,7 @@ public class PromotionService {
         }
     }
 
-    public void updatePromotionDetails(PromotionRequest promotionRequest) {
+    public List<PromotionResponse> updatePromotionDetails(PromotionRequest promotionRequest) {
         Optional<Promotion> promotionUpdate = promotionRepository.findById(promotionRequest.getPK_promotionID());
         if (promotionUpdate.isPresent()) {
             Promotion promotion = promotionUpdate.get();
@@ -213,7 +213,11 @@ public class PromotionService {
             } else {
                 throw new RuntimeException("Discount must be between 0 and 100");
             }
+            return readAllPromotion();
+        }else {
+            throw new RuntimeException("Promotion not found");
         }
+
     }
 
     private void validateEndDate(Promotion promotion, Date newEndDate) {
@@ -225,7 +229,7 @@ public class PromotionService {
     private void validateStartDate(Promotion promotion, Date newStartDate) {
         Date currentTime = new Date();
 
-        if (newStartDate.before(currentTime)) {
+        if (newStartDate.before(currentTime) && !newStartDate.equals(currentTime)) {
             throw new IllegalArgumentException("Start date cannot be earlier than the current time");
         }
     }

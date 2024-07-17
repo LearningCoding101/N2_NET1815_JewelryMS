@@ -1,19 +1,5 @@
 package com.project.JewelryMS.IntegrationTest;
 
-import com.project.JewelryMS.model.Shift.CreateShiftRequest;
-import com.project.JewelryMS.model.Shift.ShiftRequest;
-import com.project.JewelryMS.entity.Shift;
-import com.project.JewelryMS.service.ShiftService;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-
-import java.time.LocalDateTime;
-import java.util.List;
-
-import org.junit.jupiter.api.Assertions;
-import org.springframework.transaction.annotation.Transactional;
-
 //
 //@SpringBootTest
 //@Transactional

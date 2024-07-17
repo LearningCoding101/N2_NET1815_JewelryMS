@@ -1,7 +1,7 @@
 package com.project.JewelryMS.controller;
 
 import com.project.JewelryMS.model.AppraiseProduct;
-import com.project.JewelryMS.model.Order.CreateProductBuyRequest;
+import com.project.JewelryMS.model.ProductBuy.CreateProductBuyRequest;
 import com.project.JewelryMS.model.ProductBuy.ProductResponseBuy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;

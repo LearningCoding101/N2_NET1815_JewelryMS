@@ -27,7 +27,7 @@ public interface StaffAccountRepository extends JpaRepository<StaffAccount, Inte
     List<StaffAccount> findAllByShift(@Param("shift") Shift shift);
 
     // Find all staff accounts assigned to shifts within a specific date range
-    @Query("SELECT DISTINCT sa FROM StaffAccount sa JOIN sa.staffShifts ss WHERE ss.shift.startTime >= :startDate AND ss.shift.startTime <= :endDate")
+    @Query("SELECT DISTINCT sa FROM StaffAccount sa LEFT JOIN FETCH sa.staffShifts ss LEFT JOIN FETCH ss.shift s WHERE s.startTime BETWEEN :startDate AND :endDate")
     List<StaffAccount> findAllStaffAccountsByShifts(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
     @Query("SELECT s FROM StaffAccount s WHERE s.staffShifts IS EMPTY")

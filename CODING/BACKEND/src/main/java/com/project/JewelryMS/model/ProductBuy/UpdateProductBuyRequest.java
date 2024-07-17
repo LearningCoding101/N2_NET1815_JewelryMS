@@ -3,15 +3,12 @@ package com.project.JewelryMS.model.ProductBuy;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductBuyResponse {
-    Long ProductBuyID;
+public class UpdateProductBuyRequest {
     Long categoryID;
-    String categoryName;
     String pbName;
     String metalType;
     Float chi;
@@ -19,5 +16,4 @@ public class ProductBuyResponse {
     Float carat;
     String image;
     Float cost;
-    Boolean pbStatus;
 }

@@ -1,5 +1,6 @@
 package com.project.JewelryMS.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -25,9 +26,6 @@ public class Shift {
     @Column(name = "endTime")
     private LocalDateTime endTime;
 
-    @Column(name = "register")
-    private int register;
-
     @Column(name = "shiftType")
     private String shiftType;
 
@@ -37,11 +35,12 @@ public class Shift {
     @Column(name = "status")
     private String status;
 
-    @Column(name = "workArea")
-    private String workArea;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "workAreaId", referencedColumnName = "workAreaID")
+    @JsonManagedReference
+    private WorkArea workArea;
 
     @OneToMany(mappedBy = "shift", fetch = FetchType.LAZY)
     @JsonManagedReference
-    Set<Staff_Shift> staffShifts;
-
+    private Set<Staff_Shift> staffShifts;
 }

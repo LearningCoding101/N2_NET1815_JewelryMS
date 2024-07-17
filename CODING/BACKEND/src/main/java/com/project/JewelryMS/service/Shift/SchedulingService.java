@@ -1,10 +1,11 @@
-package com.project.JewelryMS.service;
+package com.project.JewelryMS.service.Shift;
 
 import com.project.JewelryMS.entity.Shift;
 import com.project.JewelryMS.entity.StaffAccount;
 import com.project.JewelryMS.entity.Staff_Shift;
 import com.project.JewelryMS.model.Shift.CreateShiftRequest;
 import com.project.JewelryMS.model.Shift.ShiftRequest;
+import com.project.JewelryMS.model.Shift.WorkAreaRequest;
 import com.project.JewelryMS.model.Staff.StaffAccountResponse;
 import com.project.JewelryMS.model.StaffShift.StaffShiftResponse;
 import com.project.JewelryMS.repository.ShiftRepository;
@@ -12,7 +13,6 @@ import com.project.JewelryMS.repository.StaffAccountRepository;
 import com.project.JewelryMS.repository.StaffShiftRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.*;
-import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -131,8 +131,7 @@ public class SchedulingService {
                             formattedEndTime,
                             shiftType,
                             shift.getStatus(),
-                            shift.getWorkArea(),
-                            shift.getRegister(),
+                            shift.getWorkArea().getWorkAreaID(),
                             assignedStaff.stream()
                                     .map(s -> new StaffShiftResponse.StaffResponse(
                                             s.getStaffID(),
@@ -227,64 +226,68 @@ public class SchedulingService {
         StaffAccount staff = staffAccountRepository.findById(staffId)
                 .orElseThrow(() -> new ShiftAssignmentException("Staff not found"));
 
-        // Explicitly initialize the collection
-        Hibernate.initialize(staff.getStaffShifts());
+        try {
+            // Check if the staff member is already assigned to a shift during the same period on the same day
+            boolean isAssigned = staff.getStaffShifts().stream()
+                    .anyMatch(ss -> ss.getShift().getStartTime().toLocalDate().equals(date) && ss.getShift().getShiftType().equals(shiftType));
 
-        boolean isAssigned = staff.getStaffShifts().stream()
-                .anyMatch(ss -> ss.getShift().getStartTime().toLocalDate().equals(date) && ss.getShift().getShiftType().equals(shiftType));
-
-        if (isAssigned) {
-            throw new ShiftAssignmentException("Staff is already assigned to a shift during this period on this day. Please choose a different shift or staff member.");
-        }
-
-        Shift shift = shiftRepository.findAllByDateAndType(date, shiftType)
-                .stream().findFirst().orElse(null);
-
-        if (shift == null) {
-            CreateShiftRequest createShiftRequest = new CreateShiftRequest();
-            createShiftRequest.setShiftType(shiftType);
-            createShiftRequest.setStatus("Active");
-            createShiftRequest.setWorkArea("Sales");
-            createShiftRequest.setRegister(0);
-
-            String startTime;
-            String endTime;
-            switch (shiftType) {
-                case "Morning" -> {
-                    startTime = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 08";
-                    endTime = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 12";
-                }
-                case "Afternoon" -> {
-                    startTime = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 13";
-                    endTime = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 16";
-                }
-                case "Evening" -> {
-                    startTime = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 17";
-                    endTime = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 21";
-                }
-                default -> throw new RuntimeException("Invalid shift type");
+            if (isAssigned) {
+                throw new ShiftAssignmentException("Staff is already assigned to a shift during this period on this day. Please choose a different shift or staff member.");
             }
 
-            createShiftRequest.setStartTime(startTime);
-            createShiftRequest.setEndTime(endTime);
+            // Find a shift on the specified date and period
+            Shift shift = shiftRepository.findAllByDateAndType(date, shiftType)
+                    .stream().findFirst().orElse(null);
 
-            ShiftRequest createdShift = shiftService.createShift(createShiftRequest);
-            shift = shiftRepository.findById((long) createdShift.getShiftID())
-                    .orElseThrow(() -> new RuntimeException("Shift not found after creation"));
+            // If no shift exists, create a new one using the ShiftService
+            if (shift == null) {
+                CreateShiftRequest createShiftRequest = new CreateShiftRequest();
+                createShiftRequest.setShiftType(shiftType);
+                createShiftRequest.setStatus("Active");
+                createShiftRequest.setWorkArea(new WorkAreaRequest( "Sales", 0, "Sales")); // Assuming "Sales" and 0 as default work area ID and register
+
+                // Define the start and end times for each shift type
+                String startTime, endTime;
+                endTime = switch (shiftType) {
+                    case "Morning" -> {
+                        startTime = date.atTime(8, 0).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+                        yield date.atTime(12, 0).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+                    }
+                    case "Afternoon" -> {
+                        startTime = date.atTime(13, 0).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+                        yield date.atTime(17, 0).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+                    }
+                    case "Evening" -> {
+                        startTime = date.atTime(17, 0).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+                        yield date.atTime(21, 0).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+                    }
+                    default -> throw new RuntimeException("Invalid shift type");
+                };
+
+                createShiftRequest.setStartTime(startTime);
+                createShiftRequest.setEndTime(endTime);
+
+                ShiftRequest createdShift = shiftService.createShift(createShiftRequest);
+                shift = shiftRepository.findById((long) createdShift.getShiftID())
+                        .orElseThrow(() -> new RuntimeException("Shift not found after creation"));
+            }
+
+            // Create a new Staff_Shift entity
+            Staff_Shift staffShift = new Staff_Shift();
+            staffShift.setStaffAccount(staff);
+            staffShift.setShift(shift);
+
+            staffShift = staffShiftRepository.save(staffShift);
+
+            return toStaffShiftResponse(staffShift);
+        } catch (Exception e) {
+            // Rollback the transaction on any exception
+            throw new RuntimeException("Failed to assign staff to shift: " + e.getMessage(), e);
         }
-
-        Staff_Shift staffShift = new Staff_Shift();
-        staffShift.setStaffAccount(staff);
-        staffShift.setShift(shift);
-
-        staffShift = staffShiftRepository.save(staffShift);
-
-        return toStaffShiftResponse(staffShift);
     }
 
     // Helper method to convert a Staff_Shift entity to a StaffShiftResponse
     private StaffShiftResponse toStaffShiftResponse(Staff_Shift staffShift) {
-//        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm a");
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh a");
         String formattedStartTime = staffShift.getShift().getStartTime().format(timeFormatter);
         String formattedEndTime = staffShift.getShift().getEndTime().format(timeFormatter);
@@ -302,8 +305,7 @@ public class SchedulingService {
                 formattedEndTime,
                 staffShift.getShift().getShiftType(),
                 staffShift.getShift().getStatus(),
-                staffShift.getShift().getWorkArea(),
-                staffShift.getShift().getRegister(),
+                staffShift.getShift().getWorkArea().getWorkAreaID(),
                 Collections.singletonList(staffResponse)
         );
     }
@@ -313,32 +315,6 @@ public class SchedulingService {
         public ShiftAssignmentException(String message) {
             super(message);
         }
-    }
-
-    @Transactional
-    public Shift updateShiftWorkArea(long shiftId, String newWorkArea) {
-        // Fetch the shift entity from the database
-        Shift shift = shiftRepository.findById(shiftId)
-                .orElseThrow(() -> new RuntimeException("Shift not found"));
-
-        // Update the work area
-        shift.setWorkArea(newWorkArea);
-
-        // Save the updated shift entity to the database
-        return shiftRepository.save(shift);
-    }
-
-    @Transactional
-    public Shift updateShiftRegister(long shiftId, int register) {
-        // Fetch the shift entity from the database
-        Shift shift = shiftRepository.findById(shiftId)
-                .orElseThrow(() -> new RuntimeException("Shift not found"));
-
-        // Update the register station for cashier
-        shift.setRegister(register);
-
-        // Save the updated shift entity to the database
-        return shiftRepository.save(shift);
     }
 
     @Transactional
@@ -353,7 +329,7 @@ public class SchedulingService {
             for (String shiftType : shiftTypes) {
                 for (int staffId : staffIds) {
                     futures.add(executorService.submit(() -> {
-                        StaffShiftResponse response = tryAssignStaffToDay(staffId, date, shiftType);
+                        StaffShiftResponse response = assignStaffToDay(staffId, date, shiftType);
                         if (response != null) {
                             staffShiftResponses.add(response);
                         }
@@ -373,69 +349,6 @@ public class SchedulingService {
 
         executorService.shutdown();
         return staffShiftResponses;
-    }
-
-    @Transactional
-    public StaffShiftResponse tryAssignStaffToDay(int staffId, LocalDate date, String shiftType) {
-        // Fetch the staff entity from the database
-        StaffAccount staff = staffAccountRepository.findById(staffId)
-                .orElseThrow(() -> new ShiftAssignmentException("Staff not found"));
-
-        // Check if the staff member is already assigned to a shift during the same period on the same day
-        boolean isAssigned = staff.getStaffShifts().stream()
-                .anyMatch(ss -> ss.getShift().getStartTime().toLocalDate().equals(date) && ss.getShift().getShiftType().equals(shiftType));
-
-        if (isAssigned) {
-            return null;  // Skip the assignment
-        }
-        // Find a shift on the specified date and period
-        Shift shift = shiftRepository.findAllByDateAndType(date, shiftType)
-                .stream().findFirst().orElse(null);
-
-        // If no shift exists, create a new one using the ShiftService
-        if (shift == null) {
-            CreateShiftRequest createShiftRequest = new CreateShiftRequest();
-            createShiftRequest.setShiftType(shiftType);
-            createShiftRequest.setStatus("Active");
-            createShiftRequest.setWorkArea("Sales");  // Set this according to your requirements
-            createShiftRequest.setRegister(0);
-
-            // Define the start and end times for each shift type
-            String startTime, endTime;
-            endTime = switch (shiftType) {
-                case "Morning" -> {
-                    startTime = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 08";
-                    yield date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 12";
-                }
-                case "Afternoon" -> {
-                    startTime = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 13";
-                    yield date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 17";
-                }
-                case "Evening" -> {
-                    startTime = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 17";
-                    yield date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 21";
-                }
-                default -> throw new RuntimeException("Invalid shift type");
-            };
-
-            createShiftRequest.setStartTime(startTime);
-            createShiftRequest.setEndTime(endTime);
-
-            ShiftRequest createdShift = shiftService.createShift(createShiftRequest);
-            shift = shiftRepository.findById((long) createdShift.getShiftID())
-                    .orElseThrow(() -> new RuntimeException("Shift not found"));
-        }
-
-        // Create a new Staff_Shift entity
-        Staff_Shift staffShift = new Staff_Shift();
-        staffShift.setStaffAccount(staff);
-        staffShift.setShift(shift);
-
-        // Save the new Staff_Shift entity to the database
-        staffShift = staffShiftRepository.save(staffShift);
-
-        // Convert the new Staff_Shift entity to a StaffShiftResponse and return it
-        return toStaffShiftResponse(staffShift);
     }
 
     //This can be used again, if necessary
@@ -600,18 +513,16 @@ public class SchedulingService {
                         .map(shift -> new StaffAccountResponse.ShiftResponse(
                                 shift.getShift().getShiftID(),
                                 shift.getShift().getEndTime(),
-                                shift.getShift().getRegister(),
                                 shift.getShift().getShiftType(),
                                 shift.getShift().getStartTime(),
                                 shift.getShift().getStatus(),
-                                shift.getShift().getWorkArea()
+                                shift.getShift().getWorkArea().getWorkAreaID()
                         ))
                         .collect(Collectors.toList())
         );
     }
 
-
-    //New method for fast assigning staff
+    //New method for fast assigning
 //    Staff with staffID % 3 == 1 get single shifts (morning, afternoon, or evening).
 //    Staff with staffID % 3 == 2 get double shifts (morning-afternoon).
 //    Staff with staffID % 3 == 0 get double shifts (afternoon-evening).
@@ -779,50 +690,6 @@ public class SchedulingService {
         return singleShiftTypes.get(0);
     }
 
-    ////EXTRA METHODS FOR ASSIGNING CASHIERS:
-    //Assign cashier to a shift
-    @Transactional
-    public Staff_Shift assignCashierToShift(int staffId, long shiftId) {
-        // Fetch the staff and shift entities from the database
-        StaffAccount staff = staffAccountRepository.findById(staffId)
-                .orElseThrow(() -> new RuntimeException("Staff not found"));
-        Shift shift = shiftRepository.findById(shiftId)
-                .orElseThrow(() -> new RuntimeException("Shift not found"));
-
-        // Check if the shift's work area is 'cashier'
-        if (!"cashier".equalsIgnoreCase(shift.getWorkArea())) {
-            throw new RuntimeException("Shift work area must be 'cashier'");
-        }
-
-        // Check if the register is between 1 and 10
-        if (shift.getRegister() < 1 || shift.getRegister() > 10) {
-            throw new RuntimeException("Shift register must be between 1 and 10");
-        }
-
-        // Check if the staff member is already assigned to another cashier shift on the same date and shift type
-        boolean isAssigned = staff.getStaffShifts().stream()
-                .anyMatch(ss -> ss.getShift().getStartTime().toLocalDate().equals(shift.getStartTime().toLocalDate())
-                        && ss.getShift().getShiftType().equals(shift.getShiftType())
-                        && "cashier".equalsIgnoreCase(ss.getShift().getWorkArea())
-                        && ss.getShift().getRegister() != shift.getRegister());
-
-        if (isAssigned) {
-            throw new RuntimeException("Staff is already assigned to another cashier shift on the same date and shift type");
-        }
-
-        // Check if the staff member is already assigned to this shift
-        if (staff.getStaffShifts().stream().anyMatch(ss -> ss.getShift().equals(shift))) {
-            throw new RuntimeException("Staff is already assigned to this shift");
-        }
-
-        // Create a new Staff_Shift entity
-        Staff_Shift staffShift = new Staff_Shift();
-        staffShift.setStaffAccount(staff);
-        staffShift.setShift(shift);
-
-        // Save the new Staff_Shift entity to the database
-        return staffShiftRepository.save(staffShift);
-    }
 
     /*
     * Cashiers cannot be assigned to multiple shifts at different register stations (register)
@@ -832,148 +699,4 @@ public class SchedulingService {
     * (register) at a time for each shift type (Morning, Afternoon, Evening).
     */
 
-    @Transactional
-    public StaffShiftResponse assignCashierToDay(int staffId, LocalDate date, String shiftType, int register) {
-        try {
-            StaffAccount staff = staffAccountRepository.findById(staffId)
-                    .orElseThrow(() -> new ShiftAssignmentException("Staff not found"));
-
-            // Check if the staff member is already assigned to another cashier shift on the same date and shift type
-            boolean isAssigned = staff.getStaffShifts().stream()
-                    .anyMatch(ss -> ss.getShift().getStartTime().toLocalDate().equals(date)
-                            && ss.getShift().getShiftType().equals(shiftType)
-                            && "cashier".equalsIgnoreCase(ss.getShift().getWorkArea())
-                            && ss.getShift().getRegister() != register);
-
-            if (isAssigned) {
-                throw new ShiftAssignmentException("Cashier is already assigned to another shift during this period on this day. Please choose a different shift or cashier.");
-            }
-
-            // Find or create a shift for the specified date, shift type, and register
-            Shift shift = findOrCreateShift(date, shiftType, register);
-
-            // Create a new Staff_Shift entity
-            Staff_Shift staffShift = new Staff_Shift();
-            staffShift.setStaffAccount(staff);
-            staffShift.setShift(shift);
-
-            // Save the new Staff_Shift entity to the database
-            staffShift = staffShiftRepository.save(staffShift);
-
-            // Convert the new Staff_Shift entity to a StaffShiftResponse and return it
-            return toStaffShiftResponse(staffShift);
-        } catch (Exception e) {
-            // Handle any unexpected exceptions and log them
-            throw new RuntimeException("Failed to assign cashier to day", e);
-        }
-    }
-
-
-    private Shift findOrCreateShift(LocalDate date, String shiftType, int register) {
-        // Find existing shift or create a new one
-        Shift shift = shiftRepository.findAllByDateAndType(date, shiftType)
-                .stream()
-                .filter(s -> "cashier".equalsIgnoreCase(s.getWorkArea()) && s.getRegister() == register)
-                .findFirst()
-                .orElse(null);
-
-        if (shift == null) {
-            CreateShiftRequest createShiftRequest = new CreateShiftRequest();
-            createShiftRequest.setShiftType(shiftType);
-            createShiftRequest.setStatus("Active");
-            createShiftRequest.setWorkArea("cashier");
-            createShiftRequest.setRegister(register);
-
-            String startTime, endTime;
-            endTime = switch (shiftType) {
-                case "Morning" -> {
-                    startTime = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 08";
-                    yield date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 12";
-                }
-                case "Afternoon" -> {
-                    startTime = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 13";
-                    yield date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 17";
-                }
-                case "Evening" -> {
-                    startTime = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 17";
-                    yield date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 21";
-                }
-                default -> throw new RuntimeException("Invalid shift type");
-            };
-
-            createShiftRequest.setStartTime(startTime);
-            createShiftRequest.setEndTime(endTime);
-
-            ShiftRequest createdShift = shiftService.createShift(createShiftRequest);
-            shift = shiftRepository.findById((long) createdShift.getShiftID())
-                    .orElseThrow(() -> new RuntimeException("Shift not found"));
-        }
-
-        return shift;
-    }
-
-    @Transactional
-    public List<StaffAccountResponse> assignCashierByShiftTypePattern(
-            Map<String, List<Integer>> cashierShiftPatterns, LocalDate startDate, LocalDate endDate) {
-
-        List<StaffShiftResponse> cashierShiftResponses = new CopyOnWriteArrayList<>();
-        int totalDays = (int) ChronoUnit.DAYS.between(startDate, endDate) + 1;
-        List<LocalDate> dates = IntStream.range(0, totalDays)
-                .mapToObj(startDate::plusDays)
-                .filter(date -> date.getDayOfWeek() != DayOfWeek.SUNDAY)
-                .toList();
-
-        // Create a map to track how often each cashier ID appears
-        Map<Integer, Integer> cashierFrequency = new HashMap<>();
-        for (List<Integer> cashierIds : cashierShiftPatterns.values()) {
-            for (int cashierId : cashierIds) {
-                cashierFrequency.put(cashierId, cashierFrequency.getOrDefault(cashierId, 0) + 1);
-            }
-        }
-
-        List<Future<?>> futures = new ArrayList<>();
-
-        for (Map.Entry<String, List<Integer>> entry : cashierShiftPatterns.entrySet()) {
-            String shiftType = entry.getKey();
-            List<Integer> cashierIds = entry.getValue();
-
-            for (int cashierId : cashierIds) {
-                int frequency = cashierFrequency.get(cashierId);
-                for (int i = 0; i < dates.size(); i += frequency) {
-                    LocalDate date = dates.get(i);
-                    futures.add(executorService.submit(() -> {
-                        try {
-                            StaffShiftResponse response = assignCashierToDay(cashierId, date, shiftType, 1); // Assuming register 1 for simplicity
-                            cashierShiftResponses.add(response);
-                        } catch (ShiftAssignmentException e) {
-                            System.out.println("Cashier ID " + cashierId + " is already assigned on " + date + " for " + shiftType + " shift.");
-                        }
-                    }));
-                }
-            }
-        }
-
-        // Wait for all tasks to complete
-        for (Future<?> future : futures) {
-            try {
-                future.get();
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();  // Handle exception
-            }
-        }
-
-        // Collect unique cashier IDs from the responses
-        Set<Integer> cashierIds = cashierShiftResponses.stream()
-                .flatMap(response -> response.getStaff().stream())
-                .map(StaffShiftResponse.StaffResponse::getStaffID)
-                .collect(Collectors.toSet());
-
-        // Fetch cashier accounts and map to responses
-        List<StaffAccount> cashierAccounts = staffAccountRepository.findAllById(cashierIds);
-        return cashierAccounts.stream()
-                .map(this::mapToStaffAccountResponse)
-                .collect(Collectors.toList());
-    }
-
-    //NO RANDOM AUTOMATIC GENERATED FOR CASHIER, THEY SHALL BE APPOINTED BY HANDS
 }

@@ -1,9 +1,10 @@
 package com.project.JewelryMS.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.JewelryMS.model.Order.CreateProductBuyRequest;
+import com.project.JewelryMS.model.ProductBuy.CreateProductBuyRequest;
 import com.project.JewelryMS.model.ProductBuy.CalculatePBRequest;
 import com.project.JewelryMS.model.ProductBuy.ProductBuyResponse;
+import com.project.JewelryMS.model.ProductBuy.UpdateProductBuyRequest;
 import com.project.JewelryMS.service.ProductBuyService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,14 +49,28 @@ public class ProductBuyController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ArrayList<>());
         }
     }
-
-    // Get all product buys
+    ////////////////////////Order of Product Buy status 3
     @GetMapping
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
-    public ResponseEntity<List<ProductBuyResponse>> getAllProductBuys() {
-        List<ProductBuyResponse> productBuys = productBuyService.getAllProductBuys();
+    public ResponseEntity<List<ProductBuyResponse>> getAllProductBuysByOrderStatus3() {
+        List<ProductBuyResponse> productBuys = productBuyService.getAllProductBuysByOrderStatus3();
         return ResponseEntity.ok(productBuys);
     }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
+    public ResponseEntity<ProductBuyResponse> updateProductBuyByOrderStatus3(@PathVariable Long id, @RequestBody UpdateProductBuyRequest updateProductBuyRequest) {
+        ProductBuyResponse productBuyResponse = productBuyService.updateProductBuyByOrderStatus3(id,updateProductBuyRequest);
+        return ResponseEntity.ok(productBuyResponse);
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
+    public ResponseEntity<String> deleteProductBuyByOrderStatus3(@PathVariable Long id) {
+        String response = productBuyService.deleteProductBuyByOrderStatus3(id);
+        return ResponseEntity.ok(response);
+    }
+    ////////////////////////Order of Product Buy status 3
 
     // Get a product buy by ID
     @GetMapping("/{id}")
@@ -63,14 +78,6 @@ public class ProductBuyController {
     public ResponseEntity<ProductBuyResponse> getProductBuyById(@PathVariable Long id) {
         ProductBuyResponse productBuy = productBuyService.getProductBuyById(id);
         return ResponseEntity.ok(productBuy);
-    }
-
-    // Delete a product buy by ID
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
-    public ResponseEntity<String> deleteProductBuy(@PathVariable Long id) {
-        String response = productBuyService.deleteProductBuy(id);
-        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/calculate-cost")
@@ -86,5 +93,6 @@ public class ProductBuyController {
         productBuyService.updatePricingRatioPB(ratio);
         return ResponseEntity.ok(ratio);
     }
+
 
 }

@@ -1,4 +1,4 @@
-package com.project.JewelryMS.model.Order;
+package com.project.JewelryMS.model.ProductBuy;
 
 import com.project.JewelryMS.entity.ProductBuy;
 import lombok.AllArgsConstructor;

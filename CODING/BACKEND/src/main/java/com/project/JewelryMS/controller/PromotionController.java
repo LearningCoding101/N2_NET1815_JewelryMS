@@ -91,9 +91,9 @@ public class PromotionController {
     // Update promotion details
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_MANAGER')")
-    public ResponseEntity<String> updatePromotionDetails(@PathVariable long id, @RequestBody PromotionRequest promotionRequest) {
+    public ResponseEntity<List<PromotionResponse>> updatePromotionDetails(@PathVariable long id, @RequestBody PromotionRequest promotionRequest) {
         promotionRequest.setPK_promotionID(id); // Set the ID from the path into the request object
-        promotionService.updatePromotionDetails(promotionRequest);
-        return ResponseEntity.ok("Promotion Details updated successfully");
+        List<PromotionResponse> promotionResponse = promotionService.updatePromotionDetails(promotionRequest);
+        return ResponseEntity.ok(promotionResponse);
     }
 }

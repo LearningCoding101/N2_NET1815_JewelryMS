@@ -2,8 +2,7 @@ package com.project.JewelryMS.UnitTest;
 
 import com.project.JewelryMS.entity.Category;
 import com.project.JewelryMS.entity.ProductBuy;
-import com.project.JewelryMS.model.Order.CreateProductBuyRequest;
-import com.project.JewelryMS.model.ProductBuy.CalculatePBRequest;
+import com.project.JewelryMS.model.ProductBuy.CreateProductBuyRequest;
 import com.project.JewelryMS.model.ProductBuy.ProductBuyResponse;
 import com.project.JewelryMS.repository.CategoryRepository;
 import com.project.JewelryMS.repository.PricingRatioRepository;

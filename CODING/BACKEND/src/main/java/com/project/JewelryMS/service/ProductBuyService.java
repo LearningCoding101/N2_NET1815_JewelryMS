@@ -1,20 +1,20 @@
 package com.project.JewelryMS.service;
 
 import com.project.JewelryMS.entity.Category;
+import com.project.JewelryMS.entity.OrderBuyDetail;
 import com.project.JewelryMS.entity.PricingRatio;
 import com.project.JewelryMS.entity.ProductBuy;
-import com.project.JewelryMS.model.Order.CreateProductBuyRequest;
-import com.project.JewelryMS.model.ProductBuy.CalculatePBRequest;
-import com.project.JewelryMS.model.ProductBuy.CreateProductBuyResponse;
-import com.project.JewelryMS.model.ProductBuy.ProductBuyResponse;
-import com.project.JewelryMS.model.ProductBuy.ProductResponseBuy;
+import com.project.JewelryMS.model.ProductBuy.*;
 import com.project.JewelryMS.repository.CategoryRepository;
+import com.project.JewelryMS.repository.OrderBuyDetailRepository;
 import com.project.JewelryMS.repository.PricingRatioRepository;
 import com.project.JewelryMS.repository.ProductBuyRepository;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 //import org.springframework.util.Base64Utils;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -36,6 +36,8 @@ public class ProductBuyService {
     private ImageService imageService;
     @Autowired
     private PricingRatioRepository pricingRatioRepository;
+    @Autowired
+    private OrderBuyDetailRepository orderBuyDetailRepository;
 
     public void initializeGoldPrice() {
         String goldPriceStr = apiService.getGoldBuyPricecalculate("http://api.btmc.vn/api/BTMCAPI/getpricebtmc?key=3kd8ub1llcg9t45hnoh8hmn7t5kc2v");
@@ -234,10 +236,15 @@ public class ProductBuyService {
     private ProductBuyResponse mapToProductBuyResponse(ProductBuy productBuy) {
         ProductBuyResponse response = new ProductBuyResponse();
         response.setProductBuyID(productBuy.getPK_ProductBuyID());
+        response.setCategoryID(productBuy.getCategory().getId());
         response.setCategoryName(productBuy.getCategory().getName());
         response.setPbName(productBuy.getPbName());
         response.setMetalType(productBuy.getMetalType());
+        response.setChi(productBuy.getChi());
+        response.setCarat(productBuy.getCarat());
         response.setGemstoneType(productBuy.getGemstoneType());
+        response.setPbStatus(productBuy.isPbStatus());
+        response.setImage(productBuy.getImage());
         response.setCost(productBuy.getPbCost());
         return response;
     }
@@ -264,6 +271,68 @@ public class ProductBuyService {
         return "Product Buy ID Not Found!!!";
     }
 
+    public List<ProductBuyResponse> getAllProductBuysByOrderStatus3() {
+        List<ProductBuy> productBuys = orderBuyDetailRepository.findAll().stream()
+                .filter(obd -> obd.getPurchaseOrder().getStatus() == 3)
+                .map(OrderBuyDetail::getProductBuy)
+                .distinct()
+                .collect(Collectors.toList());
 
+        return productBuys.stream().map(this::mapToProductBuyResponse).collect(Collectors.toList());
+    }
+
+    public ProductBuyResponse updateProductBuyByOrderStatus3(Long id, UpdateProductBuyRequest updateProductBuyRequest) {
+        OrderBuyDetail orderBuyDetail = orderBuyDetailRepository.findByProductBuyIdAndPurchaseOrderStatus(id, 3)
+                .orElseThrow(() -> new ResourceNotFoundException("ProductBuy with Order status 3 not found"));
+        ProductBuy productBuy = orderBuyDetail.getProductBuy();
+        if(updateProductBuyRequest.getCategoryID()!=null) {
+            Category category = categoryRepository.findById(updateProductBuyRequest.getCategoryID())
+                    .orElseThrow(() -> new ResourceNotFoundException("Category ID not found"));
+            productBuy.setCategory(category);
+        }
+        if (updateProductBuyRequest.getPbName() != null) {
+            productBuy.setPbName(updateProductBuyRequest.getPbName());
+        }
+        if (updateProductBuyRequest.getMetalType() != null) {
+            productBuy.setMetalType(updateProductBuyRequest.getMetalType());
+        }
+        if (updateProductBuyRequest.getChi() != null) {
+            productBuy.setChi(updateProductBuyRequest.getChi());
+        }
+        if (updateProductBuyRequest.getGemstoneType() != null) {
+            productBuy.setGemstoneType(updateProductBuyRequest.getGemstoneType());
+        }
+        if (updateProductBuyRequest.getCarat() != null) {
+            productBuy.setCarat(updateProductBuyRequest.getCarat());
+        }
+        if (updateProductBuyRequest.getImage() != null) {
+            String image = imageService.uploadImageByPathService(updateProductBuyRequest.getImage());
+            productBuy.setImage(image);
+        }
+        if (updateProductBuyRequest.getCost() != null) {
+            productBuy.setPbCost(updateProductBuyRequest.getCost());
+        }
+
+        productBuyRepository.save(productBuy);
+        return mapToProductBuyResponse(productBuy);
+    }
+
+    public String deleteProductBuyByOrderStatus3(Long id) {
+        OrderBuyDetail orderBuyDetail = orderBuyDetailRepository.findByProductBuyIdAndPurchaseOrderStatus(id, 3)
+                .orElseThrow(() -> new ResourceNotFoundException("ProductBuy with Order status 3 not found"));
+
+        ProductBuy productBuy = orderBuyDetail.getProductBuy();
+        productBuy.setPbStatus(false);
+        productBuyRepository.save(productBuy);
+
+        return "ProductBuy deleted successfully";
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public class ResourceNotFoundException extends RuntimeException {
+        public ResourceNotFoundException(String message) {
+            super(message);
+        }
+    }
 
 }

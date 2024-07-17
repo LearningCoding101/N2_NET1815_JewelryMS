@@ -584,14 +584,8 @@ public class DashboardService {
         if (revenueGenerated == null) {
             revenueGenerated = 0.0;
         }
-        Long salesCount = purchaseOrderRepository.getSalesCountByStaffEmailAndDateRange(email, startDateTime, endDateTime);
-        if (salesCount == null) {
-            salesCount = 0L;
-        }
-        Long shiftsCount = shiftRepository.countShiftsByStaffEmailAndDateRange(email, startDateTime, endDateTime);
-        if (shiftsCount == null) {
-            shiftsCount = 0L;
-        }
+        long salesCount = purchaseOrderRepository.getSalesCountByStaffEmailAndDateRange(email, startDateTime, endDateTime);
+        long shiftsCount = shiftRepository.countShiftsByStaffEmailAndDateRange(email, startDateTime, endDateTime);
 
         return mapToStaffStatisticsResponse(email, staffId, customerSignUps, revenueGenerated, salesCount, shiftsCount);
     }

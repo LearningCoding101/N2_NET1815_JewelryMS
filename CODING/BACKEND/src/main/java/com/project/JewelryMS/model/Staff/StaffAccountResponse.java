@@ -33,11 +33,9 @@ public class StaffAccountResponse {
     public static class ShiftResponse {
         private int shiftID;
         private LocalDateTime endTime;
-        private int register;
         private String shiftType;
         private LocalDateTime startTime;
         private String status;
-        private String workArea;
+        private String workAreaID;
     }
 }
-

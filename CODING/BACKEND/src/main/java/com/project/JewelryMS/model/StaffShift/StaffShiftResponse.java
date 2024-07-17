@@ -15,8 +15,7 @@ public class StaffShiftResponse {
     private String endTime;
     private String shiftType;
     private String status;
-    private String workArea;
-    private int register;
+    private String workAreaID;
     private List<StaffResponse> staff;
 
     @Data
@@ -29,4 +28,3 @@ public class StaffShiftResponse {
         private String username;
     }
 }
-

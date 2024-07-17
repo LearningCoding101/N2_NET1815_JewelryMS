@@ -34,7 +34,7 @@ public interface ShiftRepository extends JpaRepository<Shift, Long> {
     List<Shift> findByStatus(@Param("status") String status);
 
     // Find shifts by register
-    @Query("SELECT s FROM Shift s WHERE s.register = :register")
+    @Query("SELECT s FROM Shift s WHERE s.workArea.register = :register")
     List<Shift> findByRegister(@Param("register") int register);
 
     // Find shifts by work area
@@ -49,7 +49,7 @@ public interface ShiftRepository extends JpaRepository<Shift, Long> {
 
     // Find shifts by the actual ID
     @Query("SELECT s FROM Shift s WHERE s.shiftID = :shiftID")
-    Shift findByShiftId(@Param("shiftID") int shiftID);
+    Shift findByShiftId(@Param("shiftID") Long shiftID);
 
     // Find shifts by date
     @Query("SELECT s FROM Shift s WHERE FUNCTION('DATE', s.startTime) = :date")
@@ -62,12 +62,11 @@ public interface ShiftRepository extends JpaRepository<Shift, Long> {
     @Query("SELECT s FROM Shift s WHERE FUNCTION('DATE', s.startTime) = :date AND s.shiftType = :shiftType")
     List<Shift> findAllDateAndType(@Param("date") LocalDateTime date, @Param("shiftType") String shiftType);
 
-
     @Query("SELECT s FROM Shift s WHERE s.staffShifts IS EMPTY")
     List<Shift> findShiftsWithoutStaff();
 
     @Query("SELECT s FROM Shift s WHERE s.startTime < :cutoffDate")
-    List<Shift> findShiftsOlderThan(LocalDate cutoffDate);
+    List<Shift> findShiftsOlderThan(@Param("cutoffDate") LocalDate cutoffDate);
 
     List<Shift> findAllByStartTimeBetween(LocalDateTime startDate, LocalDateTime endDate);
 
@@ -77,5 +76,9 @@ public interface ShiftRepository extends JpaRepository<Shift, Long> {
 
     @Query("SELECT COUNT(s) FROM Shift s JOIN s.staffShifts ss WHERE ss.staffAccount.account.email = :staffEmail AND s.startTime BETWEEN :startDate AND :endDate")
     long countShiftsByStaffEmailAndDateRange(@Param("staffEmail") String staffEmail, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    // Find shifts by work area description
+    @Query("SELECT s FROM Shift s WHERE s.workArea.description = :workAreaDescription")
+    List<Shift> findByWorkAreaDescription(@Param("workAreaDescription") String workAreaDescription);
 
 }

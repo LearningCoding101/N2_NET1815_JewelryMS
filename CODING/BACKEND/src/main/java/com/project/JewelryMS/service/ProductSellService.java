@@ -452,13 +452,8 @@ public class ProductSellService {
             super(message);
         }
     }
-//        List<Customer> customers = customerRepository.findByCusNameContainingIgnoreCase(search);
-//        if (customers.isEmpty()) {
-//            customers = customerRepository.findByEmailContainingIgnoreCase(search);
-//        }
-//        if (customers.isEmpty()) {
-//            customers = customerRepository.findByPhoneNumberContainingIgnoreCase(search);
-//        }
+
+
     public List<GuaranteeProductSellResponse> readProductByGuaranteeSearch(String search){
         List<Guarantee> guarantees = guaranteeRepository.findByCoverageIgnoreCase(search);
         if(guarantees.isEmpty()){
