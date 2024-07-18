@@ -23,31 +23,37 @@ public class Account implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PK_userID")
-    int PK_userID;
+    private int PK_userID;
+
     @Column(name = "email", unique = true)
-    String email;
+    private String email;
+
     @Column(name = "aUsername", unique = true)
-    String aUsername;
+    private String aUsername;
+
     @Column(name = "aPassword")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    String aPassword;
-    @Column(name = "accountName")
-    String accountName;
-    @Column(name = "status")
-    Integer status;
-    @Column(name = "role")
-            @Enumerated(value = EnumType.STRING)
-    RoleEnum role;
+    private String aPassword;
 
-    @Column(name ="aImage")
-    String aImage;
+    @Column(name = "accountName")
+    private String accountName;
+
+    @Column(name = "status")
+    private Integer status;
+
+    @Column(name = "role")
+    @Enumerated(value = EnumType.STRING)
+    private RoleEnum role;
+
+    @Column(name = "aImage")
+    private String aImage;
+
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
     @JsonIgnoreProperties("account")
     private StaffAccount staffAccount;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        System.out.println(new SimpleGrantedAuthority(role.name()));
         return List.of(new SimpleGrantedAuthority(role.name()));
     }
 

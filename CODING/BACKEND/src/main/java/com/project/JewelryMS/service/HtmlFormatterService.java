@@ -1,6 +1,7 @@
 package com.project.JewelryMS.service;
 
 import com.project.JewelryMS.entity.Category;
+import com.project.JewelryMS.entity.OrderDetail;
 import com.project.JewelryMS.model.Order.ProductResponse;
 import com.project.JewelryMS.model.OrderDetail.OrderDetailDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,7 +112,38 @@ public class HtmlFormatterService {
                 "<td style='border: 2px solid #dededf; background-color: #ffffff; color: #000000; padding: 5px;'>" + period + "</td>" +
                 "</tr>";
     }
+    public String createRefundDetailTable(OrderDetailDTO orderDetail, float refundAmount) {
+        StringBuilder htmlTable = new StringBuilder();
 
+        // Start table structure
+        htmlTable.append("<div style='overflow: auto; width: 100%;' role='region' tabindex='0'>")
+                .append("<table align='center' style='border: 2px solid #dededf; width: 100%; table-layout: auto; border-collapse: collapse; border-spacing: 1px; text-align: center;'>")
+                .append("<caption style='caption-side: top; text-align: center;'>Refund Details</caption>")
+                .append("<thead>")
+                .append("<tr>")
+                .append("<th style='border: 2px solid #dededf; background-color: #eceff1; color: #000000; padding: 5px;'>Product Name</th>")
+                .append("<th style='border: 2px solid #dededf; background-color: #eceff1; color: #000000; padding: 5px;'>Original Quantity</th>")
+                .append("<th style='border: 2px solid #dededf; background-color: #eceff1; color: #000000; padding: 5px;'>Original Price</th>")
+                .append("<th style='border: 2px solid #dededf; background-color: #eceff1; color: #000000; padding: 5px;'>Refund Amount</th>")
+                .append("</tr>")
+                .append("</thead>")
+                .append("<tbody>");
+
+        // Add row for the refund details
+        htmlTable.append("<tr>")
+                .append("<td style='border: 2px solid #dededf; background-color: #ffffff; color: #000000; padding: 5px;'>").append(orderDetail.getPName()).append("</td>")
+                .append("<td style='border: 2px solid #dededf; background-color: #ffffff; color: #000000; padding: 5px;'>").append(orderDetail.getQuantity()).append("</td>")
+                .append("<td style='border: 2px solid #dededf; background-color: #ffffff; color: #000000; padding: 5px;'>").append(String.format("%.2f", orderDetail.getCost())).append("</td>")
+                .append("<td style='border: 2px solid #dededf; background-color: #ffffff; color: #000000; padding: 5px;'>").append(String.format("%.2f", refundAmount)).append("</td>")
+                .append("</tr>");
+
+        // End table structure
+        htmlTable.append("</tbody>")
+                .append("</table>")
+                .append("</div>");
+
+        return htmlTable.toString();
+    }
     public String createOrderDetailTableConfirm(List<OrderDetailDTO> orderDetails) {
         StringBuilder htmlTable = new StringBuilder();
 

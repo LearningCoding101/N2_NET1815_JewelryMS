@@ -24,6 +24,7 @@ public class StaffAccountResponse {
     private int status;
     private String email;
     private String username;
+    private String image;
     private List<ShiftResponse> shift;
 
     // Getters and Setters

@@ -15,6 +15,7 @@ public class StaffAccountWithoutShiftResponse {
     private float salary;
     private LocalDate startDate;
     private String accountName;
+    private String image;
     private RoleEnum role;
     private int status;
     private String email;

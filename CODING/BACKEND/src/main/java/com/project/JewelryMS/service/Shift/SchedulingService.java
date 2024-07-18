@@ -85,8 +85,8 @@ public class SchedulingService {
         return assignStaffToShift(staffId, shiftId);
     }
 
-
     // Method to view schedule
+    @Transactional
     public Map<String, Map<String, List<StaffShiftResponse>>> getScheduleMatrix(LocalDate startDate, LocalDate endDate) {
         String[] shiftTypes = {"Morning", "Afternoon", "Evening"};
         Map<String, Map<String, List<StaffShiftResponse>>> matrix = new ConcurrentHashMap<>();
@@ -175,7 +175,6 @@ public class SchedulingService {
             }
         });
     }
-
     // Method to assign multiple staff to a shift
     @Transactional
     public List<Staff_Shift> assignMultipleStaffToShift(List<Integer> staffIds, int shiftId) {
@@ -509,6 +508,7 @@ public class SchedulingService {
                 staffAccount.getAccount().getStatus(),
                 staffAccount.getAccount().getEmail(),
                 staffAccount.getAccount().getUsername(),
+                staffAccount.getAccount().getAImage(),
                 staffAccount.getStaffShifts().stream()
                         .map(shift -> new StaffAccountResponse.ShiftResponse(
                                 shift.getShift().getShiftID(),

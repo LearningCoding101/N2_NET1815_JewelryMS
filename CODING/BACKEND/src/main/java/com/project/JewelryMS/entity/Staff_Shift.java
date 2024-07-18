@@ -3,10 +3,7 @@ package com.project.JewelryMS.entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.io.Serializable;
 
@@ -14,6 +11,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@ToString(exclude = {"staffAccount", "shift"})
 @Table(name="Staff_Shift")
 public class Staff_Shift implements Serializable {
     @Id
@@ -31,21 +29,4 @@ public class Staff_Shift implements Serializable {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @JsonBackReference
     private Shift shift;
-
-//    @Transient
-//    private int staffId;
-//
-//    @Transient
-//    private int shiftId;
-//
-//    @PostLoad
-//    void fillTransient() {
-//        if (staffAccount != null) {
-//            this.staffId = staffAccount.getStaffID();
-//        }
-//        if (shift != null) {
-//            this.shiftId = shift.getShiftID();
-//        }
-//    }
 }
-

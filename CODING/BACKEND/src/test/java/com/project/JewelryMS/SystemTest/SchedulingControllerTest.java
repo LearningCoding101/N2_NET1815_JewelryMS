@@ -5,7 +5,7 @@ import com.project.JewelryMS.model.Shift.AssignStaffByShiftTypePatternRequest;
 import com.project.JewelryMS.model.Shift.AssignStaffToMultipleDaysRequest;
 import com.project.JewelryMS.model.Staff.StaffAccountResponse;
 import com.project.JewelryMS.model.StaffShift.StaffShiftResponse;
-import com.project.JewelryMS.service.SchedulingService;
+import com.project.JewelryMS.service.Shift.SchedulingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

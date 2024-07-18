@@ -78,6 +78,36 @@ public class ProductBuyService {
         Long ProductBuy_ID =  productBuy1.getPK_ProductBuyID();
         return ProductBuy_ID;
     }
+
+    public Long createProductBuyWithImage(CreateProductBuyRequest request) {
+        ProductBuy productBuy = new ProductBuy();
+        productBuy.setPbName(request.getName());
+
+        // Find the category by name
+        Optional<Category> categoryOpt = categoryRepository.findCategoryById(request.getCategory_id());
+        if (categoryOpt.isPresent()) {
+            productBuy.setCategory(categoryOpt.get());
+        } else {
+            throw new IllegalArgumentException("Category name not found");
+        }
+
+        productBuy.setMetalType(request.getMetalType());
+        productBuy.setGemstoneType(request.getGemstoneType());
+        if(request.getImage()!=null) {
+
+            productBuy.setImage(request.getImage());
+        }else{
+            productBuy.setImage(null);
+        }
+        productBuy.setChi(request.getMetalWeight());
+        productBuy.setCarat(request.getGemstoneWeight());
+        productBuy.setPbCost(request.getCost());
+        productBuy.setPbStatus(true);
+        ProductBuy productBuy1 = productBuyRepository.save(productBuy);
+        Long ProductBuy_ID =  productBuy1.getPK_ProductBuyID();
+        return ProductBuy_ID;
+    }
+
     public ProductResponseBuy updateProductBuy(Long id, CalculatePBRequest request) {
         Optional<ProductBuy> optionalProductBuy = productBuyRepository.findById(id);
         if (optionalProductBuy.isPresent()) {

@@ -2,9 +2,9 @@ echo "Building app..."
 ./mvnw clean package
 
 echo "Deploy files to server..."
-scp -r D:/swpBackend/target/jewelry.jar root@174.138.72.129:/var/www/jewelry_be/
+scp -r D:/swpBackend/target/jewelry.jar root@159.89.49.13:/var/www/jewelry_be/
 
-ssh -i ~/Desktop/jewelryManagementSystem root@174.138.72.129 <<EOF
+ssh -i ~/Desktop/jewelryManagementSystem root@159.89.49.13 <<EOF
 pid=\$(sudo lsof -t -i :8080)
 
 if [ -z "\$pid" ]; then

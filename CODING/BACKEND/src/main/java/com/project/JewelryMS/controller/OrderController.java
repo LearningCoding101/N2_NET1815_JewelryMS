@@ -1,30 +1,25 @@
 package com.project.JewelryMS.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
-import com.project.JewelryMS.model.Dashboard.RevenueDateRequest;
 import com.project.JewelryMS.model.EmailDetail;
 import com.project.JewelryMS.model.Order.*;
 import com.project.JewelryMS.model.OrderDetail.*;
+import com.project.JewelryMS.model.Refund.RefundOrderDetailRequest;
 import com.project.JewelryMS.service.CustomerService;
 import com.project.JewelryMS.service.EmailService;
 import com.project.JewelryMS.service.Order.OrderDetailService;
 import com.project.JewelryMS.service.Order.OrderHandlerService;
 import com.project.JewelryMS.service.QRService;
-import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -260,6 +255,17 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
-
-
+    @PostMapping("/refund")
+    public ResponseEntity<String> refundOrderDetail(@RequestBody RefundOrderDetailRequest request) {
+        try {
+            String result = orderHandlerService.refundOrderDetail(request);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Refund failed: " + e.getMessage());
+        }
+    }
+    @GetMapping("/refund")
+    public ResponseEntity getAllRefunded(){
+        return ResponseEntity.ok(orderHandlerService.getAllRefunds());
+    }
 }

@@ -30,5 +30,5 @@ public class ProductResponse {
     private boolean Status;
     private long category_id;
     private List<String> promotion_id;
-
+    private int refundQuantity;
 }

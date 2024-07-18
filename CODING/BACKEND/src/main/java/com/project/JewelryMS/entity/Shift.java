@@ -3,19 +3,17 @@ package com.project.JewelryMS.entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.Set;
 
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@EqualsAndHashCode(exclude = {"staffShifts"})
+@ToString(exclude = {"staffShifts"})
 @Table(name = "Shift")
 public class Shift {
     @Id
@@ -37,10 +35,11 @@ public class Shift {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "workAreaId", referencedColumnName = "workAreaID")
+    @JsonBackReference
     @JsonManagedReference
     private WorkArea workArea;
 
-    @OneToMany(mappedBy = "shift", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "shift", fetch = FetchType.EAGER)
     @JsonManagedReference
     private Set<Staff_Shift> staffShifts;
 }

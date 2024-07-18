@@ -52,11 +52,11 @@ public class StaffAccountService {
         response.setSalary(staffAccount.getSalary());
         response.setStartDate(staffAccount.getStartDate());
         response.setAccountName(staffAccount.getAccount().getAccountName());
+        response.setImage(staffAccount.getAccount().getAImage());
         response.setRole(staffAccount.getAccount().getRole());
         response.setStatus(staffAccount.getAccount().getStatus());
         response.setEmail(staffAccount.getAccount().getEmail());
         response.setUsername(staffAccount.getAccount().getUsername());
-
         if (staffAccount.getStaffShifts() != null && !staffAccount.getStaffShifts().isEmpty()) {
             List<StaffAccountResponse.ShiftResponse> shifts = staffAccount.getStaffShifts().stream()
                     .map(staffShift -> mapToShiftResponse(staffShift.getShift()))
@@ -171,6 +171,7 @@ public class StaffAccountService {
         response.setSalary(staffAccount.getSalary());
         response.setStartDate(staffAccount.getStartDate());
         response.setAccountName(staffAccount.getAccount().getAccountName());
+        response.setImage(staffAccount.getAccount().getAImage());
         response.setRole(staffAccount.getAccount().getRole());
         response.setStatus(staffAccount.getAccount().getStatus());
         response.setEmail(staffAccount.getAccount().getEmail());

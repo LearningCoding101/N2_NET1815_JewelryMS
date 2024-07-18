@@ -4,6 +4,8 @@ import com.project.JewelryMS.entity.*;
 import com.project.JewelryMS.model.EmailDetail;
 import com.project.JewelryMS.model.Order.*;
 import com.project.JewelryMS.model.OrderDetail.OrderDetailResponse;
+import com.project.JewelryMS.model.Refund.RefundOrderDetailRequest;
+import com.project.JewelryMS.model.Refund.RefundResponse;
 import com.project.JewelryMS.repository.*;
 import com.project.JewelryMS.service.EmailService;
 import com.project.JewelryMS.service.ImageService;
@@ -15,8 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -58,6 +62,8 @@ public class OrderHandlerService {
     OrderRepository orderRepository;
     @Autowired
     ImageService imageService;
+    @Autowired
+    RefundRepository refundRepository;
     @PreDestroy
     public void cleanup() {
         scheduler.shutdown();
@@ -279,7 +285,9 @@ public class OrderHandlerService {
             for(OrderDetail item : iterateList){
                 ProductSell product = item.getProductSell();
                 ProductResponse response = new ProductResponse();
+                response.setOrderDetail_ID(item.getPK_ODID());
                 response.setQuantity(item.getQuantity());
+                response.setRefundQuantity(item.getRefundedQuantity());
                 response.setProductID(product.getProductID());
                 response.setName(product.getPName());
                 response.setCarat(product.getCarat());
@@ -771,7 +779,127 @@ public class OrderHandlerService {
                 guarantee.getWarrantyPeriodMonth()
         );
     }
+    private boolean isEligibleForRefund(PurchaseOrder order) {
+        // Implement your refund eligibility logic here
+        // For example, check if the order is within 30 days
+        return ChronoUnit.DAYS.between(order.getPurchaseDate().toInstant(), Instant.now()) <= 30;
+    }
 
+
+    @Transactional
+    public String refundOrderDetail(RefundOrderDetailRequest request) {
+        OrderDetail orderDetail = orderDetailRepository.findById(request.getOrderDetailId())
+                .orElseThrow(() -> new IllegalArgumentException("OrderDetail not found"));
+
+        // Check for existing refund
+        Optional<Refund> existingRefund = refundRepository.findByOrderDetailId(request.getOrderDetailId());
+
+        int totalRefundedQuantity = orderDetail.getRefundedQuantity() + request.getQuantityToRefund();
+        if (totalRefundedQuantity > orderDetail.getQuantity()) {
+            throw new IllegalArgumentException("Refund quantity exceeds available quantity");
+        }
+
+        PurchaseOrder order = orderDetail.getPurchaseOrder();
+
+        if (!isEligibleForRefund(order)) {
+            throw new IllegalStateException("This order is not eligible for refund");
+        }
+
+        // Calculate refund amount for the partial quantity
+        float refundAmount = calculateRefundAmount(orderDetail, request.getQuantityToRefund());
+
+        // Update order total
+        order.setTotalAmount(order.getTotalAmount() - refundAmount);
+
+        Refund refund;
+        if (existingRefund.isPresent()) {
+            // Update existing refund
+            refund = existingRefund.get();
+            refund.setAmount(refund.getAmount() + refundAmount);
+            refund.setReason(refund.getReason() + "; " + request.getRefundReason());
+            refund.setRefundedQuantity(refund.getRefundedQuantity() + request.getQuantityToRefund());
+        } else {
+            // Create new refund
+            refund = new Refund();
+            refund.setOrderDetail(orderDetail);
+            refund.setAmount(refundAmount);
+            refund.setReason(request.getRefundReason());
+            refund.setRefundedQuantity(request.getQuantityToRefund());
+        }
+
+        // Convert java.util.Date to java.sql.Date
+        java.util.Date currentDate = new java.util.Date();
+        java.sql.Date sqlDate = new java.sql.Date(currentDate.getTime());
+
+        refund.setRefundDate(sqlDate);
+
+        // Update refunded quantity in OrderDetail
+        orderDetail.setRefundedQuantity(totalRefundedQuantity);
+
+        // Save changes
+        orderRepository.save(order);
+        refundRepository.save(refund);
+        orderDetailRepository.save(orderDetail);
+
+        // Send email notification
+        String customerEmail = order.getCustomer().getEmail();
+        emailService.sendRefundConfirmationEmail(request.getOrderDetailId(), customerEmail, refundAmount);
+
+        return existingRefund.isPresent() ? "Refund updated successfully" : "New refund processed successfully";
+    }
+
+    private float calculateRefundAmount(OrderDetail orderDetail, int quantityToRefund) {
+        // Calculate refund amount for the specified quantity
+        return (orderDetail.getProductSell().getCost() * quantityToRefund);
+    }
+
+    public List<RefundResponse> getAllRefunds() {
+        List<Refund> refunds = refundRepository.findAll();
+        return refunds.stream()
+                .map(this::mapToRefundResponse)
+                .collect(Collectors.toList());
+    }
+
+    private RefundResponse mapToRefundResponse(Refund refund) {
+        OrderDetail orderDetail = refund.getOrderDetail();
+        PurchaseOrder order = orderDetail.getPurchaseOrder();
+        Customer customer = order.getCustomer();
+
+        RefundResponse.RefundResponseBuilder builder = RefundResponse.builder()
+                .refundId(refund.getId())
+                .amount(refund.getAmount())
+                .reason(refund.getReason())
+                .refundDate(refund.getRefundDate())
+                .refundedQuantity(refund.getRefundedQuantity())
+                .orderDetailId(orderDetail.getPK_ODID())
+                .orderId(order.getPK_OrderID())
+                .orderDate(order.getPurchaseDate())
+                .orderStatus(order.getStatus())
+                .orderTotalAmount(order.getTotalAmount())
+                .paymentType(order.getPaymentType());
+
+        if (customer != null) {
+            builder.customerId(customer.getPK_CustomerID())
+                    .customerName(customer.getCusName())
+                    .customerEmail(customer.getEmail())
+                    .customerPhone(customer.getPhoneNumber())
+                    .customerLoyaltyRank(customer.getLoyaltyRank());
+        }
+
+        ProductSell productSell = orderDetail.getProductSell();
+        if (productSell != null) {
+            builder.productId(productSell.getProductID())
+                    .productName(productSell.getPName())
+                    .productCode(productSell.getProductCode())
+                    .productCost(productSell.getCost());
+        }
+
+        builder.orderDetailQuantity(orderDetail.getQuantity())
+                .orderDetailRefundedQuantity(orderDetail.getRefundedQuantity())
+                .guaranteeEndDate(orderDetail.getGuaranteeEndDate());
+
+        return builder.build();
+    }
 
 
 }

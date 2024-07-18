@@ -34,7 +34,16 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
             "JOIN Guarantee g ON g.productSell = ps " +
             "WHERE od.purchaseOrder.PK_OrderID = ?1")
     List<OrderDetailDTO> findOrderDetailsByOrderId(@Param("orderId") Long orderId);
-
+    @Query("SELECT new com.project.JewelryMS.model.OrderDetail.OrderDetailDTO(od.PK_ODID, od.quantity, od.purchaseOrder.PK_OrderID, " +
+            "od.guaranteeEndDate, g.coverage, g.policyType, g.warrantyPeriodMonth, g.status, ps.carat, " +
+            "c.id, ps.chi, ps.cost, ps.pDescription, ps.gemstoneType, ps.image, ps.metalType, ps.pName, ps.productCode, " +
+            "ps.pStatus, ps.manufacturer, ps.manufactureCost, ps.productID) " +
+            "FROM OrderDetail od " +
+            "JOIN od.productSell ps " +
+            "JOIN ps.category c " +
+            "JOIN Guarantee g ON g.productSell = ps " +
+            "WHERE od.PK_ODID = :orderDetailId")
+    OrderDetailDTO findOrderDetailDTOById(@Param("orderDetailId") Long orderDetailId);
     @Query("SELECT SUM(od.quantity) AS totalQuantity, SUM(od.quantity * ps.cost) AS totalRevenue " +
             "FROM OrderDetail od JOIN od.productSell ps JOIN od.purchaseOrder po " +
             "WHERE FUNCTION('DATE', po.purchaseDate) = :date")

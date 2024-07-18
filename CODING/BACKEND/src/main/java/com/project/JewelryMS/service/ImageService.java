@@ -81,17 +81,14 @@ public class ImageService {
     }
 
     public String uploadImageByPathService(String base64EncodedFile) {
-        // Validate the base64 string
         if (base64EncodedFile == null || base64EncodedFile.isEmpty()) {
             return "Invalid base64 string: empty or null";
         }
 
-        // Correct the base64 prefix if necessary
         if (base64EncodedFile.startsWith("data:image/")) {
             base64EncodedFile = base64EncodedFile.substring(base64EncodedFile.indexOf(",") + 1);
         }
 
-        // Check if the base64 string is valid
         try {
             Base64.getDecoder().decode(base64EncodedFile);
         } catch (IllegalArgumentException e) {
@@ -105,7 +102,14 @@ public class ImageService {
         body.add("image", base64EncodedFile);
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+        ResponseEntity<String> response;
+
+        try {
+            response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+        } catch (Exception e) {
+            return "Failed to upload image: " + e.getMessage();
+        }
+
         if (response.getStatusCode().is2xxSuccessful()) {
             try {
                 ObjectMapper mapper = new ObjectMapper();
@@ -113,11 +117,12 @@ public class ImageService {
                 String imageUrl = imgbbResponse.getData().getUrl();
                 return imageUrl;
             } catch (IOException e) {
-                return "Failed to parse Imgbb response";
+                return "Failed to parse Imgbb response: " + e.getMessage();
             }
         } else {
             return "Failed to upload image: " + response.getBody();
         }
     }
+
 
 }

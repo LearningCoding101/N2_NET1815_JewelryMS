@@ -28,7 +28,8 @@ public class OrderDetail implements Serializable {
     private PurchaseOrder purchaseOrder;
 
     private Integer quantity;
-
+    @Column(name = "refunded_quantity")
+    private Integer refundedQuantity = 0;
     @Column(name = "guaranteeEndDate")
     private Timestamp guaranteeEndDate;
 

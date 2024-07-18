@@ -58,7 +58,7 @@ public class ProfileService {
         if (authenticationOptional.isPresent() && authenticationOptional.get().getRole() == RoleEnum.ROLE_ADMIN) {
             Account account = authenticationOptional.get();
             return new AdminProfileResponse(account.getRole(), account.getEmail(), account.getUsername(),
-                    account.getAccountName(), account.getStatus());
+                    account.getAccountName(), account.getAImage(), account.getStatus());
         }
         return null;
     }
@@ -141,6 +141,7 @@ public class ProfileService {
                         a.getRole(),
                         a.getEmail(),
                         a.getAUsername(),
+                        a.getAImage(),
                         a.getAccountName(),
                         a.getStatus() != null ? a.getStatus() : 0 // handle null status
                 ))

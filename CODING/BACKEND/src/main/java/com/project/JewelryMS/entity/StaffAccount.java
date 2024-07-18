@@ -14,6 +14,8 @@ import java.util.*;
 @NoArgsConstructor
 @Entity
 @Table(name = "Staff")
+@EqualsAndHashCode(exclude = {"staffShifts", "purchaseOrders", "customer"})
+@ToString(exclude = {"staffShifts", "purchaseOrders", "customer"})
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "account.staffAccount", "shift.staffAccounts"})
 public class StaffAccount {
     @Id
@@ -23,10 +25,8 @@ public class StaffAccount {
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "FK_UserID", referencedColumnName = "PK_userID")
-//    @JsonBackReference
     @JsonIgnoreProperties
     private Account account;
-
 
     @Column(name = "phoneNumber")
     private String phoneNumber;
@@ -37,16 +37,16 @@ public class StaffAccount {
     @Column(name = "startDate")
     private LocalDate startDate;
 
-    @OneToMany(mappedBy = "staffAccount", fetch = FetchType.EAGER)//Change fetch type for schedule
+    @OneToMany(mappedBy = "staffAccount", fetch = FetchType.EAGER)
     @JsonIgnoreProperties
     @JsonManagedReference
-    Set<Staff_Shift> staffShifts;
+    private Set<Staff_Shift> staffShifts = new HashSet<>();
 
     @OneToMany(mappedBy = "staffAccount", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties
-    Set<PurchaseOrder> purchaseOrders = new HashSet<>();
+    private Set<PurchaseOrder> purchaseOrders = new HashSet<>();
 
     @OneToMany(mappedBy = "staffAccount")
     @JsonIgnoreProperties("staffAccount")
-    List<Customer> customer;
+    private List<Customer> customer = new ArrayList<>();
 }

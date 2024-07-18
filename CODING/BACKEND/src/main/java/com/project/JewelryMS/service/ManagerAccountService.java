@@ -50,6 +50,7 @@ public class ManagerAccountService {
                 account.getEmail(),
                 account.getUsername(),
                 account.getAccountName(),
+                account.getAImage(),
                 account.getRole(),
                 account.getStatus()
         );

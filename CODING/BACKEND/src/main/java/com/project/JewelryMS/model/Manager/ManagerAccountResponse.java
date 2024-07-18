@@ -17,6 +17,8 @@ public class ManagerAccountResponse {
 
     String accountName;
 
+    String image;
+
     RoleEnum role;
 
     int status;

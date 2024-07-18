@@ -32,4 +32,5 @@ public class OrderDetailGuaranteeResponse {
     String policyType;
     Boolean GuaranteeStatus;
     Integer warrantyPeriodMonth;
+
 }

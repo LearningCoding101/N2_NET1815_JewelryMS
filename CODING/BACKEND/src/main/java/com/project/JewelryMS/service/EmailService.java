@@ -7,6 +7,7 @@ import com.project.JewelryMS.model.Order.ProductResponse;
 import com.project.JewelryMS.model.OrderDetail.OrderDetailDTO;
 import com.project.JewelryMS.model.OrderDetail.OrderDetailGuarantee;
 import com.project.JewelryMS.model.OrderDetail.OrderDetailResponse;
+import com.project.JewelryMS.repository.OrderDetailRepository;
 import com.project.JewelryMS.service.Order.OrderDetailService;
 import com.project.JewelryMS.service.Order.OrderHandlerService;
 import jakarta.mail.MessagingException;
@@ -39,6 +40,8 @@ public class EmailService {
     private TemplateEngine templateEngine;
     @Autowired
     private ImageService imageService;
+    @Autowired
+    private OrderDetailRepository orderDetailRepository;
     @Autowired
     private JavaMailSender javaMailSender;
     @Autowired
@@ -208,7 +211,31 @@ public class EmailService {
         return response;
     }
 
+    public void sendRefundConfirmationEmail(Long orderDetailId, String recipientEmail, float refundAmount) {
+        try {
+            // Fetch order detail information
+            OrderDetailDTO orderDetail = orderDetailRepository.findOrderDetailDTOById(orderDetailId);
 
+            Context context = new Context();
+            context.setVariable("name", recipientEmail);
+            context.setVariable("content", "Your refund has been processed successfully.");
+            context.setVariable("refundTable", htmlFormatterService.createRefundDetailTable(orderDetail, refundAmount));
+
+            String text = templateEngine.process("refundEmail", context);
+
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
+
+            mimeMessageHelper.setFrom("jewelryms44@gmail.com");
+            mimeMessageHelper.setTo(recipientEmail);
+            mimeMessageHelper.setText(text, true);
+            mimeMessageHelper.setSubject("Refund Confirmation for Order Detail #" + orderDetailId);
+
+            javaMailSender.send(mimeMessage);
+        } catch (MessagingException messagingException) {
+            messagingException.printStackTrace();
+        }
+    }
     public boolean validEmail(String email){
         if (email == null){
             return false;

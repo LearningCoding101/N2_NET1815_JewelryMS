@@ -13,5 +13,6 @@ public class AdminProfileResponse {
     private String email;
     private String username;
     private String accountName;
+    private String image;
     private int status;
 }
