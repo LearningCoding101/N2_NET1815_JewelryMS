@@ -1,9 +1,10 @@
 package com.project.JewelryMS.controller;
 
-import com.project.JewelryMS.entity.Shift;
+import com.project.JewelryMS.entity.StaffAccount;
 import com.project.JewelryMS.entity.Staff_Shift;
 import com.project.JewelryMS.model.Shift.AssignStaffByShiftTypePatternRequest;
 import com.project.JewelryMS.model.Shift.AssignStaffToMultipleDaysRequest;
+import com.project.JewelryMS.model.Shift.UpdateStaffWorkAreaRequest;
 import com.project.JewelryMS.model.Staff.StaffAccountResponse;
 import com.project.JewelryMS.model.StaffShift.IdWrapper;
 import com.project.JewelryMS.model.StaffShift.StaffShiftResponse;
@@ -218,4 +219,9 @@ public class SchedulingController {
         }
     }
 
+    @PutMapping("/update-work-area")
+    public ResponseEntity<UpdateStaffWorkAreaRequest> updateStaffWorkArea(@RequestBody UpdateStaffWorkAreaRequest request) {
+        UpdateStaffWorkAreaRequest response = schedulingService.updateStaffWorkArea(request);
+        return ResponseEntity.ok(response);
+    }
 }

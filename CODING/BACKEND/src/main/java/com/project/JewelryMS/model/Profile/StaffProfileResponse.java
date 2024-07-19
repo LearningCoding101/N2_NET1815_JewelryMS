@@ -18,7 +18,7 @@ public class StaffProfileResponse {
     private String username;
     private String accountName;
     private LocalDate startDate;
-    private String phone;
+    private String phoneNumber;
     private float salary;
     private int status;
 

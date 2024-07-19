@@ -8,9 +8,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateShiftRequest {
-    private String endTime;
     private String shiftType;
-    private String startTime;
     private String status;
-    private WorkAreaRequest workArea;
+    private String startTime;
+    private String endTime;
 }

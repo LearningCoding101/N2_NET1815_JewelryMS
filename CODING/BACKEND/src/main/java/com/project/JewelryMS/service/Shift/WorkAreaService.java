@@ -17,6 +17,20 @@ public class WorkAreaService {
     @Autowired
     private WorkAreaRepository workAreaRepository;
 
+    // Create a new work area
+    public WorkAreaRequest createWorkArea(WorkAreaRequest workAreaRequest) {
+        if (!isValidWorkAreaID(workAreaRequest.getWorkAreaID())) {
+            throw new IllegalArgumentException("Invalid workAreaID format. Expected format: <4 Uppercase letters><3 numbers>.");
+        }
+
+        WorkArea workArea = new WorkArea();
+        workArea.setWorkAreaID(workAreaRequest.getWorkAreaID());
+        workArea.setRegister(workAreaRequest.getRegister());
+        workArea.setDescription(workAreaRequest.getDescription());
+        workArea = workAreaRepository.save(workArea);
+        return toWorkAreaRequest(workArea);
+    }
+
     // Get all work areas
     public List<GetWorkAreaRequest> getAllWorkAreas() {
         List<WorkArea> workAreas = workAreaRepository.findAll();
@@ -73,6 +87,9 @@ public class WorkAreaService {
         );
     }
 
-
+    // Method to validate the workAreaID format
+    private boolean isValidWorkAreaID(String workAreaID) {
+        // Check if the workAreaID matches the format: 4 letters followed by 3 numbers
+        return workAreaID.matches("[A-Z]{4}\\d{3}");
+    }
 }
-

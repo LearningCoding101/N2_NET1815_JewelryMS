@@ -7,10 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ShiftRequest {
-    private int shiftID;
-    private String endTime;
-    private String shiftType;
-    private String startTime;
-    private String status;
+public class UpdateStaffWorkAreaRequest {
+    private int staffId;
+    private String workAreaId;
 }

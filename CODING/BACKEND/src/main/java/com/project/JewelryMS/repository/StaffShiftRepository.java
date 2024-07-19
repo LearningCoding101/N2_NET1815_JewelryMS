@@ -23,4 +23,9 @@ public interface StaffShiftRepository extends JpaRepository<Staff_Shift, Long> {
             LocalDateTime endDate
     );
 
+    @Query("SELECT ss FROM Staff_Shift ss WHERE ss.staffAccount.account.PK_userID = :userID AND ss.shift.startTime <= :now AND ss.shift.endTime >= :now")
+    List<Staff_Shift> findActiveShiftsForStaff(@Param("userID") Long userID, @Param("now") LocalDateTime now);
+
+    @Query("SELECT ss FROM Staff_Shift ss WHERE ss.shift.startTime < :now AND ss.attendanceStatus = 'Not yet'")
+    List<Staff_Shift> findPastShifts(@Param("now") LocalDateTime now);
 }

@@ -5,6 +5,7 @@ import com.project.JewelryMS.model.Shift.WorkAreaRequest;
 import com.project.JewelryMS.service.Shift.WorkAreaService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,14 @@ public class WorkAreaController {
 
     @Autowired
     private WorkAreaService workAreaService;
+
+    // Create work area
+    @PostMapping
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    public ResponseEntity<WorkAreaRequest> createWorkArea(@RequestBody WorkAreaRequest workAreaRequest) {
+        WorkAreaRequest createdWorkArea = workAreaService.createWorkArea(workAreaRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdWorkArea);
+    }
 
     // Get all work areas
     @GetMapping

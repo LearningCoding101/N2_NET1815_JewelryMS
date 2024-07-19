@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface StaffAccountRepository extends JpaRepository<StaffAccount, Integer> {
@@ -39,4 +40,9 @@ public interface StaffAccountRepository extends JpaRepository<StaffAccount, Inte
     @Query("SELECT sa.account.email FROM StaffAccount sa WHERE sa.staffID = :staffId")
     String findEmailByStaffId(@Param("staffId") long staffId);
 
+    @Query("SELECT DISTINCT s FROM StaffAccount s LEFT JOIN FETCH s.workArea WHERE s.staffID IN :staffIds")
+    List<StaffAccount> findAllByIdWithWorkAreaEagerly(Set<Integer> staffIds);
+
+    @Query("SELECT sa FROM StaffAccount sa WHERE sa.account.aUsername =:aUsername")
+    Optional<StaffAccount> findByUsername(@Param("aUsername") String username);
 }

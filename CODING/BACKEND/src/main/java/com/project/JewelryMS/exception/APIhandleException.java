@@ -30,9 +30,9 @@ public class APIhandleException {
     public ResponseEntity<Object> handleDuplicate(SQLIntegrityConstraintViolationException ex) {
         String message = ex.getMessage().toLowerCase();
 
-        if (message.contains("account.UKd3xjtwxrpxnpf7j2x5f35kdwo")) {
+        if (message.contains("account.ukd3xjtwxrpxnpf7j2x5f35kdwo")) {
             return handleDuplicateUsernameException(new DuplicateUsernameException("Username đã được sử dụng"));
-        } else if (message.contains("account.UKcs5bnaggwuluahrdh8mbs1rpe")) {
+        } else if (message.contains("account.ukcs5bnaggwuluahrdh8mbs1rpe")) {
             return handleDuplicateEmailException(new DuplicateEmailException("Email đã được sử dụng."));
         }
 

@@ -5,7 +5,6 @@ import com.project.JewelryMS.entity.Shift;
 import com.project.JewelryMS.entity.StaffAccount;
 import com.project.JewelryMS.exception.DuplicateEmailException;
 import com.project.JewelryMS.exception.DuplicateUsernameException;
-import com.project.JewelryMS.entity.*;
 import com.project.JewelryMS.model.Staff.StaffAccountRequest;
 import com.project.JewelryMS.model.Staff.StaffAccountResponse;
 import com.project.JewelryMS.model.Staff.StaffAccountWithoutShiftResponse;
@@ -17,8 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -76,11 +73,6 @@ public class StaffAccountService {
         shiftResponse.setShiftType(shift.getShiftType());
         shiftResponse.setStartTime(shift.getStartTime());
         shiftResponse.setStatus(shift.getStatus());
-        // Map WorkArea
-        WorkArea workArea = shift.getWorkArea();
-        if (workArea != null) {
-            shiftResponse.setWorkAreaID(workArea.getWorkAreaID());
-        }
         return shiftResponse;
     }
 

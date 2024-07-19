@@ -37,6 +37,5 @@ public class StaffAccountResponse {
         private String shiftType;
         private LocalDateTime startTime;
         private String status;
-        private String workAreaID;
     }
 }

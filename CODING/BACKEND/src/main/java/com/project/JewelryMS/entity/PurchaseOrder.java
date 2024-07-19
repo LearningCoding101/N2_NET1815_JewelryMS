@@ -1,6 +1,8 @@
 package com.project.JewelryMS.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
@@ -34,6 +36,8 @@ public class PurchaseOrder implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="FK_StaffID", referencedColumnName = "PK_staffID")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @JsonManagedReference
+    @JsonBackReference
     private StaffAccount staffAccount;
 
     String paymentType;

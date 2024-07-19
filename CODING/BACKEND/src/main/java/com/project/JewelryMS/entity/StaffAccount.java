@@ -1,5 +1,6 @@
 package com.project.JewelryMS.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -14,8 +15,8 @@ import java.util.*;
 @NoArgsConstructor
 @Entity
 @Table(name = "Staff")
-@EqualsAndHashCode(exclude = {"staffShifts", "purchaseOrders", "customer"})
-@ToString(exclude = {"staffShifts", "purchaseOrders", "customer"})
+@EqualsAndHashCode(exclude = {"staffShifts", "purchaseOrders", "customer", "workArea"})
+@ToString(exclude = {"staffShifts", "purchaseOrders", "customer", "workArea"})
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "account.staffAccount", "shift.staffAccounts"})
 public class StaffAccount {
     @Id
@@ -37,13 +38,22 @@ public class StaffAccount {
     @Column(name = "startDate")
     private LocalDate startDate;
 
-    @OneToMany(mappedBy = "staffAccount", fetch = FetchType.EAGER)
-    @JsonIgnoreProperties
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "workAreaId", referencedColumnName = "workAreaID")
+    @JsonIgnoreProperties("staffAccounts")
     @JsonManagedReference
+    @JsonBackReference
+    private WorkArea workArea;
+
+    @OneToMany(mappedBy = "staffAccount", fetch = FetchType.EAGER)
+    @JsonIgnoreProperties("staffAccount")
+    @JsonManagedReference
+    @JsonBackReference
     private Set<Staff_Shift> staffShifts = new HashSet<>();
 
     @OneToMany(mappedBy = "staffAccount", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties
+    @JsonBackReference
     private Set<PurchaseOrder> purchaseOrders = new HashSet<>();
 
     @OneToMany(mappedBy = "staffAccount")

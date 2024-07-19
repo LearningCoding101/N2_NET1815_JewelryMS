@@ -11,6 +11,6 @@ public class UpdateStaff {
     String email;
     String username;
     String accountName;
-    String phone;
+    String phoneNumber;
     String image;
 }

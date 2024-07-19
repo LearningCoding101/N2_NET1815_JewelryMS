@@ -33,12 +33,6 @@ public class Shift {
     @Column(name = "status")
     private String status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "workAreaId", referencedColumnName = "workAreaID")
-    @JsonBackReference
-    @JsonManagedReference
-    private WorkArea workArea;
-
     @OneToMany(mappedBy = "shift", fetch = FetchType.EAGER)
     @JsonManagedReference
     private Set<Staff_Shift> staffShifts;

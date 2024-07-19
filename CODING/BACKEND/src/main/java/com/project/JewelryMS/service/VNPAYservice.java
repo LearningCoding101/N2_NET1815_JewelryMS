@@ -1,12 +1,16 @@
 package com.project.JewelryMS.service;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.JewelryMS.config.VNPAYConfig;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.math.BigInteger;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -117,5 +121,118 @@ public class VNPAYservice {
             return -1;
         }
     }
+    public String queryTransaction(String vnp_TxnRef, String vnp_TransactionDate, String vnp_OrderInfo) throws IOException {
+        String vnp_RequestId = VNPAYConfig.getRandomNumber(8);
+        String vnp_Version = "2.1.0";
+        String vnp_Command = "querydr";
+        String vnp_TmnCode = VNPAYConfig.vnp_TmnCode;
+        String vnp_CreateDate = getFormatDate();
+        String vnp_IpAddr = "159.89.49.13"; // Replace with your server's IP
 
+        Map<String, String> vnp_Params = new HashMap<>();
+        vnp_Params.put("vnp_RequestId", vnp_RequestId);
+        vnp_Params.put("vnp_Version", vnp_Version);
+        vnp_Params.put("vnp_Command", vnp_Command);
+        vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
+        vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
+        vnp_Params.put("vnp_OrderInfo", vnp_OrderInfo);
+        vnp_Params.put("vnp_TransactionDate", vnp_TransactionDate);
+        vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
+        vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
+
+        String hashData = vnp_RequestId + "|" + vnp_Version + "|" + vnp_Command + "|" + vnp_TmnCode + "|"
+                + vnp_TxnRef + "|" + vnp_TransactionDate + "|" + vnp_CreateDate + "|"
+                + vnp_IpAddr + "|" + vnp_OrderInfo;
+
+        String vnp_SecureHash = VNPAYConfig.hmacSHA512(VNPAYConfig.vnp_HashSecret, hashData);
+        vnp_Params.put("vnp_SecureHash", vnp_SecureHash);
+
+        String payloadJson = new ObjectMapper().writeValueAsString(vnp_Params);
+
+        // Send POST request to VNPAY API
+        URL url = new URL(VNPAYConfig.vnp_apiUrl);
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("POST");
+        con.setRequestProperty("Content-Type", "application/json");
+        con.setDoOutput(true);
+
+        try (OutputStream os = con.getOutputStream()) {
+            byte[] input = payloadJson.getBytes("utf-8");
+            os.write(input, 0, input.length);
+        }
+
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"))) {
+            StringBuilder response = new StringBuilder();
+            String responseLine;
+            while ((responseLine = br.readLine()) != null) {
+                response.append(responseLine.trim());
+            }
+            return response.toString();
+        }
+    }
+    public String refund(String vnp_TxnRef, long refundAmount, String refundOrderInfo, String staffName)
+            throws IOException, JsonProcessingException {
+        String vnp_RequestId = VNPAYConfig.getRandomNumber(8);
+        String vnp_Version = "2.1.0";
+        String vnp_Command = "refund";
+        String vnp_TmnCode = VNPAYConfig.vnp_TmnCode;
+
+        String vnp_TransactionType = "02"; // 02 for full refund, 03 for partial refund
+        String vnp_Amount = String.valueOf(refundAmount * 100); // Convert to VND cents
+        String vnp_TransactionNo = ""; // Leave empty for VNPAY to process
+        String vnp_TransactionDate = getFormatDate();
+        String vnp_CreateBy = staffName;
+        String vnp_CreateDate = getFormatDate();
+        String vnp_IpAddr = "159.89.49.13"; // Replace with your server's IP
+
+        Map<String, String> vnp_Params = new HashMap<>();
+        vnp_Params.put("vnp_RequestId", vnp_RequestId);
+        vnp_Params.put("vnp_Version", vnp_Version);
+        vnp_Params.put("vnp_Command", vnp_Command);
+        vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
+        vnp_Params.put("vnp_TransactionType", vnp_TransactionType);
+        vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
+        vnp_Params.put("vnp_Amount", vnp_Amount);
+        vnp_Params.put("vnp_OrderInfo", refundOrderInfo);
+        vnp_Params.put("vnp_TransactionNo", vnp_TransactionNo);
+        vnp_Params.put("vnp_TransactionDate", vnp_TransactionDate);
+        vnp_Params.put("vnp_CreateBy", vnp_CreateBy);
+        vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
+        vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
+
+        String hash_Data = vnp_RequestId + "|" + vnp_Version + "|" + vnp_Command + "|" + vnp_TmnCode + "|"
+                + vnp_TransactionType + "|" + vnp_TxnRef + "|" + vnp_Amount + "|" + vnp_TransactionNo
+                + "|" + vnp_TransactionDate + "|" + vnp_CreateBy + "|" + vnp_CreateDate + "|" + vnp_IpAddr + "|" + refundOrderInfo;
+
+        String vnp_SecureHash = VNPAYConfig.hmacSHA512(VNPAYConfig.vnp_HashSecret, hash_Data);
+        vnp_Params.put("vnp_SecureHash", vnp_SecureHash);
+
+        String payloadJson = new ObjectMapper().writeValueAsString(vnp_Params);
+
+        // Send POST request to VNPAY API
+        URL url = new URL(VNPAYConfig.vnp_apiUrl);
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("POST");
+        con.setRequestProperty("Content-Type", "application/json");
+        con.setDoOutput(true);
+
+        try (OutputStream os = con.getOutputStream()) {
+            byte[] input = payloadJson.getBytes("utf-8");
+            os.write(input, 0, input.length);
+        }
+
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"))) {
+            StringBuilder response = new StringBuilder();
+            String responseLine;
+            while ((responseLine = br.readLine()) != null) {
+                response.append(responseLine.trim());
+            }
+            return response.toString();
+        }
+    }
+    private String getFormatDate() {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+        return formatter.format(cld.getTime());
+    }
 }

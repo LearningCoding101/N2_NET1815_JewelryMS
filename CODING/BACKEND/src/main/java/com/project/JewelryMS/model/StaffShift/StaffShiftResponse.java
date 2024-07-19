@@ -15,7 +15,6 @@ public class StaffShiftResponse {
     private String endTime;
     private String shiftType;
     private String status;
-    private String workAreaID;
     private List<StaffResponse> staff;
 
     @Data
@@ -26,5 +25,7 @@ public class StaffShiftResponse {
         private String accountName;
         private String email;
         private String username;
+        private String workAreaID;
+        private String attendanceStatus; // Added field for attendance status
     }
 }

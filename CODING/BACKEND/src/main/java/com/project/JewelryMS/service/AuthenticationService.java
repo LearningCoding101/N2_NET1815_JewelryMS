@@ -5,6 +5,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
 import com.project.JewelryMS.entity.Account;
+import com.project.JewelryMS.entity.Staff_Shift;
 import com.project.JewelryMS.enumClass.RoleEnum;
 import com.project.JewelryMS.entity.StaffAccount;
 import com.project.JewelryMS.exception.DuplicateEmailException;
@@ -13,9 +14,11 @@ import com.project.JewelryMS.model.*;
 import com.project.JewelryMS.model.Staff.CreateStaffAccountRequest;
 import com.project.JewelryMS.repository.AuthenticationRepository;
 import com.project.JewelryMS.repository.StaffAccountRepository;
+import com.project.JewelryMS.repository.StaffShiftRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -38,6 +41,8 @@ public class AuthenticationService implements UserDetailsService {
     JWTservice jwTservice;
 
     @Autowired
+    StaffShiftRepository staffShiftRepository;
+    @Autowired
     AuthenticationRepository authenticationRepository;
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -51,7 +56,7 @@ public class AuthenticationService implements UserDetailsService {
         if(authenticationRepository.existsByAUsername(createStaffAccountRequest.getUsername())){
             throw new DuplicateUsernameException("Username đã được sử dụng.");
         }
-        if(authenticationRepository.existsByEmail(createStaffAccountRequest.getUsername())){
+        if(authenticationRepository.existsByEmail(createStaffAccountRequest.getEmail())){
             throw new DuplicateEmailException("Email đã được sử dụng.");
         }
         account.setAccountName(createStaffAccountRequest.getAccountName());
@@ -114,7 +119,16 @@ public class AuthenticationService implements UserDetailsService {
                     accountResponse.setUsername(account.getUsername());
                     accountResponse.setToken(token);
                     accountResponse.setRole(account.getRole());
-                    accountResponse.setId((long)account.getPK_userID());
+                    if(accountResponse.getRole()==RoleEnum.ROLE_STAFF){
+                        Optional<StaffAccount> staffAccount = staffAccountRepository.findByUsername(accountResponse.getUsername());
+                        if(staffAccount.isPresent()) {
+                            StaffAccount staffAcc = staffAccount.get();
+                            accountResponse.setId((long) staffAcc.getStaffID());
+                        }
+                    }else {
+                        accountResponse.setId((long) account.getPK_userID());
+                    }
+
                     return accountResponse;
     }
     public ResponseEntity<String> changePassword(ChangePasswordRequest request ,Long id) {
@@ -171,9 +185,52 @@ public class AuthenticationService implements UserDetailsService {
              accountResponseGG.setToken(token);
              accountResponseGG.setRole(account.getRole());
 
+            // Update attendance status if the login time falls within any active shift
+            updateAttendanceStatusOnLogin(account, LocalDateTime.now());
         }catch(FirebaseAuthException e){
             e.printStackTrace();
         }
         return accountResponseGG;
+    }
+
+    private void updateAttendanceStatusOnLogin(Account account, LocalDateTime loginTime) {
+        if (account.getRole() != RoleEnum.ROLE_STAFF) {
+            return;
+        }
+
+        List<Staff_Shift> activeShifts = staffShiftRepository.findActiveShiftsForStaff((long) account.getPK_userID(), loginTime);
+
+        for (Staff_Shift staffShift : activeShifts) {
+            if ("Not yet".equals(staffShift.getAttendanceStatus())) {
+                // Check if the login time is within 30 minutes of the shift start time
+                if (!loginTime.isBefore(staffShift.getShift().getStartTime().minusMinutes(30)) &&
+                        !loginTime.isAfter(staffShift.getShift().getStartTime().plusMinutes(30))) {
+                    staffShift.setAttendanceStatus("Attended");
+                } else {
+                    staffShift.setAttendanceStatus("Absent");
+                }
+                staffShiftRepository.save(staffShift);
+            }
+        }
+    }
+
+    @Scheduled(fixedRate = 60000) // Run every minute
+    public void updateAllStaffAttendance() {
+        List<Account> staffAccounts = authenticationRepository.findByRole(RoleEnum.ROLE_STAFF);
+        LocalDateTime now = LocalDateTime.now();
+
+        for (Account staffAccount : staffAccounts) {
+            List<Staff_Shift> activeShifts = staffShiftRepository.findActiveShiftsForStaff((long) staffAccount.getPK_userID(), now);
+
+            for (Staff_Shift staffShift : activeShifts) {
+                if ("Not yet".equals(staffShift.getAttendanceStatus())) {
+                    // Check if the current time is more than 120 minutes past the shift start time
+                    if (now.isAfter(staffShift.getShift().getStartTime().plusMinutes(120))) {
+                        staffShift.setAttendanceStatus("Absent");
+                        staffShiftRepository.save(staffShift);
+                    }
+                }
+            }
+        }
     }
 }

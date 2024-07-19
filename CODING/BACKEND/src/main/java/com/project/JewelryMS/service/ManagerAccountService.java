@@ -61,7 +61,7 @@ public class ManagerAccountService {
         if(authenticationRepository.existsByAUsername(createManagerAccountRequest.getUsername())){
             throw new DuplicateUsernameException("Username đã được sử dụng.");
         }
-        if(authenticationRepository.existsByEmail(createManagerAccountRequest.getUsername())){
+        if(authenticationRepository.existsByEmail(createManagerAccountRequest.getEmail())){
             throw new DuplicateEmailException("Email đã được sử dụng.");
         }
         account.setAccountName(createManagerAccountRequest.getAccountName());

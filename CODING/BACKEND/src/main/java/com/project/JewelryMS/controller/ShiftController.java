@@ -22,18 +22,6 @@ public class ShiftController {
     @Autowired
     private ShiftService shiftService;
 
-//    // Create Shift
-//    @PostMapping("/create")
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
-//    public ResponseEntity<ShiftRequest> createShift(@RequestBody CreateShiftRequest createShiftRequest) {
-//        try {
-//            ShiftRequest createdShift = shiftService.createShift(createShiftRequest);
-//            return ResponseEntity.status(HttpStatus.CREATED).body(createdShift);
-//        } catch (RuntimeException e) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-//        }
-//    }
-        // Create Shift
         @PostMapping("/create")
         @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
         public ResponseEntity<ShiftRequest> createShift(@RequestBody CreateShiftRequest createShiftRequest) {

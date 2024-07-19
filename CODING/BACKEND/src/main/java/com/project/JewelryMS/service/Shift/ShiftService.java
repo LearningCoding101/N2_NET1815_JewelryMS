@@ -27,13 +27,10 @@ public class ShiftService {
     @Autowired
     private ShiftRepository shiftRepository;
 
-    @Autowired
-    private WorkAreaRepository workAreaRepository;
-
     // Define a formatter for "yyyy-MM-dd HH:mm"
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-    // Method to create a new shift with an associated work area
+    // Method to create a new shift
     @Transactional
     public ShiftRequest createShift(CreateShiftRequest createShiftRequest) {
         Shift shift = new Shift();
@@ -42,51 +39,8 @@ public class ShiftService {
         shift.setShiftType(createShiftRequest.getShiftType());
         shift.setStatus(createShiftRequest.getStatus());
 
-        // Create or find the WorkArea entity
-        WorkArea workArea = findOrCreateWorkArea(createShiftRequest.getWorkArea());
-
-        shift.setWorkArea(workArea);
-
         shiftRepository.save(shift);
         return convertToShiftRequest(shift);
-    }
-
-    // Method to find or create a WorkArea entity based on workAreaID
-    private WorkArea findOrCreateWorkArea(WorkAreaRequest workAreaRequest) {
-        String workAreaID = workAreaRequest.getWorkAreaID();
-
-        // Validate the workAreaID format
-        if (!isValidWorkAreaID(workAreaID)) {
-            throw new IllegalArgumentException("Invalid workAreaID format. Expected format: <4 letters><3 numbers>.");
-        }
-
-        // Find the WorkArea entity by workAreaID or create a new one if not found
-        Optional<WorkArea> workAreaOptional = workAreaRepository.findByWorkAreaID(workAreaID);
-        WorkArea workArea;
-        if (workAreaOptional.isPresent()) {
-            workArea = workAreaOptional.get();
-        } else {
-            // Create a new WorkArea if not found
-            workArea = new WorkArea();
-            workArea.setWorkAreaID(workAreaID);
-            workArea.setRegister(extractRegisterNumber(workAreaID));
-            workArea.setDescription(workAreaRequest.getDescription());
-            workArea = workAreaRepository.save(workArea);
-        }
-        return workArea;
-    }
-
-    // Method to validate the workAreaID format
-    private boolean isValidWorkAreaID(String workAreaID) {
-        // Check if the workAreaID matches the format: 4 letters followed by 3 numbers
-        return workAreaID.matches("[A-Z]{4}\\d{3}");
-    }
-
-    // Method to extract register number from workAreaID
-    private int extractRegisterNumber(String workAreaID) {
-        // Extract the last 3 digits as the register number
-        String registerStr = workAreaID.substring(4); // Extracts digits after the 4 letters
-        return Integer.parseInt(registerStr);
     }
 
     // Convert Shift entity to ShiftRequest DTO
@@ -98,15 +52,6 @@ public class ShiftService {
         shiftRequest.setShiftType(shift.getShiftType());
         shiftRequest.setStatus(shift.getStatus());
 
-        WorkAreaRequest workAreaRequest = new WorkAreaRequest();
-        WorkArea workArea = shift.getWorkArea();
-        if (workArea != null) {
-            workAreaRequest.setWorkAreaID(workArea.getWorkAreaID());
-            workAreaRequest.setRegister(workArea.getRegister());
-            workAreaRequest.setDescription(workArea.getDescription());
-        }
-
-        shiftRequest.setWorkArea(workAreaRequest);
         return shiftRequest;
     }
 
@@ -144,30 +89,11 @@ public class ShiftService {
             shift.setStartTime(startTime);
             shift.setStatus(shiftRequest.getStatus());
 
-            // Convert WorkAreaRequest to WorkArea entity
-            WorkArea workArea = findOrCreateWorkArea(shiftRequest.getWorkArea());
-
-            // Save or update WorkArea
-            workArea = workAreaRepository.save(workArea);
-
-            shift.setWorkArea(workArea);
-
             shiftRepository.save(shift);
         } else {
             throw new RuntimeException("Shift with ID " + shiftRequest.getShiftID() + " not found");
         }
     }
-
-    // Delete Shift by ID
-//    @Transactional
-//    public void deleteShiftById(Long id) {
-//        Optional<Shift> shiftOptional = shiftRepository.findById(id);
-//        if (shiftOptional.isPresent()) {
-//            shiftRepository.deleteById(id);
-//        } else {
-//            throw new RuntimeException("Shift ID: " + id + " not found");
-//        }
-//    }
 
     // Update Shift status to inactive by ID
     @Transactional
@@ -182,7 +108,6 @@ public class ShiftService {
         }
     }
 
-
     // Delete shifts with no staff and older than 2 months
     @Transactional
     public void deleteShiftsWithCriteria() {
@@ -190,9 +115,9 @@ public class ShiftService {
 
         List<Shift> shiftsWithoutStaff = shiftRepository.findShiftsWithoutStaff();
         shiftsWithoutStaff.forEach(shiftRepository::delete);
-
-        List<Shift> shiftsOlderThanTwoMonths = shiftRepository.findShiftsOlderThan(LocalDate.from(twoMonthsAgo));
-        shiftsOlderThanTwoMonths.forEach(shiftRepository::delete);
+    //De-activate 2 month shifts deletion
+//        List<Shift> shiftsOlderThanTwoMonths = shiftRepository.findShiftsOlderThan(LocalDate.from(twoMonthsAgo));
+//        shiftsOlderThanTwoMonths.forEach(shiftRepository::delete);
     }
 
     // Read Shifts by start time
@@ -234,5 +159,4 @@ public class ShiftService {
                 .map(this::convertToShiftRequest)
                 .collect(Collectors.toList());
     }
-
 }
