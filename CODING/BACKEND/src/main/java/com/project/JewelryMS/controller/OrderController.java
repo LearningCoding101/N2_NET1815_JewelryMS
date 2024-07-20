@@ -170,24 +170,24 @@ public class OrderController {
 //    @PostMapping("/subtotal")
 //  //  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_MANAGER')")
 //    public ResponseEntity<Float> calculateTotalAmount(@RequestBody OrderDetailRequest orderDetailRequest) {
-//        Float totalAmount = orderHandlerService.calculateSubTotal(orderDetailRequest);
-//        return ResponseEntity.ok(totalAmount);
+//        Float revenueAmount = orderHandlerService.calculateSubTotal(orderDetailRequest);
+//        return ResponseEntity.ok(revenueAmount);
 //    }
 //
 //    // Calculate product discount
 //    @PostMapping("/discount")
 //   // @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_MANAGER')")
 //    public ResponseEntity<Float> calculateDiscount(@RequestBody OrderPromotionRequest orderPromotionRequest) {
-//        Float totalAmount = orderHandlerService.calculateDiscountProduct(orderPromotionRequest);
-//        return ResponseEntity.ok(totalAmount);
+//        Float revenueAmount = orderHandlerService.calculateDiscountProduct(orderPromotionRequest);
+//        return ResponseEntity.ok(revenueAmount);
 //    }
 //
 //    // Calculate order details total
 //    @PostMapping("/order-details-total")
 //   // @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_STAFF', 'ROLE_MANAGER')")
 //    public ResponseEntity<Float> calculateOrderDetailTotal(@RequestBody OrderTotalRequest orderTotalRequest) {
-//        Float totalAmount = orderHandlerService.TotalOrderDetails(orderTotalRequest);
-//        return ResponseEntity.ok(totalAmount);
+//        Float revenueAmount = orderHandlerService.TotalOrderDetails(orderTotalRequest);
+//        return ResponseEntity.ok(revenueAmount);
 //    }
 
     // Calculate order total
@@ -268,6 +268,27 @@ public class OrderController {
     public ResponseEntity getAllRefunded(){
         return ResponseEntity.ok(orderHandlerService.getAllRefunds());
     }
+
+    @PutMapping("/saleStaff")
+    public ResponseEntity<String> updateSaleStaff(@RequestBody OrderStaffSaleRequest orderStaffSaleRequest) {
+        String response = orderHandlerService.updateSaleStaff(orderStaffSaleRequest);
+        if (response.contains("Successfully")) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    @PutMapping("/appraisalStaff")
+    public ResponseEntity<String> updateAppraisalStaff(@RequestBody OrderStaffAppraisalRequest orderStaffAppraisalRequest) {
+        String response = orderHandlerService.updateAppraisalStaff(orderStaffAppraisalRequest);
+        if (response.contains("Successfully")) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
 
 
 }

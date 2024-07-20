@@ -9,6 +9,7 @@ import com.project.JewelryMS.model.Staff.StaffAccountResponse;
 import com.project.JewelryMS.model.StaffShift.IdWrapper;
 import com.project.JewelryMS.model.StaffShift.StaffShiftResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -220,8 +221,25 @@ public class SchedulingController {
     }
 
     @PutMapping("/update-work-area")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<UpdateStaffWorkAreaRequest> updateStaffWorkArea(@RequestBody UpdateStaffWorkAreaRequest request) {
         UpdateStaffWorkAreaRequest response = schedulingService.updateStaffWorkArea(request);
         return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/switch-work-areas")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    public ResponseEntity<String> switchStaffWorkAreas(
+            @RequestParam Integer staffId1,
+            @RequestParam Integer staffId2) {
+
+        try {
+            schedulingService.switchStaffWorkArea(staffId1, staffId2);
+            return new ResponseEntity<>("Work areas switched successfully.", HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>("An error occurred while switching work areas.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

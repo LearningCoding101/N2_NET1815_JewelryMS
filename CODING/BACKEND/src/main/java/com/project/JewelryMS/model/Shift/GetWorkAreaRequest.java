@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetWorkAreaRequest {
-    private long id;
-    private String workAreaID;
+    private long PK_WorkAreaId;
+    private String workAreaCode;
     private int register;
     private String description;
     private String status;

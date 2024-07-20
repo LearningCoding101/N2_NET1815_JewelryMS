@@ -528,30 +528,30 @@ public class OrderHandlerService {
     //Thai Dang fix may thang order detail bo len day, t lamf wrapper tam thoi thoi
     //Calculate SubTotal, Discount product and Total////////////////////////////////////////////////////////////////////////////////////////////////
 //    public Float calculateSubTotal(OrderDetailRequest orderDetailRequest) {
-//        float totalAmount = 0;
+//        float revenueAmount = 0;
 //        Optional<ProductSell> productSellOptional = productSellRepository.findById(orderDetailRequest.getProductSell_ID());
 //        if (productSellOptional.isPresent()) {
 //            ProductSell productSell = productSellOptional.get();
 //            float productCost = productSell.getCost();
 //            int quantity = orderDetailRequest.getQuantity();
-//            totalAmount = productCost * quantity;
+//            revenueAmount = productCost * quantity;
 //        }
-//        return totalAmount;
+//        return revenueAmount;
 //    }
 //
 //    public Float calculateDiscountProduct(OrderPromotionRequest orderPromotionRequest) {
 //        Promotion promotion = promotionRepository.findById(orderPromotionRequest.getPromotionID()).orElseThrow(() -> new IllegalArgumentException("Promotion ID not found"));
 //        int discount = promotion.getDiscount();
 //        float percentage = discount / 100.0F;
-//        float totalAmount = 0.0F;
+//        float revenueAmount = 0.0F;
 //        Optional<ProductSell> productSellOptional = productSellRepository.findById(orderPromotionRequest.getProductSell_ID());
 //        if (productSellOptional.isPresent()) {
 //            ProductSell productSell = productSellOptional.get();
 //            float productCost = productSell.getCost();
 //            int quantity = orderPromotionRequest.getQuantity();
-//            totalAmount = productCost * quantity;
+//            revenueAmount = productCost * quantity;
 //        }
-//        return totalAmount * percentage;
+//        return revenueAmount * percentage;
 //    }
 //
 //    public Float TotalOrderDetails(OrderTotalRequest orderTotalRequest) {
@@ -901,5 +901,37 @@ public class OrderHandlerService {
         return builder.build();
     }
 
+
+    public String updateSaleStaff(OrderStaffSaleRequest orderStaffSaleRequest) {
+        Optional<PurchaseOrder> purchaseOrderOptional = orderRepository.findById(orderStaffSaleRequest.getOrderID());
+        if (purchaseOrderOptional.isPresent()) {
+            PurchaseOrder order = purchaseOrderOptional.get();
+            Optional<StaffAccount> staffAccountOptional = staffAccountRepository.findById(orderStaffSaleRequest.getStaffSaleID());
+            if (staffAccountOptional.isPresent()) {
+                StaffAccount staffAccount = staffAccountOptional.get();
+                order.setStaffAccountSale(staffAccount);
+                orderRepository.save(order);
+                return "Update Order with Sale Staff Successfully";
+            }
+            return "Sale Staff ID Not Found";
+        }
+        return "Order ID Not Found";
+    }
+
+    public String updateAppraisalStaff(OrderStaffAppraisalRequest orderStaffAppraisalRequest) {
+        Optional<PurchaseOrder> purchaseOrderOptional = orderRepository.findById(orderStaffAppraisalRequest.getOrderID());
+        if (purchaseOrderOptional.isPresent()) {
+            PurchaseOrder order = purchaseOrderOptional.get();
+            Optional<StaffAccount> staffAccountOptional = staffAccountRepository.findById(orderStaffAppraisalRequest.getStaffAppraisalID());
+            if (staffAccountOptional.isPresent()) {
+                StaffAccount staffAccount = staffAccountOptional.get();
+                order.setStaffAccountAppraisal(staffAccount);
+                orderRepository.save(order);
+                return "Update Order with Appraisal Staff Successfully";
+            }
+            return "Appraisal Staff ID Not Found";
+        }
+        return "Order ID Not Found";
+    }
 
 }

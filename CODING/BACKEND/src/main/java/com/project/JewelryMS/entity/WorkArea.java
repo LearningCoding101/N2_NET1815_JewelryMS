@@ -19,11 +19,11 @@ public class WorkArea {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+    @Column(name = "PK_WorkAreaID")
+    private Long id; // Change id to PK_WorkAreaID
 
-    @Column(name = "workAreaID", unique = true, nullable = false)
-    private String workAreaID;
+    @Column(name = "workAreaCode", unique = true, nullable = false)
+    private String workAreaCode; // Change workAreaID to workAreaCode
 
     @Column(name = "register")
     private int register;

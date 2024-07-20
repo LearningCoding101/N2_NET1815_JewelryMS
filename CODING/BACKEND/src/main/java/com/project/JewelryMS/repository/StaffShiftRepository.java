@@ -3,6 +3,7 @@ package com.project.JewelryMS.repository;
 import com.project.JewelryMS.entity.Shift;
 import com.project.JewelryMS.entity.StaffAccount;
 import com.project.JewelryMS.entity.Staff_Shift;
+import com.project.JewelryMS.entity.WorkArea;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -28,4 +29,14 @@ public interface StaffShiftRepository extends JpaRepository<Staff_Shift, Long> {
 
     @Query("SELECT ss FROM Staff_Shift ss WHERE ss.shift.startTime < :now AND ss.attendanceStatus = 'Not yet'")
     List<Staff_Shift> findPastShifts(@Param("now") LocalDateTime now);
+
+    @Query("SELECT ss FROM Staff_Shift ss WHERE ss.workArea.id = :workAreaId")
+    List<Staff_Shift> findByWorkAreaId(@Param("workAreaId") Long workAreaId);
+
+    @Query("SELECT ss FROM Staff_Shift ss WHERE ss.workArea = :workArea")
+    List<Staff_Shift> findByWorkArea(WorkArea workArea);
+
+    @Query("SELECT sa FROM StaffAccount sa WHERE sa.staffID = :staffID")
+    StaffAccount findStaffAccountById(@Param("staffID") Integer staffID);
+
 }

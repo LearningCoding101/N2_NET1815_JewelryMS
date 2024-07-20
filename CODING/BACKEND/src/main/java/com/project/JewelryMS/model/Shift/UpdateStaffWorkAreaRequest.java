@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UpdateStaffWorkAreaRequest {
     private int staffId;
-    private String workAreaId;
+    private String workAreaCode;
 }

@@ -1,7 +1,9 @@
 package com.project.JewelryMS.controller;
 
 import com.project.JewelryMS.model.Shift.GetWorkAreaRequest;
+import com.project.JewelryMS.model.Shift.StaffWorkAreaResponse;
 import com.project.JewelryMS.model.Shift.WorkAreaRequest;
+import com.project.JewelryMS.model.Shift.WorkAreaResponse;
 import com.project.JewelryMS.service.Shift.WorkAreaService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,5 +63,21 @@ public class WorkAreaController {
     public ResponseEntity<Void> deleteWorkArea(@PathVariable String workAreaID) {
         workAreaService.deleteWorkArea(workAreaID);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/staff")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    public ResponseEntity<List<StaffWorkAreaResponse>> getAllStaffWithWorkAreas() {
+        List<StaffWorkAreaResponse> response = workAreaService.getAllStaffWithWorkAreas();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    public ResponseEntity<List<WorkAreaResponse>> getWorkAreasByParameter(
+            @RequestParam String parameter) {
+
+        List<WorkAreaResponse> responses = workAreaService.getWorkAreasByParameter(parameter);
+        return ResponseEntity.ok(responses);
     }
 }

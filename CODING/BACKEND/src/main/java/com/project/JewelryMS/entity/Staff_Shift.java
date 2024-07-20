@@ -34,7 +34,7 @@ public class Staff_Shift implements Serializable {
     private Shift shift;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "workAreaId", referencedColumnName = "workAreaID")
+    @JoinColumn(name = "FK_WorkAreaID", referencedColumnName = "PK_WorkAreaID") // Change reference to new primary key
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @JsonBackReference
     @JsonManagedReference

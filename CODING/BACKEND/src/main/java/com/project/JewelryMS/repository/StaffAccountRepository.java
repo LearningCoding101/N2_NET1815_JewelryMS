@@ -2,6 +2,7 @@ package com.project.JewelryMS.repository;
 
 import com.project.JewelryMS.entity.Shift;
 import com.project.JewelryMS.entity.StaffAccount;
+import com.project.JewelryMS.entity.WorkArea;
 import com.project.JewelryMS.model.Staff.StaffAccountResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -45,4 +46,10 @@ public interface StaffAccountRepository extends JpaRepository<StaffAccount, Inte
 
     @Query("SELECT sa FROM StaffAccount sa WHERE sa.account.aUsername =:aUsername")
     Optional<StaffAccount> findByUsername(@Param("aUsername") String username);
+
+
+    @Query("SELECT sa FROM StaffAccount sa WHERE sa.account.accountName LIKE %:accountName%")
+    List<StaffAccount> findByAccountNameContaining(@Param("accountName") String accountName);
+
+
 }

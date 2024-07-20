@@ -22,7 +22,7 @@ public class StaffAccount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PK_staffID")
-    private int staffID;
+    private Integer staffID;
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "FK_UserID", referencedColumnName = "PK_userID")
@@ -39,7 +39,7 @@ public class StaffAccount {
     private LocalDate startDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "workAreaId", referencedColumnName = "workAreaID")
+    @JoinColumn(name = "FK_WorkAreaID", referencedColumnName = "PK_WorkAreaID") // Change reference to new primary key
     @JsonIgnoreProperties("staffAccounts")
     @JsonManagedReference
     @JsonBackReference
@@ -55,6 +55,16 @@ public class StaffAccount {
     @JsonIgnoreProperties
     @JsonBackReference
     private Set<PurchaseOrder> purchaseOrders = new HashSet<>();
+
+    @OneToMany(mappedBy = "staffAccountSale", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties
+    @JsonBackReference
+    private Set<PurchaseOrder> purchaseOrdersSale = new HashSet<>();
+
+    @OneToMany(mappedBy = "staffAccountAppraisal", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties
+    @JsonBackReference
+    private Set<PurchaseOrder> purchaseOrdersAppraisal = new HashSet<>();
 
     @OneToMany(mappedBy = "staffAccount")
     @JsonIgnoreProperties("staffAccount")

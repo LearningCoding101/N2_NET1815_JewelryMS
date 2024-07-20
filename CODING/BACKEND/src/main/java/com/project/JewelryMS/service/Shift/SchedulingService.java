@@ -70,18 +70,48 @@ public class SchedulingService {
         StaffAccount staff = staffAccountRepository.findById(request.getStaffId())
                 .orElseThrow(() -> new EntityNotFoundException("Staff not found with id: " + request.getStaffId()));
 
-        // Fetch the work area entity from the database
-        WorkArea workArea = workAreaRepository.findByWorkAreaID(request.getWorkAreaId())
-                .orElseThrow(() -> new EntityNotFoundException("Work area not found with id: " + request.getWorkAreaId()));
+        // Fetch the new work area entity from the database
+        WorkArea newWorkArea = workAreaRepository.findByWorkAreaCode(request.getWorkAreaCode())
+                .orElseThrow(() -> new EntityNotFoundException("Work area not found with code: " + request.getWorkAreaCode()));
+
+        // Check if the new work area is already occupied by another staff member
+        if (newWorkArea.getStaffAccounts().stream()
+                .anyMatch(existingStaff -> !existingStaff.getStaffID().equals(staff.getStaffID()))) {
+            throw new IllegalStateException("Work area is already occupied by another staff member.");
+        }
 
         // Update the staff's work area
-        staff.setWorkArea(workArea);
+        staff.setWorkArea(newWorkArea);
 
         // Save the updated StaffAccount entity to the database
         staffAccountRepository.save(staff);
 
         // Create and return the response DTO
-        return new UpdateStaffWorkAreaRequest(staff.getStaffID(), workArea.getWorkAreaID());
+        return new UpdateStaffWorkAreaRequest(staff.getStaffID(), newWorkArea.getWorkAreaCode());
+    }
+
+
+    @Transactional
+    public void switchStaffWorkArea(Integer staffId1, Integer staffId2) {
+        // Fetch the first staff entity from the database
+        StaffAccount staff1 = staffAccountRepository.findById(staffId1)
+                .orElseThrow(() -> new EntityNotFoundException("Staff not found with id: " + staffId1));
+
+        // Fetch the second staff entity from the database
+        StaffAccount staff2 = staffAccountRepository.findById(staffId2)
+                .orElseThrow(() -> new EntityNotFoundException("Staff not found with id: " + staffId2));
+
+        // Get the work areas assigned to each staff member
+        WorkArea workArea1 = staff1.getWorkArea();
+        WorkArea workArea2 = staff2.getWorkArea();
+
+        // Switch the work areas
+        staff1.setWorkArea(workArea2);
+        staff2.setWorkArea(workArea1);
+
+        // Save the updated StaffAccount entities to the database
+        staffAccountRepository.save(staff1);
+        staffAccountRepository.save(staff2);
     }
 
     @Transactional
@@ -91,7 +121,7 @@ public class SchedulingService {
                 .orElseThrow(() -> new EntityNotFoundException("Staff not found with id: " + staffId));
 
         // Check if the staff has a work area assigned
-        if (staff.getWorkArea() == null || staff.getWorkArea().getWorkAreaID() == null) {
+        if (staff.getWorkArea() == null || staff.getWorkArea().getWorkAreaCode() == null) {
             throw new RuntimeException("Staff does not have a work area assigned. Please update their work area ID.");
         }
 
@@ -177,7 +207,7 @@ public class SchedulingService {
                                     staffShift.getStaffAccount().getAccount().getAccountName(),
                                     staffShift.getStaffAccount().getAccount().getEmail(),
                                     staffShift.getStaffAccount().getAccount().getUsername(),
-                                    staffShift.getStaffAccount().getWorkArea().getWorkAreaID(),
+                                    staffShift.getWorkArea().getWorkAreaCode(),
                                     staffShift.getAttendanceStatus()
                             ))
                             .collect(Collectors.toList());
@@ -275,7 +305,7 @@ public class SchedulingService {
                 .orElseThrow(() -> new ShiftAssignmentException("Staff not found"));
 
         // Check if the staff's work area ID is null
-        if (staff.getWorkArea() == null || staff.getWorkArea().getWorkAreaID() == null) {
+        if (staff.getWorkArea() == null || staff.getWorkArea().getWorkAreaCode() == null) {
             throw new ShiftAssignmentException("Staff does not have a work area assigned. Please assign a work area ID for the staff.");
         }
 
@@ -350,7 +380,7 @@ public class SchedulingService {
                 staffShift.getStaffAccount().getAccount().getAccountName(),
                 staffShift.getStaffAccount().getAccount().getEmail(),
                 staffShift.getStaffAccount().getAccount().getUsername(),
-                staffShift.getStaffAccount().getWorkArea().getWorkAreaID(),
+                staffShift.getStaffAccount().getWorkArea().getWorkAreaCode(),
                 staffShift.getAttendanceStatus()  // Include attendance status
         );
 
@@ -557,7 +587,7 @@ public class SchedulingService {
                 .orElseThrow(() -> new ShiftAssignmentException("Staff not found"));
 
         // Check if the staff's work area ID is null
-        if (staff.getWorkArea() == null || staff.getWorkArea().getWorkAreaID() == null) {
+        if (staff.getWorkArea() == null || staff.getWorkArea().getWorkAreaCode() == null) {
             throw new ShiftAssignmentException("Staff does not have a work area assigned. Please assign a work area ID for the staff.");
         }
 
@@ -801,14 +831,4 @@ public class SchedulingService {
         Collections.shuffle(singleShiftTypes);
         return singleShiftTypes.get(0);
     }
-
-
-    /*
-    * Cashiers cannot be assigned to multiple shifts at different register stations (register)
-    * on the same day and shift type.
-    *
-    * Each shift assignment respects the constraint that a cashier works at only one station
-    * (register) at a time for each shift type (Morning, Afternoon, Evening).
-    */
-
 }

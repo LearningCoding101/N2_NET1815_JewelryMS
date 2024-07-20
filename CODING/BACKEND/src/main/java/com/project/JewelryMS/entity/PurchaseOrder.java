@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.ToString;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -34,11 +33,25 @@ public class PurchaseOrder implements Serializable {
     private Customer customer;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="FK_StaffID", referencedColumnName = "PK_staffID")
+    @JoinColumn(name="FK_StaffID", referencedColumnName = "PK_StaffID")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @JsonManagedReference
     @JsonBackReference
     private StaffAccount staffAccount;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="FK_StaffSaleID", referencedColumnName = "PK_StaffID")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @JsonManagedReference
+    @JsonBackReference
+    private StaffAccount staffAccountSale;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="FK_StaffAppraisalID", referencedColumnName = "PK_StaffID")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @JsonManagedReference
+    @JsonBackReference
+    private StaffAccount staffAccountAppraisal;
 
     String paymentType;
     Float totalAmount;
@@ -53,7 +66,7 @@ public class PurchaseOrder implements Serializable {
         return "PurchaseOrder{" +
                 "PK_OrderID=" + PK_OrderID +
                 ", paymentType='" + paymentType + '\'' +
-                ", totalAmount=" + totalAmount +
+                ", revenueAmount=" + totalAmount +
                 ", purchaseDate=" + purchaseDate +
                 ", status=" + status +
                 '}';

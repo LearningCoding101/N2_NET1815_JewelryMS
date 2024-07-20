@@ -7,9 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class WorkAreaRequest {
+public class StaffWorkAreaResponse {
+    private Integer staffID;
+    private String accountName;
     private String workAreaCode;
-    private int register;
-    private String description;
 }
-

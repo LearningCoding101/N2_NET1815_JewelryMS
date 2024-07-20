@@ -185,4 +185,22 @@ public class DashBoardController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/workArea-statistics-year")
+    public ResponseEntity<List<WorkAreaRevenueResponse>> getWorkAreaStatisticsYear(){
+        List<WorkAreaRevenueResponse> workAreaRevenueResponse = dashboardService.getWorkAreaRevenueResponsesByYear();
+        return ResponseEntity.ok(workAreaRevenueResponse);
+    }
+
+    @GetMapping("/workArea-statistics-month")
+    public ResponseEntity<List<WorkAreaRevenueResponse>> getWorkAreaStatisticsMonth(){
+        List<WorkAreaRevenueResponse> workAreaRevenueResponse = dashboardService.getWorkAreaRevenueResponsesByMonth();
+        return ResponseEntity.ok(workAreaRevenueResponse);
+    }
+
+    @GetMapping("/workArea-statistics-day")
+    public ResponseEntity<List<WorkAreaRevenueResponse>> getWorkAreaStatisticsDay(){
+        List<WorkAreaRevenueResponse> workAreaRevenueResponse = dashboardService.getWorkAreaRevenueResponsesByDay();
+        return ResponseEntity.ok(workAreaRevenueResponse);
+    }
+
 }
