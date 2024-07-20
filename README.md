@@ -81,10 +81,10 @@ The Jewelry Sales Management System aims to streamline operations in the jewelry
 ## Team Test Assignment
 | Sprint     | User Stories                                         |
 |------------|------------------------------------------------------|
-| Sprint 1   | UC 22, UC 23, UC 24, UC 31                                  |
-| Sprint 2   | UC 1, UC 2, UC 3, UC 5, UC 7, UC 8, UC 10, UC 25, UC 26                                      |
-| Sprint 3   |  UC 9, UC 11, UC 12, UC 16, UC 17, UC 18, UC 19, UC 20, UC 21                      |
-| Sprint 4   | UC 4, UC 6, UC 13, UC 14, UC 15, UC 27, UC 28, UC 29, UC 30                   |
+| Sprint 1   | UC 22, UC 23, UC 24, UC 31, UC27, UC28, UC29                                    |
+| Sprint 2   | UC 1, UC 2, UC 3, UC 5, UC 7, UC 8, UC 10, UC 25, UC 26, UC11                                    |
+| Sprint 3   |  UC 9, UC 12, UC 16, UC 17, UC 18, UC 19, UC 20, UC 21                      |
+| Sprint 4   | UC 4, UC 6, UC 13, UC 14, UC 30                   |
         
 
 TEST WORK FLOW
@@ -92,7 +92,7 @@ TEST WORK FLOW
 SPRINT 1:
 | Name   | Values           |
 |--------|------------------|
-| Hà Thái Hoàng | UC 24      |
+| Hà Thái Hoàng | UC 24, UC27, UC28, UC29      |
 | Duy Khánh | UC 23      |
 | Phạm Văn Quốc Vương | UC 22       |
 | Thảo | UC 31       |
