@@ -64,11 +64,20 @@ public class SchedulingService {
     @Autowired
     private WorkAreaRepository workAreaRepository;
 
+
+    // Track if shifts have been scheduled on the current Saturday
+    private boolean isShiftsScheduledToday = false;
+
     @Transactional
     public UpdateStaffWorkAreaRequest updateStaffWorkArea(UpdateStaffWorkAreaRequest request) {
         // Fetch the staff entity from the database
         StaffAccount staff = staffAccountRepository.findById(request.getStaffId())
                 .orElseThrow(() -> new EntityNotFoundException("Staff not found with id: " + request.getStaffId()));
+
+        // Check if the staff is inactive
+        if (staff.getAccount().getStatus() == 0) {
+            throw new IllegalStateException("Cannot assign work area to inactive staff.");
+        }
 
         // Fetch the new work area entity from the database
         WorkArea newWorkArea = workAreaRepository.findByWorkAreaCode(request.getWorkAreaCode())
@@ -90,16 +99,35 @@ public class SchedulingService {
         return new UpdateStaffWorkAreaRequest(staff.getStaffID(), newWorkArea.getWorkAreaCode());
     }
 
-
     @Transactional
     public void switchStaffWorkArea(Integer staffId1, Integer staffId2) {
         // Fetch the first staff entity from the database
         StaffAccount staff1 = staffAccountRepository.findById(staffId1)
                 .orElseThrow(() -> new EntityNotFoundException("Staff not found with id: " + staffId1));
 
+        // Check if the first staff is inactive
+        if (staff1.getAccount().getStatus() == 0) {
+            // If inactive staff still has a work area, set it to null
+            if (staff1.getWorkArea() != null) {
+                staff1.setWorkArea(null);
+                staffAccountRepository.save(staff1);
+            }
+            throw new IllegalStateException("Cannot switch work area of inactive staff with id: " + staffId1);
+        }
+
         // Fetch the second staff entity from the database
         StaffAccount staff2 = staffAccountRepository.findById(staffId2)
                 .orElseThrow(() -> new EntityNotFoundException("Staff not found with id: " + staffId2));
+
+        // Check if the second staff is inactive
+        if (staff2.getAccount().getStatus() == 0) {
+            // If inactive staff still has a work area, set it to null
+            if (staff2.getWorkArea() != null) {
+                staff2.setWorkArea(null);
+                staffAccountRepository.save(staff2);
+            }
+            throw new IllegalStateException("Cannot switch work area of inactive staff with id: " + staffId2);
+        }
 
         // Get the work areas assigned to each staff member
         WorkArea workArea1 = staff1.getWorkArea();
@@ -236,7 +264,7 @@ public class SchedulingService {
         // Remove shifts without staff
         shifts.removeIf(shift -> {
             if (shift.getStaffShifts().isEmpty()) {
-                // Delete the shift from the database
+                // Outright delete the shift from the database
                 shiftRepository.delete(shift);
                 return true;
             }
@@ -306,16 +334,17 @@ public class SchedulingService {
 
         // Check if the staff's work area ID is null
         if (staff.getWorkArea() == null || staff.getWorkArea().getWorkAreaCode() == null) {
-            throw new ShiftAssignmentException("Staff does not have a work area assigned. Please assign a work area ID for the staff.");
+            throw new ShiftAssignmentException("Staff does not have a work area assigned. Please assign a work area code for the staff.");
         }
 
         try {
-            // Check if the staff member is already assigned to any shift on the same day
+            // Check if the staff member is already assigned to the same shift type on the same day
             boolean isAssigned = staff.getStaffShifts().stream()
-                    .anyMatch(ss -> ss.getShift().getStartTime().toLocalDate().equals(date));
+                    .anyMatch(ss -> ss.getShift().getStartTime().toLocalDate().equals(date)
+                            && ss.getShift().getShiftType().equals(shiftType));
 
             if (isAssigned) {
-                throw new ShiftAssignmentException("Staff is already assigned to a shift on this day. Please choose a different day or staff member.");
+                throw new ShiftAssignmentException("Staff is already assigned to the " + shiftType + " shift on this day. Please choose a different shift type or day.");
             }
 
             // Find a shift on the specified date and period
@@ -744,8 +773,12 @@ public class SchedulingService {
 //    }
 
     @Scheduled(cron = "0 0 0 * * SAT") // Run every Saturday at midnight
-//    @Scheduled(cron = "0 */10 * * * *") // Run every 10 minutes
+    //    @Scheduled(cron = "0 */10 * * * *") // Run every 10 minutes
     public void scheduleShiftsAutomatically() {
+        if (isShiftsScheduledToday) {
+            return; // Skip if shifts have already been scheduled today
+        }
+
         List<Integer> staffIds = getAllStaffIds();
         LocalDate today = LocalDate.now();
         LocalDate startDate;
@@ -782,15 +815,18 @@ public class SchedulingService {
         }
 
         assignRandomStaffShiftPattern(staffIds, startDate, endDate);
+        isShiftsScheduledToday = true; // Mark that shifts have been scheduled today
     }
 
-    @PostConstruct
-    public void checkAndRunAutomationOnStartup() {
-        LocalDate today = LocalDate.now();
-        if (today.getDayOfWeek() == DayOfWeek.SATURDAY) {
-            scheduleShiftsAutomatically();
-        }
-    }
+//    @PostConstruct
+//    public void checkAndRunAutomationOnStartup() {
+//        CompletableFuture.runAsync(() -> {
+//            LocalDate today = LocalDate.now();
+//            if (today.getDayOfWeek() == DayOfWeek.SATURDAY && !isShiftsScheduledToday) {
+//                scheduleShiftsAutomatically();
+//            }
+//        });
+//    }
 
 
     private List<Integer> getAllStaffIds() {
@@ -799,7 +835,8 @@ public class SchedulingService {
                 .collect(Collectors.toList());
     }
 
-    private Future<?> assignShift(ExecutorService executorService, int staffId, LocalDate date, String shiftType, ConcurrentLinkedQueue<StaffShiftResponse> staffShiftResponses) {
+    @Transactional
+    public Future<?> assignShift(ExecutorService executorService, int staffId, LocalDate date, String shiftType, ConcurrentLinkedQueue<StaffShiftResponse> staffShiftResponses) {
         return executorService.submit(() -> {
             try {
                 StaffShiftResponse response = assignStaffToDay(staffId, date, shiftType);
@@ -812,7 +849,8 @@ public class SchedulingService {
         });
     }
 
-    private Future<?> assignSingleShift(ExecutorService executorService, int staffId, LocalDate date, ConcurrentLinkedQueue<StaffShiftResponse> staffShiftResponses) {
+    @Transactional
+    public Future<?> assignSingleShift(ExecutorService executorService, int staffId, LocalDate date, ConcurrentLinkedQueue<StaffShiftResponse> staffShiftResponses) {
         return executorService.submit(() -> {
             try {
                 String shiftType = getRandomSingleShiftType();

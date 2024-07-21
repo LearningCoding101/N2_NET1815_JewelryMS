@@ -29,7 +29,7 @@ public class WorkAreaService {
     // Create a new work area
     public WorkAreaRequest createWorkArea(WorkAreaRequest workAreaRequest) {
         if (!isValidWorkAreaID(workAreaRequest.getWorkAreaCode())) {
-            throw new IllegalArgumentException("Invalid workAreaID format. Expected format: <4 Uppercase letters><3 numbers>.");
+            throw new IllegalArgumentException("Invalid workAreaCode format. Expected format: <4 Uppercase letters><3 numbers>.");
         }
 
         WorkArea workArea = new WorkArea();

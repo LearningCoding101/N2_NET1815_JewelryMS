@@ -38,7 +38,7 @@ public class StaffAccount {
     @Column(name = "startDate")
     private LocalDate startDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_WorkAreaID", referencedColumnName = "PK_WorkAreaID") // Change reference to new primary key
     @JsonIgnoreProperties("staffAccounts")
     @JsonManagedReference

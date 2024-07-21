@@ -721,31 +721,35 @@ public class DashboardService {
     }
 
     private Float calculateTotalRevenue(List<PurchaseOrder> orders) {
+        if (orders == null) {
+            return 0f;
+        }
         return orders.stream()
-                .map(PurchaseOrder::getTotalAmount)
+                .filter(Objects::nonNull) // Check for non-null orders
+                .map(order -> {
+                    Float totalAmount = order.getTotalAmount();
+                    return totalAmount != null ? totalAmount : 0f; // Handle null totalAmount
+                })
                 .reduce(0f, Float::sum);
     }
 
     private List<StaffWorkAreaRevenue> calculateStaffRevenues(List<Integer> staffIDs, List<PurchaseOrder> orders, String workAreaCode) {
+        if (orders == null) {
+            return List.of();
+        }
+
         Map<Integer, Float> staffRevenueMap = orders.stream()
-                .filter(order -> {
-                    if (workAreaCode.startsWith("SALE")) {
-                        return staffIDs.contains(order.getStaffAccountSale().getStaffID());
-                    } else if (workAreaCode.startsWith("CASH")) {
-                        return staffIDs.contains(order.getStaffAccount().getStaffID());
-                    }
-                    return false;
-                })
+                .filter(order -> order != null && (workAreaCode.startsWith("SALE")
+                        ? staffIDs.contains(order.getStaffAccountSale().getStaffID())
+                        : staffIDs.contains(order.getStaffAccount().getStaffID())))
                 .collect(Collectors.groupingBy(
-                        order -> {
-                            if (workAreaCode.startsWith("SALE")) {
-                                return order.getStaffAccountSale().getStaffID();
-                            } else if (workAreaCode.startsWith("CASH")) {
-                                return order.getStaffAccount().getStaffID();
-                            }
-                            return null;
-                        },
-                        Collectors.reducing(0f, PurchaseOrder::getTotalAmount, Float::sum)
+                        order -> workAreaCode.startsWith("SALE")
+                                ? order.getStaffAccountSale().getStaffID()
+                                : order.getStaffAccount().getStaffID(),
+                        Collectors.reducing(0f, order -> {
+                            Float totalAmount = order.getTotalAmount();
+                            return totalAmount != null ? totalAmount : 0f;
+                        }, Float::sum)
                 ));
 
         return staffRevenueMap.entrySet().stream()
@@ -763,9 +767,10 @@ public class DashboardService {
                         return null;
                     }
                 })
-                .filter(revenue -> revenue != null)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
+
 
 
 

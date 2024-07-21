@@ -124,15 +124,17 @@ public class StaffAccountService {
         return "Update Staff Successfully";
     }
 
-    // Method to "delete" a StaffAccount by updating the Account status
+    // Method to "deactivate" a StaffAccount
     public void deactivateStaffAccount(Integer id) {
         Optional<StaffAccount> staffAccountOpt = staffAccountRepository.findById(id);
         if (staffAccountOpt.isPresent()) {
             StaffAccount staffAccount = staffAccountOpt.get();
             Account account = staffAccount.getAccount();
             if (account != null) {
-                account.setStatus(0);
+                account.setStatus(0); // Deactivate the account
+                staffAccount.setWorkArea(null); // Set the work area to null
                 authenticationRepository.save(account);
+                staffAccountRepository.save(staffAccount);
             } else {
                 throw new RuntimeException("Account associated with StaffAccount ID " + id + " not found");
             }
