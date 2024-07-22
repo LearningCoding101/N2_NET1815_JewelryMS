@@ -222,9 +222,18 @@ public class SchedulingController {
 
     @PutMapping("/update-work-area")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
-    public ResponseEntity<UpdateStaffWorkAreaRequest> updateStaffWorkArea(@RequestBody UpdateStaffWorkAreaRequest request) {
-        UpdateStaffWorkAreaRequest response = schedulingService.updateStaffWorkArea(request);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> updateStaffWorkArea(@RequestBody UpdateStaffWorkAreaRequest request) {
+        try {
+            UpdateStaffWorkAreaRequest response = schedulingService.updateStaffWorkArea(request);
+            return ResponseEntity.ok(response);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal Server Error: " + e.getMessage());
+        }
     }
 
     @PutMapping("/switch-work-areas")

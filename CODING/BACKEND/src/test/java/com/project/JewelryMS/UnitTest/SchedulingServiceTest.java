@@ -64,8 +64,7 @@
 //        mockStaffAccount.setAccount(mockAccount);
 //
 //        WorkArea mockWorkArea = new WorkArea();
-//        mockWorkArea.setWorkAreaID("CASH003");
-//        mockWorkArea.setRegister(3);
+//        mockWorkArea.setWorkAreaCode("CASH003");
 //        mockWorkArea.setDescription("Cashier");
 //
 //        mockShift = new Shift();

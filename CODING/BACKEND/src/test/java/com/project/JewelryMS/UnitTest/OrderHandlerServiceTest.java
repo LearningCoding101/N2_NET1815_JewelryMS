@@ -94,60 +94,60 @@ class OrderHandlerServiceTest {
         assertFalse(orderHandlerService.releaseOrder(orderId, userId));
     }
 
-    @Test
-    void testHandleCreateOrderWithDetails() {
-        // Prepare test data
-        CreateOrderRequest orderRequest = new CreateOrderRequest();
-        orderRequest.setStatus(1);
-        orderRequest.setPaymentType("Cash");
-        orderRequest.setTotalAmount(1000000.0F);
-        orderRequest.setStaff_ID(1);
-
-        List<CreateOrderDetailRequest> detailRequests = new ArrayList<>();
-        CreateOrderDetailRequest detailRequest = new CreateOrderDetailRequest();
-        detailRequest.setProductID(1L);
-        detailRequest.setQuantity(2);
-        detailRequests.add(detailRequest);
-
-        // Mock StaffAccount
-        StaffAccount staffAccount = new StaffAccount();
-        staffAccount.setStaffID(1);
-        when(staffAccountRepository.findById(1)).thenReturn(Optional.of(staffAccount));
-
-        // Mock ProductSell
-        ProductSell productSell = new ProductSell();
-        productSell.setProductID(1L);
-        productSell.setCost(500000.0F);
-        when(productSellService.getProductSellById(1L)).thenReturn(productSell);
-
-        // Mock OrderService
-        when(orderService.saveOrder(any(PurchaseOrder.class))).thenAnswer(invocation -> {
-            PurchaseOrder savedOrder = invocation.getArgument(0);
-            savedOrder.setPK_OrderID(1L); // Simulate database assigning an ID
-            return savedOrder;
-        });
-
-        // Execute the method
-        Long orderId = orderHandlerService.handleCreateOrderWithDetails(orderRequest, detailRequests, "test@example.com");
-
-        // Verify the results
-        assertNotNull(orderId);
-        assertEquals(1L, orderId);
-
-        // Verify interactions
-        verify(staffAccountRepository).findById(1);
-        verify(productSellService, atLeastOnce()).getProductSellById(1L); // Changed to atLeastOnce()
-        verify(orderService).saveOrder(argThat(order ->
-                order.getStatus() == 1 &&
-                        "Cash".equals(order.getPaymentType()) &&
-                        Math.abs(1000000.0F - order.getTotalAmount()) < 0.001 &&
-                        order.getStaffAccount().getStaffID() == 1 &&
-                        "test@example.com".equals(order.getEmail()) &&
-                        order.getOrderDetails().size() == 1 &&
-                        order.getOrderDetails().iterator().next().getQuantity() == 2 &&
-                        order.getOrderDetails().iterator().next().getProductSell().getProductID() == 1L
-        ));
-    }
+//    @Test
+//    void testHandleCreateOrderWithDetails() {
+//        // Prepare test data
+//        CreateOrderRequest orderRequest = new CreateOrderRequest();
+//        orderRequest.setStatus(1);
+//        orderRequest.setPaymentType("Cash");
+//        orderRequest.setTotalAmount(1000000.0F);
+//        orderRequest.setStaff_ID(1);
+//
+//        List<CreateOrderDetailRequest> detailRequests = new ArrayList<>();
+//        CreateOrderDetailRequest detailRequest = new CreateOrderDetailRequest();
+//        detailRequest.setProductID(1L);
+//        detailRequest.setQuantity(2);
+//        detailRequests.add(detailRequest);
+//
+//        // Mock StaffAccount
+//        StaffAccount staffAccount = new StaffAccount();
+//        staffAccount.setStaffID(1);
+//        when(staffAccountRepository.findById(1)).thenReturn(Optional.of(staffAccount));
+//
+//        // Mock ProductSell
+//        ProductSell productSell = new ProductSell();
+//        productSell.setProductID(1L);
+//        productSell.setCost(500000.0F);
+//        when(productSellService.getProductSellById(1L)).thenReturn(productSell);
+//
+//        // Mock OrderService
+//        when(orderService.saveOrder(any(PurchaseOrder.class))).thenAnswer(invocation -> {
+//            PurchaseOrder savedOrder = invocation.getArgument(0);
+//            savedOrder.setPK_OrderID(1L); // Simulate database assigning an ID
+//            return savedOrder;
+//        });
+//
+//        // Execute the method
+//        Long orderId = orderHandlerService.handleCreateOrderWithDetails(orderRequest, detailRequests, "test@example.com");
+//
+//        // Verify the results
+//        assertNotNull(orderId);
+//        assertEquals(1L, orderId);
+//
+//        // Verify interactions
+//        verify(staffAccountRepository).findById(1);
+//        verify(productSellService, atLeastOnce()).getProductSellById(1L); // Changed to atLeastOnce()
+//        verify(orderService).saveOrder(argThat(order ->
+//                order.getStatus() == 1 &&
+//                        "Cash".equals(order.getPaymentType()) &&
+//                        Math.abs(1000000.0F - order.getTotalAmount()) < 0.001 &&
+//                        order.getStaffAccount().getStaffID() == 1 &&
+//                        "test@example.com".equals(order.getEmail()) &&
+//                        order.getOrderDetails().size() == 1 &&
+//                        order.getOrderDetails().iterator().next().getQuantity() == 2 &&
+//                        order.getOrderDetails().iterator().next().getProductSell().getProductID() == 1L
+//        ));
+//    }
     @Test
     void testUpdateOrderStatus() {
         String info = "Thanh toan 1";

@@ -646,15 +646,19 @@ public class DashboardService {
                 .collect(Collectors.toList());
 
         List<PurchaseOrder> orders;
-        if (workArea.getWorkAreaCode().startsWith("SALE")) {
-            orders = orderRepository.findByStaffSaleIDsAndYear(staffIDs, year);
+        Float totalRevenue;
+
+        if (workArea.getWorkAreaCode().startsWith("SALE") || workArea.getWorkAreaCode().startsWith("APPR")) {
+            orders = List.of(); // No orders for SALE and APPR work areas
+            totalRevenue = 0.0f;
         } else if (workArea.getWorkAreaCode().startsWith("CASH")) {
             orders = orderRepository.findByStaffIDsAndYear(staffIDs, year);
+            totalRevenue = calculateTotalRevenue(orders);
         } else {
             orders = List.of();
+            totalRevenue = 0.0f;
         }
 
-        Float totalRevenue = calculateTotalRevenue(orders);
         response.setTotalRevenueAmount(totalRevenue);
         response.setNumberOrder(orders.size());
         response.setStaffWorkAreaRevenues(calculateStaffRevenues(staffIDs, orders, workArea.getWorkAreaCode()));
@@ -675,15 +679,19 @@ public class DashboardService {
                 .collect(Collectors.toList());
 
         List<PurchaseOrder> orders;
-        if (workArea.getWorkAreaCode().startsWith("SALE")) {
-            orders = orderRepository.findByStaffSaleIDsAndMonth(staffIDs, year, month);
+        Float totalRevenue;
+
+        if (workArea.getWorkAreaCode().startsWith("SALE") || workArea.getWorkAreaCode().startsWith("APPR")) {
+            orders = List.of(); // No orders for SALE and APPR work areas
+            totalRevenue = 0.0f;
         } else if (workArea.getWorkAreaCode().startsWith("CASH")) {
             orders = orderRepository.findByStaffIDsAndMonth(staffIDs, year, month);
+            totalRevenue = calculateTotalRevenue(orders);
         } else {
             orders = List.of();
+            totalRevenue = 0.0f;
         }
 
-        Float totalRevenue = calculateTotalRevenue(orders);
         response.setTotalRevenueAmount(totalRevenue);
         response.setNumberOrder(orders.size());
         response.setStaffWorkAreaRevenues(calculateStaffRevenues(staffIDs, orders, workArea.getWorkAreaCode()));
@@ -704,15 +712,19 @@ public class DashboardService {
                 .collect(Collectors.toList());
 
         List<PurchaseOrder> orders;
-        if (workArea.getWorkAreaCode().startsWith("SALE")) {
-            orders = orderRepository.findByStaffSaleIDsAndDay(staffIDs, year, month, day);
+        Float totalRevenue;
+
+        if (workArea.getWorkAreaCode().startsWith("SALE") || workArea.getWorkAreaCode().startsWith("APPR")) {
+            orders = List.of(); // No orders for SALE and APPR work areas
+            totalRevenue = 0.0f;
         } else if (workArea.getWorkAreaCode().startsWith("CASH")) {
             orders = orderRepository.findByStaffIDsAndDay(staffIDs, year, month, day);
+            totalRevenue = calculateTotalRevenue(orders);
         } else {
             orders = List.of();
+            totalRevenue = 0.0f;
         }
 
-        Float totalRevenue = calculateTotalRevenue(orders);
         response.setTotalRevenueAmount(totalRevenue);
         response.setNumberOrder(orders.size());
         response.setStaffWorkAreaRevenues(calculateStaffRevenues(staffIDs, orders, workArea.getWorkAreaCode()));

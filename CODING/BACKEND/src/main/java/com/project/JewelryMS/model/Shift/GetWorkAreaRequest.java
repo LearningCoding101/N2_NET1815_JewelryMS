@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 public class GetWorkAreaRequest {
     private long PK_WorkAreaId;
     private String workAreaCode;
-    private int register;
     private String description;
     private String status;
 }

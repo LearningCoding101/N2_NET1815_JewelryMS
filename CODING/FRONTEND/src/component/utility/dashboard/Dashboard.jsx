@@ -105,11 +105,16 @@ const Dashboard = () => {
           getItem("Sản phẩm mua vào", "manager/productbuy"),
           getItem("Sản phẩm mua vào được xóa", "manager/productbuy/inactive"),
         ]),
+        getItem("Quầy làm việc", "manager/workarea", <HeartOutlined />, [
+          getItem("Giao quầy làm việc", "manager/assign/workarea"),
+          getItem("Thông kê theo quầy", "manager/statistic/workarea"),
+        ]),
         getItem(
           "Kiểm tra bảo hành",
           "manager/check/guarantee",
           <HeartOutlined />
         ),
+        getItem("Kiểm tra kho", "manager/inventory", <HeartOutlined />),
 
         getItem("Khách hàng", "manager/customer/view", <UserOutlined />),
         getItem("Chat", "manager/chat", <ProfileOutlined />),
@@ -125,26 +130,32 @@ const Dashboard = () => {
           getItem("Quản lí", "admin/manager"),
           getItem("Nhân viên", "admin/staff"),
         ]),
-        getItem("Thống kê sản phẩm", "viewproductadmin", <AppstoreAddOutlined />, [
-          getItem("Sản phẩm bán", "admin/product"),
-          getItem("Sản phẩm bán được xóa", "admin/inactive/product"),
-          getItem("Sản phẩm mua", "admin/productbuy"),
-          getItem("Sản phẩm bán được xóa", "admin/productbuy/inactive"),
-        ]),
+        getItem(
+          "Thống kê sản phẩm",
+          "viewproductadmin",
+          <AppstoreAddOutlined />,
+          [
+            getItem("Sản phẩm bán", "admin/product"),
+            getItem("Sản phẩm bán được xóa", "admin/inactive/product"),
+            getItem("Sản phẩm mua", "admin/productbuy"),
+            getItem("Sản phẩm bán được xóa", "admin/productbuy/inactive"),
+          ]
+        ),
 
         getItem("Chat", "admin/chat", <ProfileOutlined />),
         getItem("Thể loại", "admin/category", <AppstoreAddOutlined />),
-        getItem(
-          "Thống kê tổng quát",
-          "admin/analytic",
-          <AppstoreAddOutlined />
-        ),
+        // getItem("Thống kê tổng quát", "admin/analytic", <AppstoreAddOutlined />),
+        getItem("Thống kê tổng quát", "admin/analytic", <AppstoreAddOutlined />, [
+          getItem("Sản phẩm bán chạy", "admin/topproduct"),
+          getItem("Bán theo thể loại", "admin/topcategory"),
+          getItem("Lịch sử giao dịch", "admin/transaction"),
+          getItem("Năng suất nhân viên", "admin/statistic/staff"),
+          getItem("Khách hàng đã đăng kí", "admin/statistic/customer"),
+          getItem("Khách hàng chưa đăng kí", "admin/statistic/customerunsigned"),
+        ]),
 
-        getItem(
-          "Sản phẩm bán chạy",
-          "admin/topproductsell",
-          <BarChartOutlined />
-        ),
+        getItem("Sản phẩm bán chạy", "admin/topproductsell", <BarChartOutlined />),
+
       ]);
     }
   }, [user.role]);

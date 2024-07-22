@@ -37,4 +37,13 @@ public class OrderDetail implements Serializable {
     @JoinColumn(name = "FK_Promotion_ID", referencedColumnName = "PK_promotionID", nullable = true)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Promotion promotion;
+    @PrePersist
+    @PreUpdate
+    private void updateInventory() {
+        if (this.productSell != null && this.productSell.getInventory() != null) {
+            Inventory inventory = this.productSell.getInventory();
+            inventory.setQuantity(inventory.getQuantity() - this.quantity);
+        }
+    }
+
 }

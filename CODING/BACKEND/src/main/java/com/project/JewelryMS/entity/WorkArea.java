@@ -25,9 +25,6 @@ public class WorkArea {
     @Column(name = "workAreaCode", unique = true, nullable = false)
     private String workAreaCode; // Change workAreaID to workAreaCode
 
-    @Column(name = "register")
-    private int register;
-
     @Column(name = "description")
     private String description;
 

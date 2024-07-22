@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class WorkAreaRequest {
     private String workAreaCode;
-    private int register;
     private String description;
 }
 

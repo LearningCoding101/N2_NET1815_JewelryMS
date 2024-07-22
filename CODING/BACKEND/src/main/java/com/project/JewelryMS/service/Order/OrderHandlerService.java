@@ -7,10 +7,7 @@ import com.project.JewelryMS.model.OrderDetail.OrderDetailResponse;
 import com.project.JewelryMS.model.Refund.RefundOrderDetailRequest;
 import com.project.JewelryMS.model.Refund.RefundResponse;
 import com.project.JewelryMS.repository.*;
-import com.project.JewelryMS.service.EmailService;
-import com.project.JewelryMS.service.ImageService;
-import com.project.JewelryMS.service.ProductBuyService;
-import com.project.JewelryMS.service.ProductSellService;
+import com.project.JewelryMS.service.*;
 import jakarta.annotation.PreDestroy;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +66,9 @@ public class OrderHandlerService {
         scheduler.shutdown();
     }
     @Autowired
+    private InventoryService inventoryService;
+
+    @Autowired
     private SimpMessagingTemplate messagingTemplate;
     private final ConcurrentHashMap<Long, String> claimedOrders = new ConcurrentHashMap<>();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
@@ -89,17 +89,28 @@ public class OrderHandlerService {
         return false; // Order was not claimed by this user or already released
     }
     @Transactional
-    public Long createOrderWithDetails(PurchaseOrder purchaseOrder, List<OrderDetail> list){
+    public Long createOrderWithDetails(PurchaseOrder purchaseOrder, List<OrderDetail> list) {
         Set<OrderDetail> detailSet = new HashSet<>();
-        for(OrderDetail detail : list){
+        for (OrderDetail detail : list) {
             detail.setPurchaseOrder(purchaseOrder);
             detailSet.add(detail);
+
+            // Update inventory
+            Inventory inventory = inventoryService.getInventoryForProduct(detail.getProductSell().getProductID());
+            if (inventory != null) {
+                inventory.setQuantity(inventory.getQuantity() - detail.getQuantity());
+                inventoryService.updateInventory(inventory);
+                inventoryService.checkAndNotifyLowStock(inventory);
+            } else {
+                throw new IllegalStateException("Inventory not found for product: " + detail.getProductSell().getPName());
+            }
         }
         purchaseOrder.setOrderDetails(detailSet);
         orderService.saveOrder(purchaseOrder);
 
         return purchaseOrder.getPK_OrderID();
     }
+    @Transactional
     public Long handleCreateOrderWithDetails(CreateOrderRequest orderRequest, List<CreateOrderDetailRequest> detailRequest, String email) {
         PurchaseOrder order = new PurchaseOrder();
         order.setStatus(orderRequest.getStatus());
@@ -107,7 +118,7 @@ public class OrderHandlerService {
         Long id = -1L;
         if(orderRequest.getPaymentType()!=null) {
             order.setPaymentType(orderRequest.getPaymentType());
-        }else{
+        } else {
             order.setPaymentType(null);
         }
         order.setTotalAmount(orderRequest.getTotalAmount());
@@ -119,19 +130,30 @@ public class OrderHandlerService {
         }
         order.setEmail(email);
         List<OrderDetail> orderDetails = new ArrayList<>();
-        for (CreateOrderDetailRequest detail : detailRequest) {
-                OrderDetail orderDetail = new OrderDetail();
-                orderDetail.setQuantity(detail.getQuantity());
-                orderDetail.setProductSell(productSellService.getProductSellById(detail.getProductID()));
-                System.out.println(productSellService.getProductSellById(detail.getProductID()));
-                orderDetail.setPurchaseOrder(order);
+        List<String> outOfStockProducts = new ArrayList<>();
 
-            orderDetails.add(orderDetail);
+        for (CreateOrderDetailRequest detail : detailRequest) {
+            ProductSell productSell = productSellService.getProductSellById(detail.getProductID());
+            if (productSell != null) {
+                Inventory inventory = inventoryService.getInventoryForProduct(productSell.getProductID());
+                if (inventory != null && inventory.getQuantity() >= detail.getQuantity()) {
+                    OrderDetail orderDetail = new OrderDetail();
+                    orderDetail.setQuantity(detail.getQuantity());
+                    orderDetail.setProductSell(productSell);
+                    orderDetail.setPurchaseOrder(order);
+                    orderDetails.add(orderDetail);
+                } else {
+                    outOfStockProducts.add(productSell.getPName());
+                }
             }
-        System.out.println(orderDetails.toString());
+        }
+
+        if (!outOfStockProducts.isEmpty()) {
+            throw new IllegalStateException("The following products are out of stock: " + String.join(", ", outOfStockProducts));
+        }
+
         if (!orderDetails.isEmpty()) {
-                id = createOrderWithDetails(order, orderDetails);
-                System.out.println(id);
+            id = createOrderWithDetails(order, orderDetails);
         }
         return id;
     }
@@ -417,15 +439,42 @@ public class OrderHandlerService {
 
     }
 
-    public void updateOrderStatus(String info){
+    public void updateOrderStatus(String info) {
         int orderID = Integer.parseInt(info.replace("Thanh toan ", "").trim());
 
         PurchaseOrder orderToUpdate = orderService.getOrderById((long) orderID);
         System.out.println(orderToUpdate.toString());
+
+        // Check if all products are in stock before updating status
+        boolean allInStock = true;
+        List<String> outOfStockProducts = new ArrayList<>();
+
+        for (OrderDetail detail : orderToUpdate.getOrderDetails()) {
+            Inventory inventory = inventoryService.getInventoryForProduct(detail.getProductSell().getProductID());
+            if (inventory == null || inventory.getQuantity() < detail.getQuantity()) {
+                allInStock = false;
+                outOfStockProducts.add(detail.getProductSell().getPName());
+            }
+        }
+
+        if (!allInStock) {
+            throw new IllegalStateException("Cannot complete order. The following products are out of stock: " + String.join(", ", outOfStockProducts));
+        }
+
+        // If all products are in stock, proceed with order update
         orderToUpdate.setStatus(3);
         orderToUpdate.setPaymentType("VNPAY");
         calculateAndSetGuaranteeEndDate((long) orderID);
         sendConfirmationEmail((long) orderID, orderToUpdate.getEmail());
+
+        // Update inventory
+        for (OrderDetail detail : orderToUpdate.getOrderDetails()) {
+            Inventory inventory = inventoryService.getInventoryForProduct(detail.getProductSell().getProductID());
+            inventory.setQuantity(inventory.getQuantity() - detail.getQuantity());
+            inventoryService.updateInventory(inventory);
+            inventoryService.checkAndNotifyLowStock(inventory);
+        }
+
         System.out.println(orderToUpdate);
         orderService.saveOrder(orderToUpdate);
     }
@@ -849,8 +898,9 @@ public class OrderHandlerService {
     }
 
     private float calculateRefundAmount(OrderDetail orderDetail, int quantityToRefund) {
+        Float discountFactor = orderDetail.getPromotion().getDiscount() / 100.0f;
         // Calculate refund amount for the specified quantity
-        return (orderDetail.getProductSell().getCost() * quantityToRefund);
+        return (orderDetail.getProductSell().getCost() * quantityToRefund * discountFactor);
     }
 
     public List<RefundResponse> getAllRefunds() {

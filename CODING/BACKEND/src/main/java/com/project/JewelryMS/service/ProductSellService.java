@@ -43,7 +43,11 @@ public class ProductSellService {
 
     @Autowired
     ProductSellPromotionRepository productSellPromotionRepository;
+    @Autowired
+    private InventoryService inventoryService;
 
+    @Autowired
+    private InventoryRepository inventoryRepository;
     public ProductSell removePromotionsFromProductSell(RemovePromotionRequest request) {
         Optional<ProductSell> productSellOpt = productSellRepository.findById(request.getProductSellId());
         if (!productSellOpt.isPresent()) {
@@ -250,6 +254,12 @@ public class ProductSellService {
         productSell.setPStatus(true);
         // Save ProductSell
         ProductSell productSell1 = productSellRepository.save(productSell);
+        Inventory inventory = new Inventory();
+        inventory.setProductSell(productSell1);
+        inventory.setQuantity(0); // Set initial quantity
+        inventory.setReorderLevel(10); // Set default reorder level
+        inventory.setLastRestocked(new Date());
+        inventoryRepository.save(inventory);
         return getProductSellById2(productSell1.getProductID());
     }
     private Float goldPrice;
@@ -311,6 +321,23 @@ public class ProductSellService {
         }else{
             return new ProductSell();
         }
+    }
+    public ProductSellWithInventoryResponse getProductSellWithInventory(Long id) {
+        ProductSell productSell = getProductSellById(id);
+        Inventory inventory = inventoryService.getInventoryForProduct(id);
+
+        ProductSellWithInventoryResponse response = new ProductSellWithInventoryResponse();
+        // Map ProductSell fields
+        // ...
+
+        // Map Inventory fields
+        if (inventory != null) {
+            response.setQuantity(inventory.getQuantity());
+            response.setReorderLevel(inventory.getReorderLevel());
+            response.setLastRestocked(inventory.getLastRestocked());
+        }
+
+        return response;
     }
 
     public ProductSellResponse getProductSellById2(long id) {
@@ -375,7 +402,16 @@ public class ProductSellService {
 
 
         // Save the updated entity
-        productSellRepository.save(existingProductSell);
+        ProductSell updatedProductSell = productSellRepository.save(existingProductSell);
+        Inventory inventory = inventoryService.getInventoryForProduct(updatedProductSell.getProductID());
+        if (inventory == null) {
+            inventory = new Inventory();
+            inventory.setProductSell(updatedProductSell);
+            inventory.setQuantity(0);
+            inventory.setReorderLevel(10);
+            inventory.setLastRestocked(new Date());
+        }
+        inventoryRepository.save(inventory);
 
         // Return the updated ProductSellResponse
         return mapToProductSellResponse(existingProductSell);

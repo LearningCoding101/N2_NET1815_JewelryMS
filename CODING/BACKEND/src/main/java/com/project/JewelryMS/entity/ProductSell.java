@@ -81,6 +81,9 @@ public class ProductSell {
     @JsonManagedReference
 
     Guarantee guarantee;
+    @OneToOne(mappedBy = "productSell", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("productSell")
+    private Inventory inventory;
     @Override
     public int hashCode() {
         return Objects.hash(productID, carat, chi, cost, pDescription, gemstoneType, manufacturer,

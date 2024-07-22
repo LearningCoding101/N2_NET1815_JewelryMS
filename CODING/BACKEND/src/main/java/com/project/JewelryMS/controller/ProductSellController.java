@@ -41,7 +41,6 @@ public class ProductSellController {
     //Get all Active(In-Stock) Product Sell
     @GetMapping("active")
    // @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF')")
-
     public ResponseEntity<List<ProductSellResponse>> readAllActiveProductSell() {
         List<ProductSellResponse> allProductSell = productSellService.getAllActiveProductSellResponses();
         return ResponseEntity.ok(allProductSell);

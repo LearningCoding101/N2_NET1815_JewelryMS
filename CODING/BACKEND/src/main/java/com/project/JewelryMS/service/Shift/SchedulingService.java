@@ -315,7 +315,7 @@ public class SchedulingService {
 
         // Find the Staff_Shift entity that links the staff member and the shift
         Staff_Shift staffShift = staffShiftRepository.findByStaffAccountAndShift(staff, shift)
-                .orElseThrow(() -> new RuntimeException("Staff is not assigned to this shift"));
+                .orElseThrow(() -> new RuntimeException("Nhân viên chưa đuoc"));
 
         // Delete the Staff_Shift entity from the database
         staffShiftRepository.delete(staffShift);
@@ -330,11 +330,11 @@ public class SchedulingService {
     @Transactional
     public StaffShiftResponse assignStaffToDay(int staffId, LocalDate date, String shiftType) {
         StaffAccount staff = staffAccountRepository.findById(staffId)
-                .orElseThrow(() -> new ShiftAssignmentException("Staff not found"));
+                .orElseThrow(() -> new ShiftAssignmentException("Nhân Viên không tồn tại"));
 
         // Check if the staff's work area ID is null
         if (staff.getWorkArea() == null || staff.getWorkArea().getWorkAreaCode() == null) {
-            throw new ShiftAssignmentException("Staff does not have a work area assigned. Please assign a work area code for the staff.");
+            throw new ShiftAssignmentException("Chưa giao vị trí làm cho nhân viên");
         }
 
         try {
@@ -373,7 +373,7 @@ public class SchedulingService {
                         startTime = date.atTime(17, 0).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
                         yield date.atTime(21, 0).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
                     }
-                    default -> throw new RuntimeException("Invalid shift type");
+                    default -> throw new RuntimeException("Loại ca làm không hợp lệ");
                 };
 
                 createShiftRequest.setStartTime(startTime);
@@ -381,7 +381,7 @@ public class SchedulingService {
 
                 ShiftRequest createdShift = shiftService.createShift(createShiftRequest);
                 shift = shiftRepository.findById((long) createdShift.getShiftID())
-                        .orElseThrow(() -> new RuntimeException("Shift not found after creation"));
+                        .orElseThrow(() -> new RuntimeException("Ca làm việc không được tìm ra sau khi khởi tạo"));
             }
 
             // Create a new Staff_Shift entity
@@ -511,7 +511,7 @@ public class SchedulingService {
     public void removeStaffFromShiftsInRange(int staffId, LocalDate startDate, LocalDate endDate) {
         // Validate staff existence
         StaffAccount staff = staffAccountRepository.findById(staffId)
-                .orElseThrow(() -> new RuntimeException("Staff not found"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy nhân viên"));
 
         // Retrieve all shifts for the staff within the date range
         List<Staff_Shift> staffShifts = staffShiftRepository.findAllByStaffAccountAndShift_StartTimeBetween(
@@ -613,11 +613,11 @@ public class SchedulingService {
     @Transactional
     public StaffShiftResponse assignStaffToDayWithExistingShiftCheck(int staffId, LocalDate date, String shiftType) {
         StaffAccount staff = staffAccountRepository.findById(staffId)
-                .orElseThrow(() -> new ShiftAssignmentException("Staff not found"));
+                .orElseThrow(() -> new ShiftAssignmentException("Nhân Viên không tồn tại hoặc không tìm thấy"));
 
         // Check if the staff's work area ID is null
         if (staff.getWorkArea() == null || staff.getWorkArea().getWorkAreaCode() == null) {
-            throw new ShiftAssignmentException("Staff does not have a work area assigned. Please assign a work area ID for the staff.");
+            throw new ShiftAssignmentException("Chưa giao chỗ làm việc cho nhân viên");
         }
 
         // Check if a shift of the specified type already exists on the date
@@ -645,7 +645,7 @@ public class SchedulingService {
                     startTime = date.atTime(17, 0).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
                     yield date.atTime(21, 0).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
                 }
-                default -> throw new RuntimeException("Invalid shift type");
+                default -> throw new RuntimeException("Loại ca làm không hợp lệ");
             };
 
             createShiftRequest.setStartTime(startTime);
@@ -653,7 +653,7 @@ public class SchedulingService {
 
             ShiftRequest createdShift = shiftService.createShift(createShiftRequest);
             shift = shiftRepository.findById((long) createdShift.getShiftID())
-                    .orElseThrow(() -> new RuntimeException("Shift not found after creation"));
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy ca làm việc sau khởi tạo"));
         }
 
         // Add the staff member to the existing shift with the correct work area
@@ -828,7 +828,6 @@ public class SchedulingService {
 //        });
 //    }
 
-
     private List<Integer> getAllStaffIds() {
         return staffAccountRepository.findAllStaffAccountsByRoleStaff().stream()
                 .map(StaffAccount::getStaffID)
@@ -844,7 +843,7 @@ public class SchedulingService {
             } catch (ShiftAssignmentException e) {
                 logger.warn("Staff ID {} is already assigned on {}.", staffId, date);
             } catch (Exception e) {
-                logger.error("Failed to assign shift for staff ID {} on {}: {}", staffId, date, e.getMessage(), e);
+                logger.error("Không thể giao việc cho nhân viên với id {} vào ngày {}: {}", staffId, date, e.getMessage(), e);
             }
         });
     }
@@ -857,9 +856,9 @@ public class SchedulingService {
                 StaffShiftResponse response = assignStaffToDay(staffId, date, shiftType);
                 staffShiftResponses.add(response);
             } catch (ShiftAssignmentException e) {
-                logger.warn("Staff ID {} is already assigned on {}.", staffId, date);
+                logger.warn("Nhân viên với ID {} đã được giao ca làm vào ngày {}.", staffId, date);
             } catch (Exception e) {
-                logger.error("Failed to assign single shift for staff ID {} on {}: {}", staffId, date, e.getMessage(), e);
+                logger.error("Không thể giao việc cho nhân viên với id {} vào ngày {}: {}", staffId, date, e.getMessage(), e);
             }
         });
     }

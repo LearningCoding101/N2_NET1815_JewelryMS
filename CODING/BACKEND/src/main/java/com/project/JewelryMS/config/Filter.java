@@ -51,7 +51,8 @@ public class Filter extends OncePerRequestFilter {
             "/api/productSell/read/{id}",
             "/images/uploadByPath",
             "/api/order/**",
-            "/ws/**"
+            "/ws/**",
+            "/api/inventory/**"
 
 
     );

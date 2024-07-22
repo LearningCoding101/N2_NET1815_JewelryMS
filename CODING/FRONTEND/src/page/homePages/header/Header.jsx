@@ -10,6 +10,16 @@ function Header() {
       <Link to={"/"}>
         <img src="./images/Logo.png" alt="Logo" className="header__logo" />
       </Link>
+      <Link to="/displaygold">
+        <Button type="primary" className="display-gold-button">
+          Giá Vàng
+        </Button>
+      </Link>
+      <Link to="/policy">
+        <Button type="primary" className="display-gold-button">
+          Chính sách
+        </Button>
+      </Link>
       <Link to={"/"}>
         <h2 className="header__title">JEWELRYMS</h2>
       </Link>

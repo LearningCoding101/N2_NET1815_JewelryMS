@@ -8,7 +8,6 @@ import com.project.JewelryMS.model.Shift.WorkAreaRequest;
 import com.project.JewelryMS.model.Shift.WorkAreaResponse;
 import com.project.JewelryMS.repository.StaffAccountRepository;
 import com.project.JewelryMS.repository.WorkAreaRepository;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,7 +33,6 @@ public class WorkAreaService {
 
         WorkArea workArea = new WorkArea();
         workArea.setWorkAreaCode(workAreaRequest.getWorkAreaCode());
-        workArea.setRegister(workAreaRequest.getRegister());
         workArea.setDescription(workAreaRequest.getDescription());
         workArea = workAreaRepository.save(workArea);
         return toWorkAreaRequest(workArea);
@@ -60,7 +58,6 @@ public class WorkAreaService {
         WorkArea workArea = workAreaRepository.findByWorkAreaCode(workAreaCode)
                 .orElseThrow(() -> new RuntimeException("Work Area ID: " + workAreaCode + " not found"));
 
-        workArea.setRegister(workAreaRequest.getRegister());
         workArea.setDescription(workAreaRequest.getDescription());
         workArea = workAreaRepository.save(workArea);
         return toWorkAreaRequest(workArea);
@@ -80,7 +77,6 @@ public class WorkAreaService {
     private WorkAreaRequest toWorkAreaRequest(WorkArea workArea) {
         WorkAreaRequest workAreaRequest = new WorkAreaRequest();
         workAreaRequest.setWorkAreaCode(workArea.getWorkAreaCode());
-        workAreaRequest.setRegister(workArea.getRegister());
         workAreaRequest.setDescription(workArea.getDescription());
         return workAreaRequest;
     }
@@ -90,7 +86,6 @@ public class WorkAreaService {
         return new GetWorkAreaRequest(
                 workArea.getId(),
                 workArea.getWorkAreaCode(),
-                workArea.getRegister(),
                 workArea.getDescription(),
                 workArea.getStatus()
         );
